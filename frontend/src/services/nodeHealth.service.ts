@@ -58,14 +58,17 @@ async function fetchNodeHealth(base: BackendAssetListItem): Promise<NodeHealth> 
     id: base.id,
     name: base.name,
     type: nodeType,
-    version: base.subtype ?? '—',
+    version: base.spec?.version ?? base.subtype ?? '—',
     health: classifyHealth(base.status, base.health_score),
     healthScore: base.health_score,
     incidents: alerts.length,
     lastSync: base.last_seen ?? new Date().toISOString(),
-    uptime: 0,
+    uptime: base.spec?.uptime ?? 0,
     stationId: base.station_id,
-    tags: base.zone_id ? [base.zone_id] : [],
+    tags: [
+      ...(base.zone_id ? [base.zone_id] : []),
+      ...(base.spec?.tags ?? [])
+    ],
     trend,
     alerts: alerts.map((a) => ({
       id: a.id,

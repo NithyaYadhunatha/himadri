@@ -94,6 +94,7 @@ class GraphService:
         station_id: str,
         status: str = "offline",
         health_score: float = 100.0,
+        zone_id: str | None = None,
     ) -> None:
         """Create or update an asset node in the graph."""
         driver = get_driver()
@@ -106,6 +107,7 @@ class GraphService:
                 station_id,
                 status,
                 health_score,
+                zone_id,
             )
         logger.info("graph.asset_registered", asset_id=asset_id, category=category)
 
@@ -118,6 +120,7 @@ class GraphService:
         station_id: str,
         status: str,
         health_score: float,
+        zone_id: str | None,
     ) -> None:
         query = """
         MERGE (n:Asset {asset_id: $asset_id})
@@ -126,6 +129,7 @@ class GraphService:
             n.station_id = $station_id,
             n.status = $status,
             n.health_score = $health_score,
+            n.zone_id = $zone_id,
             n.updated_at = datetime()
         """
         await tx.run(
@@ -136,6 +140,7 @@ class GraphService:
             station_id=station_id,
             status=status,
             health_score=health_score,
+            zone_id=zone_id,
         )
 
     async def update_asset_status(

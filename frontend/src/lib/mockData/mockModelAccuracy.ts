@@ -56,8 +56,8 @@ export interface DriftMetrics {
 }
 
 export interface ForecastSystem {
-  node_id: string
-  node_name: string
+  asset_id: string
+  asset_name: string
   risk_level: 'CRITICAL' | 'HIGH' | 'LOW' | 'WARNING' | string
   failure_probability: number
   current_health_score?: number
@@ -267,8 +267,8 @@ function buildForecastSystems(): ForecastSystem[] {
     const failureProbability = Math.max(0.02, Math.min(0.96, Math.round((baseProb + jitter) * 1000) / 1000))
     const riskLevel: ForecastSystem['risk_level'] = n.healthScore < 50 ? 'CRITICAL' : n.healthScore < 72 ? 'HIGH' : 'LOW'
     return {
-      node_id: n.id,
-      node_name: n.label,
+      asset_id: n.id,
+      asset_name: n.label,
       risk_level: riskLevel,
       failure_probability: failureProbability,
       current_health_score: n.healthScore,

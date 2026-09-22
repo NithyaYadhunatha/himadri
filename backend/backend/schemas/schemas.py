@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, Field
 
 # ─── Device registration / auth ─────────────────────────────────────────────
@@ -236,6 +237,7 @@ class AssetListItem(BaseModel):
     primary_unit: str | None
     provenance: str
     last_seen: datetime | None
+    spec: dict[str, Any] | None = None
 
     model_config = {"from_attributes": True}
 

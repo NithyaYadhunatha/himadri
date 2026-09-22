@@ -28,4 +28,4 @@ EXPOSE 8000
 # output ordering. Wrapping the weekly job alone in a subshell scopes the
 # "&" to just that command, so init_db and init_graph now run to completion
 # (blocking) before uvicorn ever starts.
-CMD sh -c "python scripts/init_db.py && python scripts/init_graph.py && (PYTHONPATH=. python backend/analysis/weekly_job.py >> /app/analysis.log 2>&1 &) && uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+CMD sh -c "python3 scripts/init_db.py && python3 scripts/seed_himadri_demo.py && python3 scripts/init_graph.py && python3 scripts/sync_neo4j.py && (PYTHONPATH=. python3 backend/analysis/weekly_job.py >> /app/analysis.log 2>&1 &) && uvicorn backend.main:app --host 0.0.0.0 --port 8000"

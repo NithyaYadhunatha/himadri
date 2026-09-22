@@ -32,6 +32,7 @@ export interface BackendAssetListItem {
   primary_unit: string | null
   provenance: string
   last_seen: string | null
+  spec: Record<string, any> | null
 }
 
 export interface BackendReadingRecord {
@@ -88,6 +89,7 @@ export interface BackendGraphAssetNode {
    * neo4j_client.py's _get_full_graph_tx). Powers the 2D twin's
    * zone/floor-banded layout (lib/graph/zoneLayout.ts) when present. */
   zone_id?: string | null
+  spec?: Record<string, any> | null
 }
 
 export interface BackendGraphEdge {
@@ -201,6 +203,8 @@ export function adaptFullGraph(raw: BackendFullGraph): { nodes: GraphNode[]; edg
       id: n.asset_id,
       label: n.name,
       type: mapNodeType(n.category),
+      version: n.spec?.version ?? mapNodeType(n.category),
+      ipAddress: n.spec?.ip_address,
       health: classifyHealth(n.status, n.health_score),
       healthScore: n.health_score,
       isSimulating: n.status === 'simulating',
@@ -210,7 +214,7 @@ export function adaptFullGraph(raw: BackendFullGraph): { nodes: GraphNode[]; edg
       dependents,
       incidents: 0, // not available without an N+1 alert-count fetch per asset
       lastSync: new Date().toISOString(),
-      metadata: {},
+      metadata: n.spec || {},
       stationId: n.station_id,
       zoneId: n.zone_id ?? undefined,
     }

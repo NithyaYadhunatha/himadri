@@ -301,7 +301,7 @@ function ImpactPreviewModal({ system, onClose }: { system: ForecastSystem; onClo
     return () => { cancelled = true }
   }, [])
 
-  const nodeExists = graph?.nodes.some((n) => n.id === system.node_id) ?? false
+  const nodeExists = graph?.nodes.some((n) => n.id === system.asset_id) ?? false
   const riskColor = system.risk_level === 'CRITICAL' ? '#B23A2E' : '#B8720F'
 
   return (
@@ -309,8 +309,8 @@ function ImpactPreviewModal({ system, onClose }: { system: ForecastSystem; onClo
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <p className="text-sm font-sans text-white font-semibold">{system.node_name}</p>
-            <p className="font-mono text-[9px] text-white/30 mt-0.5">{system.node_id}</p>
+            <h3 className="font-sans text-sm text-white font-semibold">{system.asset_name}</h3>
+            <p className="font-mono text-[9px] text-white/30 mt-0.5">{system.asset_id}</p>
           </div>
           <div className="flex items-center gap-3">
             <Badge variant={system.risk_level === 'CRITICAL' ? 'critical' : 'warning'} size="sm">{system.risk_level}</Badge>
@@ -338,14 +338,14 @@ function ImpactPreviewModal({ system, onClose }: { system: ForecastSystem; onClo
               <FlowCanvas
                 nodes={graph!.nodes}
                 edges={graph!.edges}
-                selectedNodeId={system.node_id}
+                selectedNodeId={system.asset_id}
                 readOnly
                 showLegend
                 colorMode="health"
               />
             </div>
             <p className="text-[10px] font-sans text-white/40 leading-relaxed">
-              Current node layout, centered on <span className="text-white/70">{system.node_name}</span>. Cyan nodes are its
+              Current node layout, centered on <span className="text-white/70">{system.asset_name}</span>. Cyan nodes are its
               upstream dependencies (what it needs to function); amber nodes are its blast radius — everything downstream
               that would be impacted if this system fails.
             </p>
@@ -418,15 +418,15 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
               ))}
             </div>
             {highRisk.map((sys) => (
-              <div key={sys.node_id} onClick={() => onSelectSystem(sys)}
+              <div key={sys.asset_id} onClick={() => onSelectSystem(sys)}
                 title="Click to preview current topology & impact radius"
                 className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr_2fr] gap-3 px-3 py-3 rounded-lg items-center transition-colors cursor-pointer hover:brightness-125"
                 style={{ background: `rgba(${sys.risk_level === 'CRITICAL' ? '239,68,68' : '245,158,11'},0.04)`, border: `1px solid rgba(${sys.risk_level === 'CRITICAL' ? '239,68,68' : '245,158,11'},0.12)` }}>
                 <div className="flex items-center gap-1.5">
                   <Waypoints size={11} className="text-white/25 shrink-0" />
                   <div>
-                    <p className="text-xs font-sans text-white font-semibold leading-tight">{sys.node_name}</p>
-                    <p className="font-mono text-[9px] text-white/30 mt-0.5">{sys.node_id}</p>
+                    <p className="text-xs font-sans text-white font-semibold leading-tight">{sys.asset_name}</p>
+                    <p className="font-mono text-[9px] text-white/30 mt-0.5">{sys.asset_id}</p>
                   </div>
                 </div>
                 <div>
@@ -495,11 +495,11 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
               ))}
             </div>
             {stable.map((sys) => (
-              <div key={sys.node_id} className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-3 rounded-lg items-center"
+              <div key={sys.asset_id} className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-3 rounded-lg items-center"
                 style={{ background: 'rgba(31, 158, 109,0.03)', border: '1px solid rgba(31, 158, 109,0.08)' }}>
                 <div>
-                  <p className="text-xs font-sans text-white font-semibold">{sys.node_name}</p>
-                  <p className="font-mono text-[9px] text-white/30 mt-0.5">{sys.node_id}</p>
+                  <p className="text-xs font-sans text-white font-semibold">{sys.asset_name}</p>
+                  <p className="font-mono text-[9px] text-white/30 mt-0.5">{sys.asset_id}</p>
                 </div>
                 <div className="font-mono text-sm" style={{ color: '#1F9E6D' }}>{sys.current_health_score}</div>
                 <div className="font-mono text-sm text-white/70">{(sys.failure_probability * 100).toFixed(1)}%</div>

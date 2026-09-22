@@ -40,6 +40,13 @@ export const riskService = {
       const body = await res.json().catch(() => ({}))
       throw new Error(body.error ?? `Failed to load risk heatmap (${res.status})`)
     }
-    return res.json()
+    const data = await res.json()
+    // The FastAPI backend returns a list of RiskCellDetail, but the frontend
+    // expects a RiskHeatmap object.
+    return {
+      station,
+      generated_at: new Date().toISOString(),
+      cells: Array.isArray(data) ? data : [],
+    }
   },
 }

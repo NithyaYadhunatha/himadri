@@ -3,7 +3,7 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Create and activate virtual environment
-RUN python -m venv /opt/venv
+RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirement files (Backend only)
@@ -27,4 +27,4 @@ EXPOSE 8000
 # output ordering. Wrapping the weekly job alone in a subshell scopes the
 # "&" to just that command, so init_db and init_graph now run to completion
 # (blocking) before uvicorn ever starts.
-CMD sh -c "python3 scripts/init_db.py && python3 scripts/init_graph.py && (PYTHONPATH=. python3 backend/analysis/weekly_job.py >> /app/analysis.log 2>&1 &) && uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+CMD sh -c "python3 scripts/init_db.py && python3 scripts/seed_himadri_demo.py && python3 scripts/init_graph.py && python3 scripts/sync_neo4j.py && (PYTHONPATH=. python3 backend/analysis/weekly_job.py >> /app/analysis.log 2>&1 &) && uvicorn backend.main:app --host 0.0.0.0 --port 8000"

@@ -4,15 +4,15 @@ services:
     container_name: himadri_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: himadri
-      POSTGRES_PASSWORD: himadri
-      POSTGRES_DB: himadri
+      POSTGRES_USER: infra
+      POSTGRES_PASSWORD: infra
+      POSTGRES_DB: inframind
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U himadri -d himadri" ]
+      test: [ "CMD-SHELL", "pg_isready -U infra -d inframind" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
     container_name: himadri_neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: neo4j/himadri
+      NEO4J_AUTH: neo4j/inframind
       NEO4J_server_memory_heap_initial__size: 256m
       NEO4J_server_memory_heap_max__size: 512m
     ports:
@@ -90,15 +90,15 @@ services:
     build:
       context: .
       # rename Dockerfile.[mac/windows] based on device type
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/Dockerfile.mac
     container_name: himadri_backend
     restart: unless-stopped
     env_file: .env
     environment:
-      POSTGRES_URL: postgresql+asyncpg://himadri:himadri@postgres:5432/himadri
+      POSTGRES_URL: postgresql+asyncpg://infra:infra@postgres:5432/inframind
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
-      NEO4J_PASSWORD: himadri
+      NEO4J_PASSWORD: inframind
       REDIS_URL: redis://redis:6379
       MQTT_BROKER_HOST: mosquitto
     ports:
