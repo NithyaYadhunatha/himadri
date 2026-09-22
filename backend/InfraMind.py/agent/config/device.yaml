@@ -1,0 +1,14 @@
+# HIMADRI Station Device Agent — Connection Defaults
+#
+# Asset identity (name, category, subtype, station) is set when the asset
+# is registered on the HIMADRI dashboard ("Connect New Device"), which
+# hands back an Asset ID + API Key — paste those into the startup dialog.
+# This file only pre-fills that dialog's Backend URL field.
+
+# Backend server URL — set to the machine running docker-compose up
+# For local testing: http://localhost:8000
+# For a multi-laptop demo: http://<HOST_IP>:8000
+backend_url: "http://localhost:8000"
+
+# How often to send heartbeat telemetry (seconds)
+report_interval_seconds: 10

@@ -1,0 +1,30 @@
+{
+  "maitri-main-building": {
+    "identity": { "type": "Main Station Building", "construction": "Elevated steel-frame module", "commissioned": "1989 (rebuilt 2014)" },
+    "telemetry": { "internalTempC": 20, "occupancy": 24, "restricted": false },
+    "health": {
+      "overall": 86,
+      "breakdown": { "structural": 89, "envelope": 83 },
+      "remainingUsefulLifeHours": 40000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 1,
+      "failureProbability90d": 3
+    },
+    "lastMaintenance": { "date": "2026-02-10", "type": "Inspection", "actionTaken": "Annual structural and roof inspection", "technician": "Station Leader", "downtimeHours": 0 },
+    "recentEvents": []
+  },
+  "bharati-satellite-control-room": {
+    "identity": { "type": "Satellite Control Room", "construction": "Insulated module", "commissioned": "2015" },
+    "telemetry": { "internalTempC": 19, "occupancy": 2, "restricted": true },
+    "health": {
+      "overall": 91,
+      "breakdown": { "structural": 92, "envelope": 90 },
+      "remainingUsefulLifeHours": 38000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 1,
+      "failureProbability90d": 2
+    },
+    "lastMaintenance": { "date": "2026-03-05", "type": "Inspection", "actionTaken": "Access-control and envelope inspection", "technician": "Station Leader", "downtimeHours": 0 },
+    "recentEvents": []
+  }
+}

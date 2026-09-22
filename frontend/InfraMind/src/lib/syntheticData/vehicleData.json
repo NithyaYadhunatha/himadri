@@ -1,0 +1,32 @@
+{
+  "maitri-pistenbully-1": {
+    "identity": { "manufacturer": "Kassbohrer", "model": "PistenBully 300", "registration": "MTR-PB-01", "commissioned": "2015" },
+    "telemetry": { "coolantTempC": 84, "runHoursHours": 6400, "fuelLevelPercent": 72, "faultCode": "None" },
+    "health": {
+      "overall": 74,
+      "breakdown": { "engine": 78, "tracks": 70 },
+      "remainingUsefulLifeHours": 2200,
+      "failureProbability7d": 4,
+      "failureProbability30d": 14,
+      "failureProbability90d": 29
+    },
+    "lastMaintenance": { "date": "2026-08-28", "type": "Corrective", "actionTaken": "Track tensioner adjustment via 16-pin Mini-Doc diagnostic", "technician": "Engineer on duty", "downtimeHours": 5 },
+    "recentEvents": [
+      { "timestamp": "2026-09-05T08:40:00Z", "type": "fault", "severity": "WARNING", "description": "Cold-start coolant fault code read via Mini-Doc connector — bypassed dead display." }
+    ]
+  },
+  "bharati-pistenbully-vitesta": {
+    "identity": { "manufacturer": "Kassbohrer", "model": "PistenBully 300", "registration": "BHR-PB-VITESTA", "commissioned": "2018" },
+    "telemetry": { "coolantTempC": 81, "runHoursHours": 4100, "fuelLevelPercent": 88, "faultCode": "None" },
+    "health": {
+      "overall": 90,
+      "breakdown": { "engine": 92, "tracks": 88 },
+      "remainingUsefulLifeHours": 4800,
+      "failureProbability7d": 1,
+      "failureProbability30d": 5,
+      "failureProbability90d": 13
+    },
+    "lastMaintenance": { "date": "2026-07-02", "type": "Preventive", "actionTaken": "Routine 500-hour service", "technician": "Engineer on duty", "downtimeHours": 2 },
+    "recentEvents": []
+  }
+}

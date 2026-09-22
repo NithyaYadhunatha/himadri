@@ -1,0 +1,75 @@
+PRODUCT REQUIREMENTS DOCUMENT
+Edge Cold-Chain Sensor Gateway — "ColdLink-100"
+
+1. OVERVIEW
+The ColdLink-100 is an edge IoT gateway deployed in cold-storage rooms and
+refrigerated transport units across Waters Corporation lab and warehouse
+sites. It continuously aggregates temperature, humidity, and door-open
+sensor readings from up to 32 wireless sensor probes per room, and forwards
+that telemetry to the central InfraMind digital twin for real-time
+monitoring, historical trending, and compliance reporting (GxP cold-chain
+audit requirements).
+
+Unlike a general-purpose server or network device, this system has no
+operating system console, no user-facing application layer, and does not
+run any lab instrument software (Empower, NuGenesis, etc.) — its entire
+function is sensor aggregation, local buffering during network outages, and
+telemetry forwarding.
+
+2. PURPOSE / PROBLEM STATEMENT
+Cold-storage excursions (temperature drift outside the validated 2-8°C
+range) can invalidate entire batches of biologic reagents and reference
+standards. Today, excursions are only caught during manual twice-daily
+logbook checks, often hours after the excursion began. The ColdLink-100
+closes that gap with continuous, real-time monitoring and automated alert
+escalation.
+
+3. FUNCTIONAL REQUIREMENTS
+- Poll all connected wireless sensor probes every 30 seconds.
+- Buffer up to 72 hours of readings locally (SQLite) if the network link to
+  InfraMind is unavailable, then backfill on reconnect — no data loss during
+  short outages.
+- Trigger a local audible/visual alarm within 60 seconds of any probe
+  reading exceeding the configured temperature or humidity threshold.
+- Support configurable per-room threshold profiles (e.g. 2-8°C for reagent
+  fridges, -20°C ±2°C for freezers, -80°C ±5°C for ultra-low freezers).
+- Log every door-open event with duration, to correlate excursions with
+  door-open time.
+- Expose a heartbeat every 60 seconds so InfraMind can detect an offline
+  gateway within 3 minutes.
+- Support firmware updates pushed remotely from a central management
+  console, with automatic rollback if a health check fails post-update.
+
+4. NON-FUNCTIONAL REQUIREMENTS
+- Operating temperature range for the gateway unit itself: -30°C to 50°C
+  (must survive being mounted inside a walk-in freezer anteroom).
+- IP54-rated enclosure (dust and splash resistant) — cold-storage
+  environments regularly experience condensation.
+- Wireless sensor range: minimum 40 meters line-of-sight per probe, to cover
+  a large walk-in cold room without needing repeaters.
+- Battery backup for the gateway itself: minimum 8 hours runtime on a power
+  outage, so buffering/alerting continues during a facility power event.
+- Mean time between failures (MTBF) target: 3 years continuous operation.
+
+5. INTEGRATION REQUIREMENTS
+- Report into InfraMind via the same heartbeat/metrics ingestion path used
+  by other monitored assets, so it appears in the Digital Twin graph and
+  Node Health dashboard alongside servers, databases, and lab instruments.
+- Alert escalation must integrate with the existing InfraMind alert engine
+  (CRITICAL severity for any active excursion, WARNING for a device offline
+  longer than 5 minutes).
+- Should NOT require a dedicated agent install per room — the gateway
+  itself is the reporting endpoint, aggregating all probes behind it.
+
+6. OUT OF SCOPE
+- The gateway does not control refrigeration equipment (it is
+  monitoring-only, not a controller).
+- No support for wired (non-wireless) probes in this revision.
+- No on-device analytics/ML — anomaly detection and trend prediction happen
+  centrally in InfraMind, not on the gateway.
+
+7. SUCCESS METRICS
+- Zero undetected cold-chain excursions longer than 5 minutes across all
+  deployed sites within 90 days of rollout.
+- 99.5% gateway uptime (heartbeat availability) measured monthly.
+- Mean alert-to-acknowledgment time under 10 minutes during business hours.

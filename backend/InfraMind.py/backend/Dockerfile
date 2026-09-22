@@ -1,0 +1,31 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Create and activate virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy requirement files (Backend only)
+COPY backend/requirements.txt ./backend_reqs.txt
+
+# Install dependencies for backend
+RUN pip install --no-cache-dir -r backend_reqs.txt
+
+# Copy necessary directories (Excluding agent)
+COPY backend/ backend/
+COPY scripts/ scripts/
+
+EXPOSE 8000
+
+# Run initialization scripts, start the background weekly job, and launch the API server
+# Using sh -c works perfectly fine inside Linux containers running on Docker Desktop for Windows
+#
+# NOTE: "&&" binds looser than a trailing "&" in POSIX sh — without the
+# parentheses below, "init_db && init_graph && weekly_job & uvicorn" backgrounds
+# the *entire* init_db/init_graph/weekly_job chain and lets uvicorn start
+# immediately, racing table/graph creation and skipping the training job's
+# output ordering. Wrapping the weekly job alone in a subshell scopes the
+# "&" to just that command, so init_db and init_graph now run to completion
+# (blocking) before uvicorn ever starts.
+CMD sh -c "python scripts/init_db.py && python scripts/init_graph.py && (PYTHONPATH=. python backend/analysis/weekly_job.py >> /app/analysis.log 2>&1 &) && uvicorn backend.main:app --host 0.0.0.0 --port 8000"

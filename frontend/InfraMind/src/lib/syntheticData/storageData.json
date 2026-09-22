@@ -1,0 +1,58 @@
+{
+  "maitri-fuel-farm-1": {
+    "identity": { "type": "Fuel Farm Tank", "capacityLitres": 200000, "fuelGrade": "Arctic Diesel (SKO)" },
+    "telemetry": { "levelPercent": 68, "levelLitres": 136000, "temperatureC": -6 },
+    "health": {
+      "overall": 93,
+      "breakdown": { "tank": 95, "pumpSkid": 90 },
+      "remainingUsefulLifeHours": 30000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 2,
+      "failureProbability90d": 6
+    },
+    "lastMaintenance": { "date": "2026-01-20", "type": "Inspection", "actionTaken": "Annual tank integrity dip and pump-skid check", "technician": "Engineer on duty", "downtimeHours": 0 },
+    "recentEvents": []
+  },
+  "maitri-deep-freezer-1": {
+    "identity": { "type": "Deep Freezer", "capacityM3": 12, "contents": "Perishable food stock" },
+    "telemetry": { "internalTempC": -19.5, "doorSeal": "OK", "compressorRuntimePercent": 62 },
+    "health": {
+      "overall": 88,
+      "breakdown": { "compressor": 89, "seal": 87 },
+      "remainingUsefulLifeHours": 8000,
+      "failureProbability7d": 1,
+      "failureProbability30d": 5,
+      "failureProbability90d": 13
+    },
+    "lastMaintenance": { "date": "2026-06-01", "type": "Preventive", "actionTaken": "Door seal replacement and refrigerant check", "technician": "Engineer on duty", "downtimeHours": 2 },
+    "recentEvents": []
+  },
+  "bharati-fuel-farm-1": {
+    "identity": { "type": "Fuel Farm Tank", "capacityLitres": 150000, "fuelGrade": "Arctic Diesel (SKO)" },
+    "telemetry": { "levelPercent": 74, "levelLitres": 111000, "temperatureC": -4 },
+    "health": {
+      "overall": 95,
+      "breakdown": { "tank": 96, "pumpSkid": 93 },
+      "remainingUsefulLifeHours": 32000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 1,
+      "failureProbability90d": 4
+    },
+    "lastMaintenance": { "date": "2026-02-14", "type": "Inspection", "actionTaken": "Annual tank integrity dip", "technician": "Engineer on duty", "downtimeHours": 0 },
+    "recentEvents": []
+  },
+  "bharati-deep-freezer-1": {
+    "identity": { "type": "Deep Freezer", "capacityM3": 10, "contents": "Perishable food stock" },
+    "telemetry": { "internalTempC": -18.2, "doorSeal": "OK", "compressorRuntimePercent": 55 },
+    "health": {
+      "overall": 91,
+      "breakdown": { "compressor": 92, "seal": 90 },
+      "remainingUsefulLifeHours": 9200,
+      "failureProbability7d": 0,
+      "failureProbability30d": 3,
+      "failureProbability90d": 9
+    },
+    "lastMaintenance": { "date": "2026-07-11", "type": "Preventive", "actionTaken": "Routine compressor service", "technician": "Engineer on duty", "downtimeHours": 1 },
+    "recentEvents": []
+  }
+}

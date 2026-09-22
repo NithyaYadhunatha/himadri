@@ -1,0 +1,32 @@
+{
+  "maitri-genset-1": {
+    "identity": { "manufacturer": "Cummins", "model": "NTA-855-G", "ratedKw": 320, "commissioned": "2019" },
+    "telemetry": { "outputKw": 214, "loadFactorPercent": 67, "fuelRateLitresPerHour": 42, "engineTempC": 82, "runHoursHours": 18420 },
+    "health": {
+      "overall": 88,
+      "breakdown": { "engine": 90, "alternator": 86 },
+      "remainingUsefulLifeHours": 6200,
+      "failureProbability7d": 2,
+      "failureProbability30d": 6,
+      "failureProbability90d": 14
+    },
+    "lastMaintenance": { "date": "2026-08-02", "type": "Preventive", "actionTaken": "500-hour service — oil, filters, injector check", "technician": "Engineer on duty", "downtimeHours": 3 },
+    "recentEvents": [
+      { "timestamp": "2026-09-14T06:20:00Z", "type": "load-switch", "severity": "INFO", "description": "Load shifted from Generator 2 during scheduled swap." }
+    ]
+  },
+  "bharati-chp-1": {
+    "identity": { "manufacturer": "MAN", "model": "CHP-2000", "ratedKw": 250, "commissioned": "2021" },
+    "telemetry": { "outputKw": 178, "loadFactorPercent": 71, "heatRecoveryKw": 95, "engineTempC": 79, "runHoursHours": 9840 },
+    "health": {
+      "overall": 91,
+      "breakdown": { "engine": 92, "heatExchanger": 89 },
+      "remainingUsefulLifeHours": 8100,
+      "failureProbability7d": 1,
+      "failureProbability30d": 4,
+      "failureProbability90d": 10
+    },
+    "lastMaintenance": { "date": "2026-07-20", "type": "Preventive", "actionTaken": "Heat exchanger descale and coolant change", "technician": "Engineer on duty", "downtimeHours": 2 },
+    "recentEvents": []
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "maitri-comms-vsat": {
+    "identity": { "manufacturer": "Hughes", "model": "VSAT HX200", "linkType": "Ku-band", "commissioned": "2018" },
+    "telemetry": { "linkState": "Online", "bandwidthUsedMbps": 4.2, "bandwidthBudgetMbps": 8, "queueDepth": 12 },
+    "health": {
+      "overall": 87,
+      "breakdown": { "modem": 89, "antenna": 85 },
+      "remainingUsefulLifeHours": 9000,
+      "failureProbability7d": 2,
+      "failureProbability30d": 7,
+      "failureProbability90d": 16
+    },
+    "lastMaintenance": { "date": "2026-06-12", "type": "Preventive", "actionTaken": "Antenna alignment check after storm season", "technician": "Engineer on duty", "downtimeHours": 1 },
+    "recentEvents": [
+      { "timestamp": "2026-09-08T03:00:00Z", "type": "degraded-link", "severity": "WARNING", "description": "Link degraded to PNR-isolated for 40 minutes during heavy snow squall." }
+    ]
+  },
+  "bharati-comms-vsat": {
+    "identity": { "manufacturer": "Hughes", "model": "VSAT HX200", "linkType": "Ku-band", "commissioned": "2019" },
+    "telemetry": { "linkState": "Online", "bandwidthUsedMbps": 5.6, "bandwidthBudgetMbps": 10, "queueDepth": 4 },
+    "health": {
+      "overall": 95,
+      "breakdown": { "modem": 96, "antenna": 94 },
+      "remainingUsefulLifeHours": 11000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 3,
+      "failureProbability90d": 9
+    },
+    "lastMaintenance": { "date": "2026-07-25", "type": "Preventive", "actionTaken": "Firmware update and link budget check", "technician": "Engineer on duty", "downtimeHours": 0 },
+    "recentEvents": []
+  }
+}

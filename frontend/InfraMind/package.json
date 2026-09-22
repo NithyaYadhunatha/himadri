@@ -1,0 +1,53 @@
+{
+  "name": "twin2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.8.1",
+    "@clerk/themes": "^2.4.57",
+    "@google/genai": "^2.18.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "@xyflow/react": "^12.11.0",
+    "axios": "^1.17.0",
+    "dagre": "^0.8.5",
+    "framer-motion": "^12.40.0",
+    "immer": "^11.1.8",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.17.0",
+    "mammoth": "^1.12.2",
+    "mongoose": "^9.9.4",
+    "next": "^16.3.3",
+    "openai": "^7.8.0",
+    "pdf-parse": "^2.4.5",
+    "qrcode.react": "^4.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "resend": "^6.26.0",
+    "svix": "^2.1.0",
+    "three": "^0.169.0",
+    "three-stdlib": "^2.36.1",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/dagre": "^0.7.54",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.169.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

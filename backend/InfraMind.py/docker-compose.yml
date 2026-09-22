@@ -1,0 +1,128 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: himadri_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: himadri
+      POSTGRES_PASSWORD: himadri
+      POSTGRES_DB: himadri
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U himadri -d himadri" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  neo4j:
+    image: neo4j:5
+    container_name: himadri_neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/himadri
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+    ports:
+      - "7474:7474" # Browser UI
+      - "7687:7687" # Bolt protocol
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: himadri_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: himadri_mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+    # No healthcheck gating the backend's depends_on below — MQTT ingest is
+    # deliberately non-fatal (backend/services/mqtt_ingest.py retries its
+    # own connection forever), so the backend must never wait on this
+    # container being "healthy" to start, unlike postgres/neo4j/redis.
+
+  # Frontend-only datastore (Next.js RBAC/user-account layer) — this backend
+  # never reads or writes Mongo. Left as-is (name/credentials untouched) so
+  # it stays whatever the separate frontend repo's own env expects; this is
+  # a backend rename pass, not a cross-repo credential change.
+  mongo:
+    image: mongo:7
+    container_name: inframind_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: inframind
+      MONGO_INITDB_ROOT_PASSWORD: inframind
+      MONGO_INITDB_DATABASE: inframind
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      # rename Dockerfile.[mac/windows] based on device type
+      dockerfile: backend/Dockerfile
+    container_name: himadri_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_URL: postgresql+asyncpg://himadri:himadri@postgres:5432/himadri
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: himadri
+      REDIS_URL: redis://redis:6379
+      MQTT_BROKER_HOST: mosquitto
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      # No health condition — mosquitto has no healthcheck (see its own
+      # service above) and MQTT ingest is deliberately non-fatal; this only
+      # orders container startup, it never blocks on mosquitto being ready.
+      mosquitto:
+        condition: service_started
+    volumes:
+      - ./backend:/app/backend
+      - ./scripts:/app/scripts
+    command: sh -c "python scripts/init_db.py && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  redis_data:
+  mongo_data:
+  mosquitto_data:

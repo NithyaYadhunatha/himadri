@@ -1,0 +1,34 @@
+{
+  "maitri-heating-plant": {
+    "identity": { "manufacturer": "Viessmann", "model": "Vitomax 200-HW", "ratedKw": 180, "commissioned": "2018" },
+    "telemetry": { "supplyTempC": 68, "returnTempC": 54, "filterDifferentialPressureKpa": 12, "boilerLoadPercent": 58 },
+    "health": {
+      "overall": 84,
+      "breakdown": { "burner": 87, "heatExchanger": 81 },
+      "remainingUsefulLifeHours": 5400,
+      "failureProbability7d": 3,
+      "failureProbability30d": 9,
+      "failureProbability90d": 20
+    },
+    "lastMaintenance": { "date": "2026-06-28", "type": "Preventive", "actionTaken": "Filter replacement and burner tune", "technician": "Engineer on duty", "downtimeHours": 4 },
+    "recentEvents": [
+      { "timestamp": "2026-09-10T09:00:00Z", "type": "setpoint-change", "severity": "INFO", "description": "Supply setpoint raised 2°C ahead of forecast storm." }
+    ]
+  },
+  "bharati-ahu-1": {
+    "identity": { "manufacturer": "Systemair", "model": "Topvex TR15", "ratedKw": 45, "commissioned": "2020" },
+    "telemetry": { "supplyAirTempC": 21, "filterDifferentialPressureKpa": 18, "fanSpeedPercent": 72 },
+    "health": {
+      "overall": 76,
+      "breakdown": { "fan": 80, "filter": 68 },
+      "remainingUsefulLifeHours": 2600,
+      "failureProbability7d": 5,
+      "failureProbability30d": 16,
+      "failureProbability90d": 34
+    },
+    "lastMaintenance": { "date": "2026-08-15", "type": "Corrective", "actionTaken": "Filter clogged — replaced primary + secondary stage", "technician": "Engineer on duty", "downtimeHours": 6 },
+    "recentEvents": [
+      { "timestamp": "2026-09-16T14:00:00Z", "type": "alert", "severity": "WARNING", "description": "Filter differential pressure trending above baseline — service due within 2 weeks." }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "maitri-water-plant": {
+    "identity": { "manufacturer": "Genesis Water Tech", "model": "Snow-Melt RO-5000", "ratedLitresPerDay": 5000, "commissioned": "2017" },
+    "telemetry": { "productionLitresPerDay": 3200, "storageLevelPercent": 61, "pumpPressureKpa": 310 },
+    "health": {
+      "overall": 82,
+      "breakdown": { "pump": 85, "membrane": 78 },
+      "remainingUsefulLifeHours": 4100,
+      "failureProbability7d": 2,
+      "failureProbability30d": 8,
+      "failureProbability90d": 18
+    },
+    "lastMaintenance": { "date": "2026-07-05", "type": "Preventive", "actionTaken": "RO membrane flush and pump seal check", "technician": "Engineer on duty", "downtimeHours": 2 },
+    "recentEvents": []
+  },
+  "bharati-water-plant": {
+    "identity": { "manufacturer": "Aquatech", "model": "Desal-3000", "ratedLitresPerDay": 3000, "commissioned": "2020" },
+    "telemetry": { "productionLitresPerDay": 2100, "storageLevelPercent": 74, "salinityPpm": 210 },
+    "health": {
+      "overall": 89,
+      "breakdown": { "pump": 90, "membrane": 87 },
+      "remainingUsefulLifeHours": 5600,
+      "failureProbability7d": 1,
+      "failureProbability30d": 5,
+      "failureProbability90d": 12
+    },
+    "lastMaintenance": { "date": "2026-08-22", "type": "Preventive", "actionTaken": "Routine membrane inspection", "technician": "Engineer on duty", "downtimeHours": 1 },
+    "recentEvents": []
+  }
+}

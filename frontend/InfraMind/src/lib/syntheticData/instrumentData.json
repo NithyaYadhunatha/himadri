@@ -1,0 +1,44 @@
+{
+  "maitri-mara-radar": {
+    "identity": { "manufacturer": "NCPOR", "model": "MARA Atmospheric Radar", "operatingBand": "MST", "commissioned": "2012" },
+    "telemetry": { "dataContinuityPercent": 97, "transmitPowerKw": 6, "sampleIntervalMinutes": 5 },
+    "health": {
+      "overall": 93,
+      "breakdown": { "transmitter": 94, "antenna": 92 },
+      "remainingUsefulLifeHours": 12000,
+      "failureProbability7d": 1,
+      "failureProbability30d": 3,
+      "failureProbability90d": 9
+    },
+    "lastMaintenance": { "date": "2026-04-15", "type": "Calibration", "actionTaken": "Annual antenna alignment and calibration", "technician": "Scientist on duty", "downtimeHours": 4 },
+    "recentEvents": []
+  },
+  "maitri-aws-1": {
+    "identity": { "manufacturer": "Vaisala", "model": "AWS310", "location": "Met Mast", "commissioned": "2019" },
+    "telemetry": { "airTempC": -18.4, "windSpeedKmh": 42, "pressureKpa": 96.8, "dataContinuityPercent": 99 },
+    "health": {
+      "overall": 96,
+      "breakdown": { "sensors": 97, "logger": 95 },
+      "remainingUsefulLifeHours": 15000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 2,
+      "failureProbability90d": 6
+    },
+    "lastMaintenance": { "date": "2026-03-20", "type": "Calibration", "actionTaken": "Sensor calibration against reference station", "technician": "Scientist on duty", "downtimeHours": 1 },
+    "recentEvents": []
+  },
+  "bharati-imd-instrument": {
+    "identity": { "manufacturer": "IMD", "model": "AWS-IMD-2", "location": "Met Enclosure", "commissioned": "2020" },
+    "telemetry": { "airTempC": -12.1, "windSpeedKmh": 38, "dataContinuityPercent": 98 },
+    "health": {
+      "overall": 94,
+      "breakdown": { "sensors": 95, "logger": 93 },
+      "remainingUsefulLifeHours": 13000,
+      "failureProbability7d": 1,
+      "failureProbability30d": 3,
+      "failureProbability90d": 8
+    },
+    "lastMaintenance": { "date": "2026-05-10", "type": "Calibration", "actionTaken": "Routine sensor calibration", "technician": "Scientist on duty", "downtimeHours": 1 },
+    "recentEvents": []
+  }
+}

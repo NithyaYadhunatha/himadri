@@ -1,0 +1,30 @@
+{
+  "maitri-medical-bay": {
+    "identity": { "type": "Medical Bay / Infirmary", "beds": 2, "oxygenSupply": "Cylinder + concentrator" },
+    "telemetry": { "roomTempC": 21, "oxygenCylinderLevelPercent": 82, "readinessStatus": "Ready" },
+    "health": {
+      "overall": 90,
+      "breakdown": { "equipment": 91, "supplies": 89 },
+      "remainingUsefulLifeHours": 20000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 2,
+      "failureProbability90d": 5
+    },
+    "lastMaintenance": { "date": "2026-08-01", "type": "Readiness Check", "actionTaken": "Monthly equipment and supply readiness check", "technician": "Station Medical Officer", "downtimeHours": 0 },
+    "recentEvents": []
+  },
+  "bharati-ot": {
+    "identity": { "type": "Operation Theatre", "capability": "Minor surgery, telemedicine-linked" },
+    "telemetry": { "roomTempC": 22, "sterileStatus": "Ready", "oxygenCylinderLevelPercent": 90 },
+    "health": {
+      "overall": 92,
+      "breakdown": { "equipment": 93, "supplies": 91 },
+      "remainingUsefulLifeHours": 22000,
+      "failureProbability7d": 0,
+      "failureProbability30d": 1,
+      "failureProbability90d": 4
+    },
+    "lastMaintenance": { "date": "2026-08-18", "type": "Readiness Check", "actionTaken": "Sterilization cycle and equipment check", "technician": "Station Medical Officer", "downtimeHours": 0 },
+    "recentEvents": []
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "maitri-stp": {
+    "identity": { "manufacturer": "Aquarius Engineering", "model": "STP-Bio-40", "ratedCapacityLitresPerDay": 4000, "commissioned": "2016" },
+    "telemetry": { "throughputLitresPerDay": 2600, "bioreactorTempC": 24, "stageStatus": "Aeration" },
+    "health": {
+      "overall": 79,
+      "breakdown": { "bioreactor": 81, "pumps": 76 },
+      "remainingUsefulLifeHours": 3600,
+      "failureProbability7d": 3,
+      "failureProbability30d": 11,
+      "failureProbability90d": 24
+    },
+    "lastMaintenance": { "date": "2026-08-10", "type": "Preventive", "actionTaken": "Sludge pump inspection and bioreactor seeding", "technician": "Engineer on duty", "downtimeHours": 3 },
+    "recentEvents": [
+      { "timestamp": "2026-09-12T11:00:00Z", "type": "cycle-complete", "severity": "INFO", "description": "Treatment cycle completed — discharge within permitted parameters." }
+    ]
+  },
+  "maitri-orange-room-tank": {
+    "identity": { "type": "Wastewater Holding Tank", "capacityLitres": 20000, "location": "Orange Room" },
+    "telemetry": { "levelPercent": 54, "temperatureC": 4 },
+    "health": {
+      "overall": 92,
+      "breakdown": { "structure": 94, "valves": 90 },
+      "remainingUsefulLifeHours": 9000,
+      "failureProbability7d": 1,
+      "failureProbability30d": 3,
+      "failureProbability90d": 8
+    },
+    "lastMaintenance": { "date": "2026-05-30", "type": "Inspection", "actionTaken": "Annual tank and valve inspection", "technician": "Engineer on duty", "downtimeHours": 0 },
+    "recentEvents": []
+  },
+  "bharati-black-water-tank": {
+    "identity": { "type": "Black Water Tank", "capacityLitres": 15000, "location": "Utility Block" },
+    "telemetry": { "levelPercent": 68, "temperatureC": 2 },
+    "health": {
+      "overall": 85,
+      "breakdown": { "structure": 88, "valves": 82 },
+      "remainingUsefulLifeHours": 7200,
+      "failureProbability7d": 2,
+      "failureProbability30d": 6,
+      "failureProbability90d": 15
+    },
+    "lastMaintenance": { "date": "2026-07-18", "type": "Inspection", "actionTaken": "Valve and level-sensor check", "technician": "Engineer on duty", "downtimeHours": 0 },
+    "recentEvents": []
+  }
+}

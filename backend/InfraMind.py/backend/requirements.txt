@@ -1,0 +1,16 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+neo4j==5.26.0
+aiomqtt==2.3.0
+pydantic==2.13.4
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+structlog==24.4.0
+httpx==0.28.1
+python-multipart==0.0.18
+fastapi-mcp==0.4.0
+mcp==1.29.0
+pandas==2.2.3
+scikit-learn==1.6.1

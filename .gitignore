@@ -1,0 +1,29 @@
+# ─── Frontend (Next.js) ─────────────────────────────────────────────────────
+frontend/InfraMind/node_modules/
+frontend/InfraMind/.next/
+frontend/InfraMind/out/
+frontend/InfraMind/build/
+frontend/InfraMind/.env
+frontend/InfraMind/.env.local
+frontend/InfraMind/.env.*.local
+frontend/InfraMind/npm-debug.log*
+frontend/InfraMind/.turbo/
+frontend/InfraMind/*.tsbuildinfo
+frontend/InfraMind/next-env.d.ts
+
+# ─── Backend (FastAPI / Python) ─────────────────────────────────────────────
+backend/**/__pycache__/
+backend/**/*.py[cod]
+backend/**/.venv/
+backend/**/venv/
+backend/**/env/
+backend/**/*.egg-info/
+backend/InfraMind.py/.env
+backend/**/*.db
+backend/**/*.sqlite3
+backend/**/.pytest_cache/
+
+# ─── OS / editor cruft ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
