@@ -139,7 +139,7 @@ async def ingest_reading(
         station_id=asset.station_id,
     )
 
-    await ws_manager.broadcast_reading_updated(asset.id, values)
+    await ws_manager.broadcast_reading_updated(asset.id, values, reading.collected_at)
     if status != previous_status:
         await ws_manager.broadcast_asset_status_changed(asset.id, status, health_score)
     for alert in new_alerts:

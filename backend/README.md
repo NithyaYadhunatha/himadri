@@ -174,6 +174,22 @@ than silently dropped.
 
 ## API Cheatsheet
 
+The REST contract from *PolarTwin — Data Model & API Contract* is exposed at
+`/api/v1`. The existing root paths remain available for the current Next.js
+frontend and device agent. `/docs` describes the versioned routes. Responses
+under `/api/v1` include `X-Node-Id` and `X-Link-State`; HTTP errors use the
+contract's `error.code`, `error.message`, and `error.request_id` envelope.
+
+The v1 additions include station model, QR SVG, series and latest readings,
+manual readings, energy views, environmental CSV/PDF export, forecasting,
+simulation, agent fallback queries, convoy updates, and a durable sync queue.
+Set `HQ_SYNC_URL` to enable `POST /api/v1/sync/now`; without it the route
+returns a service-unavailable error. The HQ batch receiver verifies hashes
+and stores incoming items, but does not yet materialize them into domain
+tables. Audit events enter the outgoing queue; other table changes still need
+queue hooks. The identity routes (`/auth/*`, `/users*`) remain open because
+the current app uses Clerk/MongoDB rather than the PDF's JWT user store.
+
 Base URL: `http://localhost:8000` · Auth: `Authorization: Bearer <API_SECRET_KEY>`
 on every route below except `/health` and `/agent/*` (which use `X-API-Key`).
 

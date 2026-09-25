@@ -116,7 +116,7 @@ async def create_asset(body: CreateAssetRequest, db: AsyncSession = Depends(get_
     return AssetDetail.model_validate(asset)
 
 
-@router.get("/assets/{asset_id}", response_model=AssetDetail, dependencies=[Depends(require_bearer)], operation_id="get_asset")
+@router.get("/assets/{asset_id}", response_model=AssetDetail, dependencies=[Depends(require_bearer)], operation_id="get_asset", include_in_schema=False)
 async def get_asset(asset_id: str, db: AsyncSession = Depends(get_db)) -> AssetDetail:
     asset = await db.get(Asset, asset_id)
     if not asset:

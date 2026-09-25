@@ -1,35 +1,39 @@
 'use client'
 
-// Reserved slot for the Unity WebGL 3D station twin, which is being built
-// separately (not in this Next.js app). Per explicit product direction, this
-// page does NOT render its own Three.js scene — the old IT server-rack 3D
-// view (components/facility3d/*, DigitalTwin3DView.tsx) was removed
-// entirely for that reason. This just checks whether a Unity build has been
-// dropped at /unity/index.html and embeds it in an iframe if so, falling
-// back to a placeholder otherwise.
+// The two Unity station twins are exported independently and served as static
+// assets. The selected station controls which build is mounted; using the URL
+// as the iframe key also disposes the previous Unity runtime when switching.
 
 import { useEffect, useState } from 'react'
 import { Box, ExternalLink } from 'lucide-react'
 import { useStationStore } from '@/store/useStationStore'
-import { ROUTES } from '@/lib/constants'
+import { ROUTES, STATION_LABELS, type StationId } from '@/lib/constants'
 
 type UnityStatus = 'checking' | 'available' | 'unavailable'
 
+const UNITY_BUILDS: Record<StationId, string> = {
+  maitri: '/unity/index.html',
+  bharati: '/unity/bharati/index.html',
+}
+
 export default function Twin3DPage() {
   const station = useStationStore((s) => s.station)
-  const [status, setStatus] = useState<UnityStatus>('checking')
+  const [buildCheck, setBuildCheck] = useState<{ url: string; status: Exclude<UnityStatus, 'checking'> } | null>(null)
+  const unityUrl = UNITY_BUILDS[station]
+  const stationLabel = STATION_LABELS[station]
+  const status: UnityStatus = buildCheck?.url === unityUrl ? buildCheck.status : 'checking'
 
   useEffect(() => {
     let cancelled = false
-    fetch('/unity/index.html', { method: 'HEAD' })
+    fetch(unityUrl, { method: 'HEAD' })
       .then((res) => {
-        if (!cancelled) setStatus(res.ok ? 'available' : 'unavailable')
+        if (!cancelled) setBuildCheck({ url: unityUrl, status: res.ok ? 'available' : 'unavailable' })
       })
       .catch(() => {
-        if (!cancelled) setStatus('unavailable')
+        if (!cancelled) setBuildCheck({ url: unityUrl, status: 'unavailable' })
       })
     return () => { cancelled = true }
-  }, [])
+  }, [unityUrl])
 
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col bg-brand-bg p-4">
@@ -43,10 +47,12 @@ export default function Twin3DPage() {
       <div className="flex-1 rounded border-2 border-dashed border-cyan/30 bg-brand-surface overflow-hidden relative">
         {status === 'available' ? (
           <iframe
-            src="/unity/index.html"
-            title="Unity WebGL 3D Station Twin"
+            key={unityUrl}
+            src={unityUrl}
+            title={`${stationLabel} Unity WebGL 3D Station Twin`}
             className="w-full h-full border-0"
             allow="fullscreen"
+            allowFullScreen
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-center gap-3 p-8">
@@ -54,13 +60,12 @@ export default function Twin3DPage() {
               <Box size={28} className="text-cyan/60" />
             </div>
             <p className="font-mono text-sm text-white/70 uppercase tracking-widest">
-              3D Twin — Unity WebGL build in progress
+              {status === 'checking' ? `Loading ${stationLabel} 3D Twin…` : `${stationLabel} 3D Twin unavailable`}
             </p>
             <p className="text-xs text-white/40 font-sans max-w-md leading-relaxed">
-              The real-time 3D station model is being built separately in Unity and will integrate here once its
-              WebGL build is published to <code className="text-cyan/70">/unity/index.html</code> in this app&apos;s
-              public directory. This page reserves the slot and will render it automatically once available
-              {status === 'checking' ? ' — checking now…' : '.'}
+              {status === 'checking'
+                ? 'Checking the selected station build and preparing its Unity runtime.'
+                : `The ${stationLabel} Unity WebGL build could not be loaded. You can continue with the 2D station twin.`}
             </p>
             <a
               href={ROUTES.TWIN}

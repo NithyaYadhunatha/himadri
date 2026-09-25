@@ -98,6 +98,7 @@ class PendingDeviceItem(BaseModel):
     asset_name: str
     station_id: str
     category: str
+    approved: bool
     manifest: dict[str, Any] | None
     last_seen: datetime | None
 

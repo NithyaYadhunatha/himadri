@@ -21,7 +21,8 @@ import structlog
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models.tables import AuditEvent
+from backend.config import settings
+from backend.models.tables import AuditEvent, SyncItem
 
 logger = structlog.get_logger(__name__)
 
@@ -77,6 +78,17 @@ async def record(
         hash=row_hash,
     )
     db.add(event)
+    await db.flush()
+    sync_payload = {"seq": event.seq, "ts": ts.isoformat(), "user_id": user_id,
+                    "role": role, "station_id": station_id, "action": action,
+                    "resource": resource, "detail": detail, "prev_hash": prev_hash,
+                    "hash": row_hash}
+    db.add(SyncItem(
+        node_id=settings.NODE_ID, seq=event.seq, table_name="audit_event",
+        row_id=str(event.seq), op="insert", payload=sync_payload,
+        content_hash=hashlib.sha256(_canonical_json(sync_payload).encode()).hexdigest(),
+        priority=0,
+    ))
     await db.flush()
     logger.info("audit.recorded", action=action, user_id=user_id, resource=resource)
     return event
