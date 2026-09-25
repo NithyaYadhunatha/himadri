@@ -17,12 +17,15 @@ Includes:
 from __future__ import annotations
 
 import asyncio
+import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator
 
 import structlog
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_mcp import AuthConfig, FastApiMCP
 from sqlalchemy import select
@@ -39,6 +42,7 @@ from backend.routers import (
     assets,
     audit,
     commands,
+    contract_v1,
     devices,
     logistics,
     notifications,
@@ -46,6 +50,7 @@ from backend.routers import (
     reports,
     scenarios,
     stations,
+    sync,
     websocket,
 )
 from backend.services import alert_engine, command_engine, email_service, mqtt_ingest
@@ -254,21 +259,54 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.middleware("http")
+    async def contract_headers(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/api/v1/"):
+            response.headers["X-Node-Id"] = settings.NODE_ID
+            response.headers["X-Link-State"] = settings.LINK_STATE
+        return response
+
+    @app.exception_handler(HTTPException)
+    async def contract_http_error(request: Request, exc: HTTPException):
+        if not request.url.path.startswith("/api/v1/"):
+            from fastapi.exception_handlers import http_exception_handler
+            return await http_exception_handler(request, exc)
+        code = {401: "AUTH_REQUIRED", 403: "RBAC_DENIED", 422: "VALIDATION_FAILED"}.get(exc.status_code, "REQUEST_FAILED")
+        if exc.status_code == 409 and "expir" in str(exc.detail).lower():
+            code = "COMMAND_EXPIRED"
+        return JSONResponse(status_code=exc.status_code, content={"error": {"code": code, "message": str(exc.detail), "request_id": str(uuid.uuid4())}})
+
+    @app.exception_handler(RequestValidationError)
+    async def contract_validation_error(request: Request, exc: RequestValidationError):
+        if not request.url.path.startswith("/api/v1/"):
+            from fastapi.exception_handlers import request_validation_exception_handler
+            return await request_validation_exception_handler(request, exc)
+        return JSONResponse(status_code=422, content={"error": {"code": "VALIDATION_FAILED", "message": "Invalid request", "request_id": str(uuid.uuid4())}})
+
+    @app.exception_handler(Exception)
+    async def contract_unexpected_error(request: Request, exc: Exception):
+        if not request.url.path.startswith("/api/v1/"):
+            raise exc
+        logger.error("contract.unexpected_error", path=request.url.path, error=str(exc))
+        return JSONResponse(status_code=500, content={"error": {"code": "INTERNAL_ERROR", "message": "Internal server error", "request_id": str(uuid.uuid4())}},
+                            headers={"X-Node-Id": settings.NODE_ID, "X-Link-State": settings.LINK_STATE})
+
     # ── Routers ───────────────────────────────────────────────────────────────
-    app.include_router(agents.router)
-    app.include_router(stations.router)
-    app.include_router(assets.router)
-    app.include_router(alerts.router)
-    app.include_router(commands.router)
-    app.include_router(scenarios.router)
-    app.include_router(analytics.router)
-    app.include_router(logistics.router)
-    app.include_router(reports.router)
-    app.include_router(devices.router)
-    app.include_router(audit.router)
-    app.include_router(notifications.router)
+    # Keep the existing paths as compatibility aliases for the current UI and
+    # device agents. The documented HTTP API lives under /api/v1.
+    routers = (stations, assets, alerts, commands, scenarios, analytics,
+               logistics, reports, devices, audit, notifications,
+               predictive_maintenance)
+    app.include_router(contract_v1.router, prefix="/api/v1")
+    app.include_router(sync.router, prefix="/api/v1")
+    for module in routers:
+        app.include_router(module.router, prefix="/api/v1")
+    app.include_router(websocket.router, prefix="/api/v1")
+    app.include_router(agents.router, include_in_schema=False)
+    for module in routers:
+        app.include_router(module.router, include_in_schema=False)
     app.include_router(websocket.router)
-    app.include_router(predictive_maintenance.router)
 
     # ── Health check ─────────────────────────────────────────────────────────
     @app.get("/health", tags=["Health"])

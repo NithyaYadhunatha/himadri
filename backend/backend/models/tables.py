@@ -300,6 +300,30 @@ class AuditEvent(Base):
     hash: Mapped[str] = mapped_column(String(64), nullable=False)
 
 
+class SyncItem(Base):
+    __tablename__ = "sync_items"
+
+    node_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    seq: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    table_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    row_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    op: Mapped[str] = mapped_column(String(16), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    sent_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    acked_at: Mapped[datetime | None] = mapped_column(nullable=True)
+
+
+class SyncControl(Base):
+    __tablename__ = "sync_controls"
+
+    node_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    paused: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    last_sync: Mapped[datetime | None] = mapped_column(nullable=True)
+
+
 # ─── Reports ─────────────────────────────────────────────────────────────────
 
 

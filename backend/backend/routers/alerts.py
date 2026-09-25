@@ -42,6 +42,8 @@ async def list_alerts(
     category: str | None = Query(default=None),
     since: datetime | None = Query(default=None),
     until: datetime | None = Query(default=None),
+    date_from: datetime | None = Query(default=None, alias="from"),
+    date_to: datetime | None = Query(default=None, alias="to"),
     db: AsyncSession = Depends(get_db),
 ) -> list[AlertDetail]:
     q = select(Alert)
@@ -53,10 +55,10 @@ async def list_alerts(
         q = q.where(Alert.severity == severity)
     if category:
         q = q.where(Alert.category == category)
-    if since:
-        q = q.where(Alert.first_seen >= since)
-    if until:
-        q = q.where(Alert.first_seen <= until)
+    if date_from or since:
+        q = q.where(Alert.first_seen >= (date_from or since))
+    if date_to or until:
+        q = q.where(Alert.first_seen <= (date_to or until))
     q = q.order_by(Alert.last_seen.desc()).limit(500)
 
     result = await db.execute(q)
@@ -74,6 +76,8 @@ async def ack_alert(alert_id: str, body: AckAlertRequest, db: AsyncSession = Dep
     await audit_engine.record(
         db, user_id=body.user, role=None, station_id=alert.station_id, action="alert.ack", resource=alert_id, detail={"note": body.note}
     )
+    await ws_manager.broadcast("alert.acked", {"id": alert.id, "acked_by": alert.acked_by,
+                                                "acked_at": alert.acked_at}, asset_id=alert.asset_id)
     return AlertDetail.model_validate(alert)
 
 

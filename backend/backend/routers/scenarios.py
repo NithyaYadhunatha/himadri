@@ -10,6 +10,7 @@ GET  /scenarios/compare?ids=
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -110,6 +111,12 @@ async def list_scenarios(station: str | None = Query(default=None), db: AsyncSes
 @router.get("/scenarios/compare", response_model=list[ScenarioDetail], dependencies=[Depends(require_bearer)], operation_id="compare_scenarios")
 async def compare_scenarios(ids: str = Query(..., description="Comma-separated scenario ids"), db: AsyncSession = Depends(get_db)) -> list[ScenarioDetail]:
     id_list = [i.strip() for i in ids.split(",") if i.strip()]
+    if not id_list:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="At least one scenario id is required")
+    try:
+        id_list = [str(UUID(identifier)) for identifier in id_list]
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid scenario id") from None
     result = await db.execute(select(Scenario).where(Scenario.id.in_(id_list)))
     return [ScenarioDetail.model_validate(s) for s in result.scalars().all()]
 

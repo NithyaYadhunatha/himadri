@@ -26,7 +26,15 @@ async def list_devices(pending: bool = Query(default=False), db: AsyncSession = 
     if pending:
         q = q.where(Asset.approved == False)  # noqa: E712
     result = await db.execute(q)
-    return [PendingDeviceItem.model_validate(a) for a in result.scalars().all()]
+    return [PendingDeviceItem(
+        asset_id=asset.id,
+        asset_name=asset.name,
+        station_id=asset.station_id,
+        category=asset.category,
+        approved=asset.approved,
+        manifest=asset.manifest,
+        last_seen=asset.last_seen,
+    ) for asset in result.scalars().all()]
 
 
 @router.post(

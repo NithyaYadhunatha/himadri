@@ -42,6 +42,10 @@ class Settings(BaseSettings):
 
     # API Security
     API_SECRET_KEY: str = "changeme_for_hackathon"
+    NODE_ID: str = "himadri-local"
+    LINK_STATE: str = "unknown"
+    HQ_SYNC_URL: str = ""
+    SYNC_BYTES_BUDGET: int = 5_000_000
 
     # MCP server (exposes a curated set of read/report/simulation/analytics
     # endpoints as MCP tools for the natural-language Operations Agent)

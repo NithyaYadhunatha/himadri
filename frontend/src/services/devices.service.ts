@@ -36,7 +36,26 @@ export interface DeviceRecord {
   asset_id: string
   vendor: string
   status: 'pending' | 'approved' | 'rejected'
-  created_at: string
+  created_at?: string
+}
+
+interface BackendDevice {
+  asset_id: string
+  asset_name: string
+  station_id: string
+  category: string
+  approved: boolean
+  manifest: { device_id?: string; vendor?: string } | null
+}
+
+function toDeviceRecord(device: BackendDevice): DeviceRecord {
+  return {
+    id: device.asset_id,
+    asset_id: device.asset_id,
+    device_id: device.manifest?.device_id || device.asset_id,
+    vendor: device.manifest?.vendor || '—',
+    status: device.approved ? 'approved' : 'pending',
+  }
 }
 
 async function json<T>(res: Response): Promise<T> {
@@ -50,22 +69,24 @@ async function json<T>(res: Response): Promise<T> {
 export const devicesService = {
   listPending: async (): Promise<DeviceRecord[]> => {
     if (USE_MOCK) return Promise.resolve(mockDevices.filter((d) => d.status === 'pending'))
-    return json(await fetch('/api/devices?pending=true'))
+    const devices = await json<BackendDevice[]>(await fetch('/api/devices?pending=true'))
+    return devices.map(toDeviceRecord)
   },
   list: async (): Promise<DeviceRecord[]> => {
     if (USE_MOCK) return Promise.resolve(mockDevices)
-    return json(await fetch('/api/devices'))
+    const devices = await json<BackendDevice[]>(await fetch('/api/devices'))
+    return devices.map(toDeviceRecord)
   },
-  approve: async (id: string): Promise<DeviceRecord> => {
+  approve: async (id: string): Promise<void> => {
     if (USE_MOCK) {
       const device = mockDevices.find((d) => d.id === id)
       if (!device) return Promise.reject(new Error('Device not found'))
       device.status = 'approved'
-      return Promise.resolve(device)
+      return
     }
-    return json(await fetch(`/api/devices/${encodeURIComponent(id)}/approve`, { method: 'POST' }))
+    await json(await fetch(`/api/devices/${encodeURIComponent(id)}/approve`, { method: 'POST' }))
   },
-  registerManifest: async (manifest: DeviceManifest): Promise<DeviceRecord> => {
+  registerManifest: async (manifest: DeviceManifest): Promise<void> => {
     if (USE_MOCK) {
       const record: DeviceRecord = {
         id: manifest.asset_id,
@@ -76,9 +97,9 @@ export const devicesService = {
         created_at: new Date().toISOString(),
       }
       mockDevices.unshift(record)
-      return Promise.resolve(record)
+      return
     }
-    return json(await fetch('/api/devices/manifest', {
+    await json(await fetch('/api/devices/manifest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(manifest),
