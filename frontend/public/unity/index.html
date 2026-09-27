@@ -58,6 +58,44 @@
       let canvas = document.querySelector("#unity-canvas");
       let fullscreenContainer = document.querySelector("#unity-fullscreen-container");
 
+      // The Unity build was exported with the development websocket URL.
+      // Remap only that endpoint so the same WebGL artifact can use whichever
+      // backend the Next.js deployment passes as ?backend=https://...
+      (function configureDigitalTwinWebSocket() {
+        const backend = new URLSearchParams(window.location.search).get("backend");
+        if (!backend) return;
+        let parsed;
+        try {
+          parsed = new URL(backend);
+        } catch (_) {
+          console.error("Ignoring invalid digital-twin backend URL");
+          return;
+        }
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return;
+        parsed.protocol = parsed.protocol === "https:" ? "wss:" : "ws:";
+        parsed.pathname = parsed.pathname.replace(/\/$/, "") + "/ws/digital-twin";
+        parsed.search = "";
+        parsed.hash = "";
+        const deployedWebSocketUrl = parsed.toString();
+        const NativeWebSocket = window.WebSocket;
+        function ConfiguredWebSocket(url, protocols) {
+          const requested = String(url);
+          const resolved = requested === "ws://localhost:8000/ws/digital-twin"
+            ? deployedWebSocketUrl
+            : requested;
+          return protocols === undefined
+            ? new NativeWebSocket(resolved)
+            : new NativeWebSocket(resolved, protocols);
+        }
+        ConfiguredWebSocket.prototype = NativeWebSocket.prototype;
+        Object.setPrototypeOf(ConfiguredWebSocket, NativeWebSocket);
+        for (const state of ["CONNECTING", "OPEN", "CLOSING", "CLOSED"]) {
+          ConfiguredWebSocket[state] = NativeWebSocket[state];
+        }
+        window.WebSocket = ConfiguredWebSocket;
+        console.info("Maitri live telemetry:", deployedWebSocketUrl);
+      })();
+
       // Shows a temporary message banner/ribbon for a few seconds, or
       // a permanent error message on top of the canvas if type=='error'.
       // If type=='warning', a yellow highlight color is used.

@@ -1,4 +1,0 @@
-cd /Users/adityasingh/projects/SIH/PolarTwin/himadri/hardware/server
-ARDUINO_PORT=/dev/cu.usbserial-A5069RR4 npm start
-
-        

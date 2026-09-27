@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PolarTwin Dual Board</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #10151b; color: #ecf2f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    h1 { font-size: 1.55rem; margin: 0; }
+    .subtitle { color: #9eabb9; margin: 5px 0 0; }
+    .badge { border: 1px solid #465463; border-radius: 999px; padding: 7px 12px; font-size: .82rem; white-space: nowrap; }
+    .badge.good { color: #81e6a8; border-color: #2a8452; }
+    .badge.warn { color: #ffc76c; border-color: #96651b; }
+    .badge.bad { color: #ff9f9f; border-color: #8f3d3d; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+    section { border: 1px solid #2a3540; border-radius: 12px; background: #171e26; padding: 16px; }
+    section.wide { grid-column: span 2; }
+    h2 { color: #aab8c7; font-size: .82rem; font-weight: 650; letter-spacing: .08em; margin: 0 0 14px; text-transform: uppercase; }
+    .value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .unit { color: #9eabb9; font-size: .95rem; font-weight: 500; }
+    .row { display: flex; justify-content: space-between; gap: 12px; color: #c6d0da; padding: 5px 0; font-size: .92rem; }
+    .row span:last-child { font-variant-numeric: tabular-nums; text-align: right; }
+    .state { font-weight: 650; }
+    .state.on { color: #81e6a8; }
+    .state.off { color: #aab8c7; }
+    .state.alert { color: #ff9f9f; }
+    .commands { display: flex; flex-wrap: wrap; gap: 8px; }
+    button { background: #263442; border: 1px solid #465463; border-radius: 7px; color: #ecf2f8; cursor: pointer; font: inherit; padding: 8px 10px; }
+    button:hover { background: #344759; }
+    #message { color: #9eabb9; font-size: .85rem; margin-top: 10px; min-height: 1.3em; }
+    .empty { color: #9eabb9; font-size: 1rem; padding: 22px 0; }
+    @media (max-width: 560px) { main { width: min(100% - 24px, 1120px); padding-top: 18px; } header { align-items: flex-start; flex-direction: column; } section.wide { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>PolarTwin Arduino Uno</h1><p class="subtitle">Live single-board hardware telemetry</p></div>
+      <div id="connection" class="badge warn">Checking connection…</div>
+    </header>
+    <div id="empty" class="empty">Waiting for telemetry from the Arduino…</div>
+    <div id="dashboard" class="grid" hidden>
+      <section><h2>Temperature</h2><div class="value"><span id="temperature">—</span> <span class="unit">°C</span></div><div class="row"><span>Alert</span><span id="temperature-alert" class="state off">NORMAL</span></div></section>
+      <section><h2>Humidity</h2><div class="value"><span id="humidity">—</span> <span class="unit">%RH</span></div><div class="row"><span>Updated</span><span id="updated">—</span></div></section>
+      <section><h2>MQ-2 Gas</h2><div class="value"><span id="gas">—</span> <span class="unit">raw / 1023</span></div><div class="row"><span>Gas alert</span><span id="gas-alert" class="state off">NORMAL</span></div></section>
+      <section><h2>Ultrasonic</h2><div class="value"><span id="distance">—</span> <span class="unit">cm</span></div><div class="row"><span>Proximity</span><span id="proximity-alert" class="state off">CLEAR</span></div></section>
+      <section><h2>IR Presence</h2><div id="ir" class="value">—</div><div class="row"><span>Occupancy</span><span id="occupancy" class="state off">—</span></div></section>
+      <section><h2>Hall Effect</h2><div id="hall" class="value">—</div><div class="row"><span>Magnetic event</span><span id="hall-event" class="state off">—</span></div></section>
+      <section class="wide"><h2>ADXL335 Acceleration</h2><div class="row"><span>X axis</span><span id="accel-x">— m/s²</span></div><div class="row"><span>Y axis</span><span id="accel-y">— m/s²</span></div><div class="row"><span>Z axis</span><span id="accel-z">— m/s²</span></div><div class="row"><span>Tilt</span><span id="tilt">— °</span></div><div class="row"><span>Structural alert</span><span id="structural-alert" class="state off">NORMAL</span></div></section>
+      <section><h2>System</h2><div id="system-status" class="value">—</div><div class="row"><span>Alarm</span><span id="alarm" class="state off">—</span></div><div class="row"><span>Servo</span><span id="servo">— °</span></div><div class="row"><span>Buzzer</span><span id="buzzer" class="state off">—</span></div></section>
+      <section class="wide"><h2>Controls</h2><div class="commands"><button data-command="SERVO:0">Servo 0°</button><button data-command="SERVO:90">Servo 90°</button><button data-command="SERVO:180">Servo 180°</button><button data-command="BUZZER:ON">Buzzer on</button><button data-command="BUZZER:OFF">Buzzer off</button><button data-command="RGB:255,0,0">RGB red</button><button data-command="RGB:0,255,0">RGB green</button><button data-command="ACCEL:ZERO">Zero ADXL335</button><button data-command="STATUS">Refresh status</button></div><div id="message"></div></section>
+    </div>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const byId = id => document.getElementById(id);
+    const number = (value, digits = 1) => Number.isFinite(value) ? value.toFixed(digits) : '—';
+    const state = (id, active, activeText, inactiveText = 'NORMAL') => {
+      const element = byId(id);
+      element.textContent = active ? activeText : inactiveText;
+      element.className = `state ${active ? 'alert' : 'off'}`;
+    };
+    const boolState = (id, active, onText = 'DETECTED', offText = 'CLEAR') => {
+      const element = byId(id);
+      element.textContent = active ? onText : offText;
+      element.className = `state ${active ? 'on' : 'off'}`;
+    };
+    function render(packet) {
+      if (!packet) return;
+      byId('empty').hidden = true;
+      byId('dashboard').hidden = false;
+      byId('temperature').textContent = number(packet.environment.temperature);
+      byId('humidity').textContent = number(packet.environment.humidity);
+      byId('gas').textContent = packet.environment.gasRaw ?? '—';
+      byId('distance').textContent = number(packet.occupancy.distanceCm);
+      byId('ir').textContent = packet.occupancy.irDetected ? 'DETECTED' : 'CLEAR';
+      byId('hall').textContent = packet.occupancy.hallDetected ? 'DETECTED' : 'CLEAR';
+      byId('accel-x').textContent = `${number(packet.equipment.acceleration.x, 2)} m/s²`;
+      byId('accel-y').textContent = `${number(packet.equipment.acceleration.y, 2)} m/s²`;
+      byId('accel-z').textContent = `${number(packet.equipment.acceleration.z, 2)} m/s²`;
+      byId('tilt').textContent = `${number(packet.equipment.tiltDeg)} °`;
+      byId('system-status').textContent = packet.system.status;
+      byId('servo').textContent = `${packet.actuators.servo.angle} °`;
+      byId('updated').textContent = new Date(packet.timestamp).toLocaleTimeString();
+      state('temperature-alert', packet.alerts.high_temperature, 'WARNING');
+      state('gas-alert', packet.alerts.gas, 'ALERT');
+      state('proximity-alert', packet.alerts.proximity, 'TOO CLOSE', 'CLEAR');
+      state('structural-alert', packet.alerts.structural, 'WARNING');
+      boolState('occupancy', packet.states.occupancy, 'PRESENT', 'EMPTY');
+      boolState('hall-event', packet.states.hallEvent, 'ACTIVE', 'CLEAR');
+      state('alarm', packet.system.alarm, 'ACTIVE', 'OFF');
+      boolState('buzzer', packet.actuators.buzzer.state, 'ON', 'OFF');
+    }
+    function renderConnection(status) {
+      const element = byId('connection');
+      if (!status.arduinoConnected) { element.textContent = 'Arduino disconnected'; element.className = 'badge bad'; }
+      else if (status.telemetryStale) { element.textContent = 'Waiting for telemetry'; element.className = 'badge warn'; }
+      else { element.textContent = 'Arduino live'; element.className = 'badge good'; }
+    }
+    async function refresh() {
+      try {
+        const [statusResponse, latestResponse] = await Promise.all([fetch('/api/iot/status'), fetch('/api/iot/latest')]);
+        renderConnection(await statusResponse.json());
+        render(await latestResponse.json());
+      } catch { renderConnection({arduinoConnected:false}); }
+    }
+    document.querySelectorAll('[data-command]').forEach(button => button.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/iot/command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({command:button.dataset.command})});
+        const body = await response.json();
+        byId('message').textContent = response.ok ? `Sent ${body.command}` : body.error;
+      } catch { byId('message').textContent = 'Command could not reach the gateway.'; }
+    }));
+    const socket = io();
+    socket.on('iot:telemetry', render);
+    socket.on('iot:status', renderConnection);
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>

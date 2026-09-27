@@ -44,6 +44,7 @@ from backend.routers import (
     commands,
     contract_v1,
     devices,
+    digital_twin,
     logistics,
     notifications,
     predictive_maintenance,
@@ -53,7 +54,7 @@ from backend.routers import (
     sync,
     websocket,
 )
-from backend.services import alert_engine, command_engine, email_service, mqtt_ingest
+from backend.services import alert_engine, command_engine, digitaltwin_bridge, email_service, mqtt_ingest
 from backend.websocket.manager import ws_manager
 
 # Curated set of operation_ids exposed as MCP tools for the natural-language
@@ -207,6 +208,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         # or unreachable never blocks startup or affects the HTTP heartbeat
         # ingest path.
         await mqtt_ingest.start()
+        await digitaltwin_bridge.start()
         logger.info("himadri.mqtt_listener_started")
     else:
         logger.info("himadri.mqtt_disabled")
@@ -227,6 +229,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     if settings.MQTT_ENABLED:
         await mqtt_ingest.stop()
+        await digitaltwin_bridge.stop()
 
     await close_engine()
     await close_driver()
@@ -307,6 +310,12 @@ def create_app() -> FastAPI:
     for module in routers:
         app.include_router(module.router, include_in_schema=False)
     app.include_router(websocket.router)
+
+    # Digital Twin (Unity / PolarTwinDualBoard) bridge — a single mount, not
+    # the /api/v1 + compat-alias pattern above: its router already carries its
+    # own /api prefix, and its websocket must land at exactly /ws/digital-twin.
+    app.include_router(digital_twin.router)
+    app.include_router(digital_twin.ws_router)
 
     # ── Health check ─────────────────────────────────────────────────────────
     @app.get("/health", tags=["Health"])
