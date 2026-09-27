@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     MQTT_BROKER_HOST: str = "localhost"
     MQTT_BROKER_PORT: int = 1883
 
+    # Shared secret used by physical Raspberry Pi gateways posting directly
+    # to /api/telemetry/ingest. Leave empty only for local development; set the
+    # same value as BACKEND_DEVICE_KEY on the Raspberry Pi in deployment.
+    DIGITAL_TWIN_INGEST_KEY: str = ""
+
     # API Security
     API_SECRET_KEY: str = "changeme_for_hackathon"
     NODE_ID: str = "himadri-local"

@@ -1,0 +1,9 @@
+.venv/
+tests/
+agent/
+context/
+**/__pycache__/
+**/*.py[cod]
+.env
+.git/
+.DS_Store

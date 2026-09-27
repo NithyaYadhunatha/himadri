@@ -55,7 +55,7 @@ services:
     container_name: himadri_mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"
+      - "0.0.0.0:1883:1883"
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto_data:/mosquitto/data
@@ -100,7 +100,13 @@ services:
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: inframind
       REDIS_URL: redis://redis:6379
-      MQTT_BROKER_HOST: mosquitto
+      # Local serial relays publish to the Compose broker by default. Set
+      # MQTT_BROKER_HOST to the Raspberry Pi address when the ESP8266's
+      # board-to-board uplink is the active telemetry source.
+      MQTT_BROKER_HOST: ${MQTT_BROKER_HOST:-mosquitto}
+      # Set this in backend/.env in deployment and use the same value as
+      # BACKEND_DEVICE_KEY on the Raspberry Pi gateway.
+      DIGITAL_TWIN_INGEST_KEY: ${DIGITAL_TWIN_INGEST_KEY:-}
     ports:
       - "8000:8000"
     depends_on:

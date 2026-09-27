@@ -19,13 +19,17 @@ const UNITY_BUILDS: Record<StationId, string> = {
 export default function Twin3DPage() {
   const station = useStationStore((s) => s.station)
   const [buildCheck, setBuildCheck] = useState<{ url: string; status: Exclude<UnityStatus, 'checking'> } | null>(null)
-  const unityUrl = UNITY_BUILDS[station]
+  const unityBuildPath = UNITY_BUILDS[station]
+  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+  const unityUrl = station === 'maitri'
+    ? `${unityBuildPath}?backend=${encodeURIComponent(backendUrl)}`
+    : unityBuildPath
   const stationLabel = STATION_LABELS[station]
   const status: UnityStatus = buildCheck?.url === unityUrl ? buildCheck.status : 'checking'
 
   useEffect(() => {
     let cancelled = false
-    fetch(unityUrl, { method: 'HEAD' })
+    fetch(unityBuildPath, { method: 'HEAD' })
       .then((res) => {
         if (!cancelled) setBuildCheck({ url: unityUrl, status: res.ok ? 'available' : 'unavailable' })
       })
@@ -33,7 +37,7 @@ export default function Twin3DPage() {
         if (!cancelled) setBuildCheck({ url: unityUrl, status: 'unavailable' })
       })
     return () => { cancelled = true }
-  }, [unityUrl])
+  }, [unityBuildPath, unityUrl])
 
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col bg-brand-bg p-4">
