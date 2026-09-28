@@ -37,7 +37,7 @@ def load_defaults(config_path: str = "config/device.yaml") -> dict[str, Any]:
     """Defaults used to pre-fill the setup dialog — read from device.yaml."""
     config = _load_config(config_path)
     return {
-        "backend_url": config.get("backend_url", "http://localhost:8000"),
+        "backend_url": config.get("backend_url", "https://himadri.aus1in.me"),
         "interval": int(config.get("report_interval_seconds", 10)),
     }
 

@@ -52,9 +52,37 @@ class ContractRoutesTest(unittest.TestCase):
             "/api/v1/analytics/simulate": "post",
             "/api/v1/agent/query": "post",
             "/api/v1/reports/environmental": "get",
+            "/api/telemetry/latest": "get",
+            "/api/telemetry/ingest": "post",
         }
         for path, method in expected.items():
             self.assertIn(method, paths[path])
+
+    def test_polartwin_gateway_ingest_updates_live_telemetry(self):
+        body = {
+            "gatewayId": "polar-twin-uno",
+            "timestamp": "2026-09-28T00:00:00Z",
+            "readings": [
+                {"deviceId": "sensor-dht-01", "value": 21.5, "unit": "°C"},
+                {"deviceId": "sensor-humidity-01", "value": 48.0, "unit": "%"},
+            ],
+        }
+        with patch.object(settings, "DIGITAL_TWIN_INGEST_KEY", "test-device-key"):
+            rejected = self.client.post("/api/telemetry/ingest", json=body)
+            accepted = self.client.post(
+                "/api/telemetry/ingest",
+                json=body,
+                headers={"X-Device-Key": "test-device-key"},
+            )
+
+        self.assertEqual(rejected.status_code, 401)
+        self.assertEqual(accepted.status_code, 200)
+        self.assertEqual(accepted.json()["accepted"], 2)
+        latest = self.client.get("/api/telemetry/latest")
+        self.assertEqual(latest.status_code, 200)
+        devices = {device["deviceId"]: device for device in latest.json()}
+        self.assertEqual(devices["sensor-dht-01"]["value"], 21.5)
+        self.assertEqual(devices["sensor-humidity-01"]["value"], 48.0)
 
     def test_series_keys_preserve_dotted_asset_ids(self):
         asset = SimpleNamespace(

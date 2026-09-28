@@ -9,14 +9,15 @@
 // Postgres/Neo4j data — no n8n, no external workflow service, everything
 // stays on this machine's own stack.
 //
-// Same Bearer token every other server-side backend call already uses
-// (NEXT_PUBLIC_API_TOKEN, see src/app/api/fleet/graph/route.ts for the
-// established convention of reading that var server-side too).
+// Same Bearer token every other server-side backend call already uses. The
+// REST base ends in /api/v1, so MCP deliberately resolves from its origin and
+// remains mounted at the backend-root /mcp endpoint.
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
+const API_ORIGIN = new URL(API_BASE).origin
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 const TOOL_CALL_TIMEOUT_MS = 15_000
 
@@ -37,7 +38,7 @@ let clientPromise: Promise<Client> | null = null
 
 async function connect(): Promise<Client> {
   const client = new Client({ name: 'inframind-web', version: '1.0.0' })
-  const transport = new StreamableHTTPClientTransport(new URL(`${API_BASE}/mcp`), {
+  const transport = new StreamableHTTPClientTransport(new URL(`${API_ORIGIN}/mcp`), {
     requestInit: { headers: { Authorization: `Bearer ${API_TOKEN}` } },
   })
   await client.connect(transport)

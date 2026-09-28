@@ -22,7 +22,7 @@ import { DEPARTMENTS } from '@/lib/auth/constants'
 // Actions that surface in the Audit Log preset: team lifecycle, architecture
 // sharing, remediation, and invitation management — all security-sensitive
 // mutations that admins need to review independently of the general feed.
-export const AUDIT_ACTIONS = [
+const AUDIT_ACTIONS = [
   'member.approve',
   'member.revoke',
   'member.update',

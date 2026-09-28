@@ -9,7 +9,7 @@
 //
 // One real side effect: it also tells FastAPI to stop whatever synthetic
 // failure simulation is running on this node's agent (POST
-// /nodes/{id}/stop-simulation), since "execute a remediation action" is
+// /assets/{id}/stop-simulation), since "execute a remediation action" is
 // exactly the demo's "the problem is fixed now" moment. That backend route
 // only queues the command — the agent picks it up on its next heartbeat
 // (see InfraMind.py's backend/services/pending_commands.py) — so this call
@@ -23,12 +23,12 @@ import { NextResponse } from 'next/server'
 import { getCurrentMembership } from '@/lib/auth/rbac'
 import { logActivity } from '@/lib/logging/activity'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 async function queueStopSimulation(nodeId: string): Promise<void> {
   try {
-    await fetch(`${API_BASE}/nodes/${encodeURIComponent(nodeId)}/stop-simulation`, {
+    await fetch(`${API_BASE}/assets/${encodeURIComponent(nodeId)}/stop-simulation`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${API_TOKEN}` },
       cache: 'no-store',

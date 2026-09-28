@@ -1,10 +1,11 @@
 // src/lib/axios.ts
 import axios from 'axios'
 
-// InfraMind's FastAPI backend serves routes at the root (no /api prefix) —
-// see backend/main.py. Default matches the local docker-compose port.
+// HIMADRI's FastAPI backend keeps compatibility routes at the root while the
+// documented API is also exposed under /api/v1. The deployed backend is the
+// default; NEXT_PUBLIC_API_BASE_URL can still point at a local development API.
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

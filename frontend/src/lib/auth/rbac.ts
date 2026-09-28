@@ -19,6 +19,30 @@ import type { ActiveMembership } from '@/lib/auth/rbacTypes'
 
 export type { ActiveMembership } from '@/lib/auth/rbacTypes'
 
+const CLERK_METADATA_AUTH_FALLBACK = process.env.CLERK_METADATA_AUTH_FALLBACK === 'true'
+
+async function getClerkMetadataMembership(clerkUserId: string): Promise<ActiveMembership | null> {
+  const clerkUser = await currentUser()
+  if (!clerkUser) return null
+
+  const email = clerkUser.primaryEmailAddress?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress ?? ''
+  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email || clerkUserId
+  const state = resolveInitialMembershipState(email, clerkUser.publicMetadata)
+
+  if (state.status !== 'ACTIVE' || !state.role || !state.department) return null
+
+  return {
+    membershipId: `clerk:${clerkUserId}`,
+    userId: clerkUserId,
+    clerkUserId,
+    email,
+    name,
+    department: state.department,
+    role: state.role,
+    status: 'ACTIVE',
+  }
+}
+
 // Ensures a User + Membership doc exist for the current Clerk identity,
 // creating them (PENDING, unless the bootstrap-admin/email-invite rule
 // applies — see lib/auth/provisioning.ts) on first touch. Safe to call on
@@ -101,7 +125,15 @@ export async function getCurrentMembership(): Promise<ActiveMembership | null> {
   const { userId: clerkUserId } = await auth()
   if (!clerkUserId) return null
 
-  const membership = await ensureMembership()
+  // Explicit standalone mode for a local frontend pointed at the deployed
+  // FastAPI service. Avoid touching an unavailable local Mongo instance (and
+  // its connection timeout) while still requiring Clerk-verified identity and
+  // server-controlled ADMIN_EMAILS/invitation metadata for authorization.
+  if (CLERK_METADATA_AUTH_FALLBACK) {
+    return getClerkMetadataMembership(clerkUserId)
+  }
+
+  const membership: MembershipDoc & { _id: unknown } = await ensureMembership()
   if (membership.status !== 'ACTIVE' || !membership.role || !membership.department) {
     return null
   }
