@@ -3,6 +3,7 @@ Router: Digital Twin live-telemetry API (Unity / PolarTwinDualBoard bridge).
 
 GET  /api/devices, /api/devices/{deviceId}, /api/rooms,
      /api/rooms/{roomId}/devices, /api/telemetry/latest, /api/telemetry/{deviceId}
+POST /api/v1/telemetry/ingest (canonical), /api/telemetry/ingest (legacy alias)
 POST /api/devices/{deviceId}/command
 WS   /ws/digital-twin
 
@@ -104,7 +105,7 @@ async def get_telemetry(device_id: str) -> dict:
 
 
 @router.post(
-    "/telemetry/ingest",
+    "/v1/telemetry/ingest",
     dependencies=[Depends(_require_ingest_key)],
     operation_id="ingest_digital_twin_telemetry",
 )
@@ -122,6 +123,16 @@ async def ingest_telemetry(body: TelemetryIngest) -> dict:
         "updated": [device["deviceId"] for device in changed],
         "gatewayId": body.gatewayId,
     }
+
+
+@router.post(
+    "/telemetry/ingest",
+    dependencies=[Depends(_require_ingest_key)],
+    include_in_schema=False,
+)
+async def ingest_telemetry_legacy(body: TelemetryIngest) -> dict:
+    """Compatibility alias for gateways deployed before the v1 route."""
+    return await ingest_telemetry(body)
 
 
 @router.post(

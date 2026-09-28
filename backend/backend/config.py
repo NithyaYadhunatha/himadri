@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     MQTT_BROKER_PORT: int = 1883
 
     # Shared secret used by physical Raspberry Pi gateways posting directly
-    # to /api/telemetry/ingest. Leave empty only for local development; set the
+    # to /api/v1/telemetry/ingest. Leave empty only for local development; set the
     # same value as BACKEND_DEVICE_KEY on the Raspberry Pi in deployment.
     DIGITAL_TWIN_INGEST_KEY: str = ""
 

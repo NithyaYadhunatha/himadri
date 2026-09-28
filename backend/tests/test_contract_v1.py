@@ -53,7 +53,7 @@ class ContractRoutesTest(unittest.TestCase):
             "/api/v1/agent/query": "post",
             "/api/v1/reports/environmental": "get",
             "/api/telemetry/latest": "get",
-            "/api/telemetry/ingest": "post",
+            "/api/v1/telemetry/ingest": "post",
         }
         for path, method in expected.items():
             self.assertIn(method, paths[path])
@@ -68,9 +68,9 @@ class ContractRoutesTest(unittest.TestCase):
             ],
         }
         with patch.object(settings, "DIGITAL_TWIN_INGEST_KEY", "test-device-key"):
-            rejected = self.client.post("/api/telemetry/ingest", json=body)
+            rejected = self.client.post("/api/v1/telemetry/ingest", json=body)
             accepted = self.client.post(
-                "/api/telemetry/ingest",
+                "/api/v1/telemetry/ingest",
                 json=body,
                 headers={"X-Device-Key": "test-device-key"},
             )
@@ -83,6 +83,13 @@ class ContractRoutesTest(unittest.TestCase):
         devices = {device["deviceId"]: device for device in latest.json()}
         self.assertEqual(devices["sensor-dht-01"]["value"], 21.5)
         self.assertEqual(devices["sensor-humidity-01"]["value"], 48.0)
+
+        legacy = self.client.post(
+            "/api/telemetry/ingest",
+            json=body,
+            headers={"X-Device-Key": "test-device-key"},
+        )
+        self.assertEqual(legacy.status_code, 200)
 
     def test_series_keys_preserve_dotted_asset_ids(self):
         asset = SimpleNamespace(

@@ -14,7 +14,7 @@ npm start
 ```
 
 For a Raspberry Pi sending directly to the deployed backend, use its public
-base URL (without `/api/telemetry/ingest`) and the device key configured on
+base URL (without `/api/v1/telemetry/ingest`) and the device key configured on
 the backend:
 
 ```bash
@@ -47,7 +47,7 @@ second serial-port connection.
 
 `gateway.py` is a lightweight alternative when only serial-to-backend relay is
 needed (it does not serve the local dashboard). It translates the Uno packet
-to the same `/api/telemetry/ingest` contract used by `server.js` and omits
+to the same `/api/v1/telemetry/ingest` contract used by `server.js` and omits
 readings for sensors that currently report `null`.
 
 ```bash
@@ -64,3 +64,10 @@ python gateway.py
 
 Do not run `gateway.py` and `server.js` against the same serial port at the
 same time. Only one process can own the Arduino connection.
+
+Both gateways preserve partial serial reads until a newline arrives, discard
+corrupt packets without flooding the terminal, and retry backend failures with
+exponential backoff. They prefer the versioned ingest route and automatically
+fall back to the legacy alias. If both return 404, the deployed backend image
+is stale and must be rebuilt/redeployed; changing the Raspberry Pi URL will not
+create a missing server route.

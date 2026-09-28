@@ -10,7 +10,7 @@ DHT11 + MQ-2 + HC-SR04 + IR + Hall + ADXL335
                          v
                   Node serial gateway
                          |
-          HTTPS POST /api/telemetry/ingest
+          HTTPS POST /api/v1/telemetry/ingest
                          v
              FastAPI digital-twin bridge
                          |

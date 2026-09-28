@@ -4,7 +4,6 @@ const path = require('node:path');
 const express = require('express');
 const { Server } = require('socket.io');
 const { SerialPort } = require('serialport');
-const { ReadlineParser } = require('@serialport/parser-readline');
 
 const app = express();
 app.use(express.json());
@@ -29,18 +28,30 @@ if (!Number.isFinite(backendTimeoutMs) || backendTimeoutMs < 250) {
 let serial = null, latest = null, lastSeen = 0, serialConnected = false;
 let backendInFlight = false, pendingBackendPacket = null;
 let backendLastSuccess = 0, backendLastError = null;
+let backendFailureCount = 0, backendNextAttemptAt = 0, backendRetryTimer = null;
+let rejectedSerialPackets = 0, lastSerialWarningAt = 0;
 const history = [];
 
-function resolveBackendIngestUrl(baseUrl) {
-  if (!baseUrl) return null;
+function resolveBackendIngestUrls(baseUrl) {
+  if (!baseUrl) return [];
   const parsed = new URL(baseUrl);
   if (!['http:', 'https:'].includes(parsed.protocol)) throw Error('BACKEND_URL must use http:// or https://');
-  parsed.pathname = `${parsed.pathname.replace(/\/$/, '')}/api/telemetry/ingest`;
   parsed.search = '';
   parsed.hash = '';
-  return parsed;
+  const path = parsed.pathname.replace(/\/$/, '');
+  const paths = path.endsWith('/api/v1/telemetry/ingest') || path.endsWith('/api/telemetry/ingest')
+    ? [path]
+    : path.endsWith('/api/v1')
+      ? [`${path}/telemetry/ingest`, `${path.slice(0, -3)}/telemetry/ingest`]
+      : [`${path}/api/v1/telemetry/ingest`, `${path}/api/telemetry/ingest`];
+  return [...new Set(paths)].map(pathname => {
+    const url = new URL(parsed);
+    url.pathname = pathname.replace(/\/{2,}/g, '/');
+    return url;
+  });
 }
-const backendIngestUrl = resolveBackendIngestUrl(backendBaseUrl);
+const backendIngestUrls = resolveBackendIngestUrls(backendBaseUrl);
+let preferredBackendIngestIndex = 0;
 
 function finite(v, lo, hi) { return typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi; }
 function bool(v) { return typeof v === 'boolean'; }
@@ -88,24 +99,22 @@ function telemetryReadings(packet) {
     return Number.isFinite(value) ? [{deviceId, value, unit}] : [];
   });
 }
-function postBackendTelemetry(packet) {
-  if (!backendIngestUrl) return Promise.resolve();
-  const readings = telemetryReadings(packet);
-  if (!readings.length) return Promise.resolve();
-  const body = JSON.stringify({
-    gatewayId: packet.deviceId,
-    timestamp: packet.timestamp,
-    readings,
-  });
-  const transport = backendIngestUrl.protocol === 'https:' ? https : http;
+function postBackendTelemetryTo(url, body) {
+  const transport = url.protocol === 'https:' ? https : http;
   return new Promise((resolve, reject) => {
     const headers = {'Content-Type':'application/json', 'Content-Length':Buffer.byteLength(body)};
     if (backendDeviceKey) headers['X-Device-Key'] = backendDeviceKey;
-    const request = transport.request(backendIngestUrl, {method:'POST', headers, timeout:backendTimeoutMs}, response => {
-      response.resume();
+    const request = transport.request(url, {method:'POST', headers, timeout:backendTimeoutMs}, response => {
+      let responseBody = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { if (responseBody.length < 512) responseBody += chunk; });
       response.on('end', () => {
-        if (response.statusCode >= 200 && response.statusCode < 300) resolve();
-        else reject(Error(`backend returned HTTP ${response.statusCode}`));
+        if (response.statusCode >= 200 && response.statusCode < 300) resolve(response.statusCode);
+        else {
+          const error = Error(`backend returned HTTP ${response.statusCode}${responseBody ? `: ${responseBody.slice(0, 200)}` : ''}`);
+          error.statusCode = response.statusCode;
+          reject(error);
+        }
       });
     });
     request.on('timeout', () => request.destroy(Error('backend request timed out')));
@@ -113,18 +122,54 @@ function postBackendTelemetry(packet) {
     request.end(body);
   });
 }
+async function postBackendTelemetry(packet) {
+  if (!backendIngestUrls.length) return;
+  const readings = telemetryReadings(packet);
+  if (!readings.length) return;
+  const body = JSON.stringify({
+    gatewayId: packet.deviceId,
+    timestamp: packet.timestamp,
+    readings,
+  });
+  let lastError;
+  for (let offset = 0; offset < backendIngestUrls.length; offset += 1) {
+    const index = (preferredBackendIngestIndex + offset) % backendIngestUrls.length;
+    try {
+      await postBackendTelemetryTo(backendIngestUrls[index], body);
+      preferredBackendIngestIndex = index;
+      return;
+    } catch (error) {
+      lastError = error;
+      if (![404, 405].includes(error.statusCode)) throw error;
+    }
+  }
+  throw Error(`telemetry ingest route is unavailable on the deployed backend (${lastError.message}); redeploy the backend`);
+}
 function forwardBackendTelemetry(packet) {
-  if (!backendIngestUrl) return;
+  if (!backendIngestUrls.length) return;
   pendingBackendPacket = packet;
-  if (backendInFlight) return;
+  if (backendInFlight || Date.now() < backendNextAttemptAt) return;
   backendInFlight = true;
   const next = pendingBackendPacket;
   pendingBackendPacket = null;
   postBackendTelemetry(next)
-    .then(() => { backendLastSuccess = Date.now(); backendLastError = null; })
+    .then(() => {
+      backendLastSuccess = Date.now(); backendLastError = null;
+      backendFailureCount = 0; backendNextAttemptAt = 0;
+    })
     .catch(error => {
       backendLastError = error.message;
-      console.warn(`Backend relay error: ${error.message}`);
+      backendFailureCount += 1;
+      const retryMs = Math.min(60000, 2000 * (2 ** Math.min(backendFailureCount - 1, 5)));
+      backendNextAttemptAt = Date.now() + retryMs;
+      console.warn(`Backend relay error: ${error.message}; retrying in ${Math.round(retryMs / 1000)}s`);
+      if (!backendRetryTimer) {
+        backendRetryTimer = setTimeout(() => {
+          backendRetryTimer = null;
+          if (pendingBackendPacket) forwardBackendTelemetry(pendingBackendPacket);
+        }, retryMs);
+        backendRetryTimer.unref();
+      }
     })
     .finally(() => {
       backendInFlight = false;
@@ -136,7 +181,7 @@ function publish(packet) {
   io.emit('iot:telemetry',packet);
   forwardBackendTelemetry(packet);
 }
-function status(){return {arduinoConnected:serialConnected,dhtConnected:serialConnected&&Boolean(latest?.environment?.temperatureValid)&&Boolean(latest?.environment?.humidityValid),telemetryStale:!lastSeen||Date.now()-lastSeen>staleAfterMs,lastSeen:lastSeen?new Date(lastSeen).toISOString():null,source:'arduino-only',backendRelay:{enabled:Boolean(backendIngestUrl),connected:Boolean(backendLastSuccess)&&!backendLastError,lastSuccess:backendLastSuccess?new Date(backendLastSuccess).toISOString():null,lastError:backendLastError}};}
+function status(){return {arduinoConnected:serialConnected,dhtConnected:serialConnected&&Boolean(latest?.environment?.temperatureValid)&&Boolean(latest?.environment?.humidityValid),telemetryStale:!lastSeen||Date.now()-lastSeen>staleAfterMs,lastSeen:lastSeen?new Date(lastSeen).toISOString():null,source:'arduino-only',serial:{rejectedPackets:rejectedSerialPackets},backendRelay:{enabled:Boolean(backendIngestUrls.length),connected:Boolean(backendLastSuccess)&&!backendLastError,lastSuccess:backendLastSuccess?new Date(backendLastSuccess).toISOString():null,lastError:backendLastError,nextAttempt:backendNextAttemptAt?new Date(backendNextAttemptAt).toISOString():null}};}
 app.get('/api/iot/latest',(req,res)=>res.json(latest?{...latest,system:{...latest.system,...status()}}:null));
 app.get('/api/iot/history',(req,res)=>res.json(history.slice(-Math.min(Number(req.query.limit)||100,maxHistory))));
 app.get('/api/iot/status',(req,res)=>res.json(status()));
@@ -155,7 +200,25 @@ function encodeCommand(body) {
 app.post('/api/iot/command',(req,res)=>{const wireCommand=encodeCommand(req.body||{});if(!wireCommand)return res.status(400).json({error:'Unsupported or invalid command'});if(!serialConnected)return res.status(503).json({error:'Arduino disconnected'});serial.write(wireCommand+'\n');res.json({sent:true,command:wireCommand});});
 io.on('connection',socket=>{if(latest)socket.emit('iot:telemetry',{...latest,system:{...latest.system,...status()}});});
 async function findPort(){if(process.env.ARDUINO_PORT)return process.env.ARDUINO_PORT;const ports=await SerialPort.list();const likely=ports.find(p=>/arduino|usbmodem|usbserial|wch|ch340|ftdi/i.test(`${p.manufacturer||''} ${p.path} ${p.pnpId||''}`));if(!likely)throw Error('No likely Arduino serial device found; set ARDUINO_PORT');return likely.path;}
-async function connect(){try{const path=await findPort();serial=new SerialPort({path,baudRate,autoOpen:false});serial.open(err=>{if(err){console.error('Serial open failed:',err.message);setTimeout(connect,3000);return;}serialConnected=true;console.log(`Arduino connected: ${path} @ ${baudRate}`);const parser=serial.pipe(new ReadlineParser({delimiter:'\n'}));parser.on('data',line=>{try{publish(normalize(JSON.parse(line.trim())));}catch(e){console.warn('Rejected serial packet:',e.message);}});serial.on('close',()=>{serialConnected=false;console.warn('Arduino disconnected; retrying');setTimeout(connect,2000);});serial.on('error',e=>{serialConnected=false;console.error('Serial error:',e.message);});});}catch(e){serialConnected=false;console.warn(e.message,'Retrying in 3s');setTimeout(connect,3000);}}
+function handleSerialLine(rawLine) {
+  const line = rawLine.trim();
+  if (!line) return;
+  const start = line.indexOf('{');
+  const end = line.lastIndexOf('}');
+  try {
+    if (start < 0 || end <= start) throw Error('incomplete JSON frame');
+    publish(normalize(JSON.parse(line.slice(start, end + 1))));
+  } catch (error) {
+    rejectedSerialPackets += 1;
+    const now = Date.now();
+    if (now - lastSerialWarningAt >= 10000) {
+      const suffix = rejectedSerialPackets > 1 ? ` (${rejectedSerialPackets} rejected total)` : '';
+      console.warn(`Rejected serial packet: ${error.message}${suffix}`);
+      lastSerialWarningAt = now;
+    }
+  }
+}
+async function connect(){try{const path=await findPort();serial=new SerialPort({path,baudRate,autoOpen:false});serial.open(err=>{if(err){console.error('Serial open failed:',err.message);setTimeout(connect,3000);return;}serialConnected=true;console.log(`Arduino connected: ${path} @ ${baudRate}`);let serialBuffer='';serial.on('data',chunk=>{serialBuffer+=chunk.toString('utf8');if(serialBuffer.length>16384){const lastNewline=serialBuffer.lastIndexOf('\n');serialBuffer=lastNewline>=0?serialBuffer.slice(lastNewline+1):'';rejectedSerialPackets+=1;}const lines=serialBuffer.split(/\r?\n/);serialBuffer=lines.pop()||'';for(const line of lines)handleSerialLine(line);});serial.on('close',()=>{serialConnected=false;console.warn('Arduino disconnected; retrying');setTimeout(connect,2000);});serial.on('error',e=>{serialConnected=false;console.error('Serial error:',e.message);});});}catch(e){serialConnected=false;console.warn(e.message,'Retrying in 3s');setTimeout(connect,3000);}}
 setInterval(()=>{if(latest){const stale=Date.now()-lastSeen>staleAfterMs;io.emit('iot:status',{...status(),deviceId:latest.deviceId});}},2000).unref();
 server.on('error', error => {
   if (error.code === 'EADDRINUSE' && activePort < requestedPort + 20) {
@@ -169,7 +232,7 @@ server.on('error', error => {
 server.on('listening', () => {
   console.log(`PolarTwin dashboard: http://localhost:${activePort}/`);
   console.log(`PolarTwin API: http://localhost:${activePort}/api/iot/status`);
-  if (backendIngestUrl) console.log(`Backend relay enabled: ${backendIngestUrl.origin}${backendIngestUrl.pathname}`);
+  if (backendIngestUrls.length) console.log(`Backend relay enabled: ${backendIngestUrls.map(url => `${url.origin}${url.pathname}`).join(' (fallback: ') + (backendIngestUrls.length > 1 ? ')' : '')}`);
   else console.log('Backend relay disabled; set BACKEND_URL to the deployed HIMADRI backend.');
   connect();
 });
