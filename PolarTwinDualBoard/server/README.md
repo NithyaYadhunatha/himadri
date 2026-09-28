@@ -1,13 +1,13 @@
 # PolarTwin hybrid Uno/Raspberry Pi gateway
 
 The production Python gateway combines the Uno USB stream with HC-SR04, IR, and
-servo state owned by Pi GPIO/PWM, renders the combined state on the Pi-connected
-SSD1306 OLED, and sends it to HIMADRI over HTTP. The backend pushes changes to
-Maitri over WebSocket. It does not require MQTT or an ESP8266.
+servo state owned by Pi GPIO/PWM and sends it to HIMADRI over HTTP. The backend
+pushes changes to Maitri over WebSocket. It does not require MQTT or an ESP8266.
 
-The OLED shows the live Uno temperature, humidity, Hall/magnetic detection,
-buzzer ON/OFF state, and smoke/gas-alert ON/OFF state. Missing sensor values are
-shown as `--` rather than being fabricated.
+`polartwin_status.py` is a separate local process for the Pi-connected SSD1306.
+It displays only Raspberry Pi IP address, CPU usage and temperature, RAM, root
+disk usage, and uptime. It does not read Arduino packets or send system stats to
+the backend, so an OLED fault cannot stop telemetry.
 
 The legacy Node gateway below can still inspect an old Uno-only firmware packet
 and serve its local dashboard, but it does not access Raspberry Pi GPIO. Use
@@ -29,8 +29,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Confirm that the OLED appears at `0x3c` (or `0x3d`) with `i2cdetect -y 1`, and
-locate the stable Uno USB name with `ls -l /dev/serial/by-id/`. Start one gateway:
+Locate the stable Uno USB name with `ls -l /dev/serial/by-id/`. Start one gateway:
 
 ```bash
 cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
@@ -53,12 +52,97 @@ Set `BACKEND_DEVICE_KEY` only when the deployed backend has
 `lastSuccess`, and `lastError`, so deployment can be checked without exposing
 the secret.
 
-Default Pi ownership is BCM23 TRIG, BCM24 divided ECHO, BCM17 IR, BCM18 servo,
-and I2C address `0x3c`. Override it with `PI_ULTRASONIC_TRIGGER_BCM`,
+Default Pi ownership is BCM23 TRIG, BCM24 divided ECHO, BCM17 IR, and BCM18
+servo. Override it with `PI_ULTRASONIC_TRIGGER_BCM`,
 `PI_ULTRASONIC_ECHO_BCM`, `PI_IR_BCM`, `PI_IR_ACTIVE_LOW=0`, or
-`PI_OLED_I2C_ADDRESS=0x3d`. Servo settings are `PI_SERVO_BCM`,
-`PI_SERVO_START_ANGLE`, `PI_SERVO_MIN_PULSE_US`, and `PI_SERVO_MAX_PULSE_US`.
-Set `PI_HARDWARE_ENABLED=0` only for development on a non-Pi machine.
+`PI_SERVO_BCM`. Servo settings are `PI_SERVO_START_ANGLE`,
+`PI_SERVO_MIN_PULSE_US`, and `PI_SERVO_MAX_PULSE_US`. Set
+`PI_HARDWARE_ENABLED=0` only for development on a non-Pi machine.
+
+## Raspberry Pi OLED system status
+
+The SSD1306 status monitor is intentionally independent from `gateway.py`.
+Stopping or restarting it does not open the Arduino serial port and does not
+alter sensor collection, payloads, backend requests, or hardware commands.
+
+### 1. Enable I2C
+
+```bash
+sudo raspi-config
+```
+
+Choose **Interface Options -> I2C -> Enable**, then reboot if requested.
+
+### 2. Verify the OLED
+
+```bash
+sudo i2cdetect -y 1
+```
+
+The common address is `3c`. If the table shows `3d`, set
+`PI_OLED_I2C_ADDRESS=0x3d` when running manually and update the same environment
+line in the generated systemd service.
+
+### 3. Install dependencies
+
+From `PolarTwinDualBoard/server`:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv python3-rpi.gpio i2c-tools
+python3 -m venv --system-site-packages venv
+venv/bin/python -m pip install -r requirements.txt
+```
+
+The requirements use Blinka, Adafruit CircuitPython SSD1306, Pillow, and psutil.
+
+### 4. Test only the OLED
+
+```bash
+cd PolarTwinDualBoard/server
+venv/bin/python polartwin_status.py
+```
+
+Press Ctrl+C to clear the screen, release I2C, and stop. Optional overrides are
+`PI_OLED_I2C_ADDRESS=0x3d` and `PI_OLED_REFRESH_SECONDS=2`. For a single-frame
+hardware check, add `--once`.
+
+### 5. Enable systemd auto-start
+
+The installer renders `systemd/polartwin-oled.service.in` with the current
+absolute project path, the project virtual environment, and the normal user
+that invoked `sudo`; no username is hardcoded.
+
+```bash
+sudo ./systemd/install_oled_service.sh
+sudo systemctl daemon-reload
+sudo systemctl enable polartwin-oled
+sudo systemctl start polartwin-oled
+sudo systemctl status polartwin-oled
+```
+
+Follow logs with:
+
+```bash
+journalctl -u polartwin-oled -f
+```
+
+### Troubleshooting
+
+- **No `3c`/`3d` in `i2cdetect`:** enable I2C, confirm SDA is physical pin 3,
+  SCL is pin 5, power is 3.3 V, ground is common, and reboot the Pi.
+- **Permission denied for `/dev/i2c-1`:** run
+  `sudo usermod -aG i2c "$USER"`, then log out and back in before reinstalling
+  or restarting the service.
+- **Wrong address:** run `sudo i2cdetect -y 1`, then configure the detected
+  address with `PI_OLED_I2C_ADDRESS`.
+- **Missing Python module:** activate/use `server/venv` and rerun
+  `venv/bin/python -m pip install -r requirements.txt`.
+- **Blank or corrupted screen with a detected device:** confirm the module is
+  an SSD1306 128x64. An SH1106 display needs a different driver.
+- **Service failure:** inspect `sudo systemctl status polartwin-oled` and
+  `journalctl -u polartwin-oled -f`. OLED initialization errors do not affect
+  the independent gateway process.
 
 ## Legacy local Node dashboard
 

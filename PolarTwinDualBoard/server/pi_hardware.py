@@ -1,4 +1,4 @@
-"""Raspberry Pi GPIO sensors and SSD1306 display for PolarTwin."""
+"""Raspberry Pi GPIO sensors and actuators for PolarTwin."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def _env_int(name: str, default: str, minimum: int, maximum: int) -> int:
 
 
 class PiHardware:
-    """Sample Pi-owned sensors in the background and render combined state."""
+    """Sample Pi-owned sensors and control the servo in the background."""
 
     def __init__(self) -> None:
         self.trigger_pin = _env_int("PI_ULTRASONIC_TRIGGER_BCM", "23", 0, 27)
@@ -31,7 +31,6 @@ class PiHardware:
         self.sample_seconds = max(0.1, float(os.getenv("PI_SAMPLE_SECONDS", "0.2")))
         self.stale_seconds = max(0.5, float(os.getenv("PI_SENSOR_STALE_SECONDS", "2")))
         self.echo_timeout = max(0.005, float(os.getenv("PI_ECHO_TIMEOUT_SECONDS", "0.03")))
-        self.oled_address = _env_int("PI_OLED_I2C_ADDRESS", "0x3c", 0x03, 0x77)
         self.servo_min_pulse_us = _env_int("PI_SERVO_MIN_PULSE_US", "500", 300, 1500)
         self.servo_max_pulse_us = _env_int("PI_SERVO_MAX_PULSE_US", "2400", 1500, 2700)
         if self.servo_min_pulse_us >= self.servo_max_pulse_us:
@@ -39,9 +38,6 @@ class PiHardware:
         self._servo_angle = _env_int("PI_SERVO_START_ANGLE", "90", 0, 180)
 
         self._gpio: Any = None
-        self._display: Any = None
-        self._draw_canvas: Any = None
-        self._font: Any = None
         self._servo_pwm: Any = None
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -51,7 +47,6 @@ class PiHardware:
         self._distance_at = 0.0
         self._ir_detected: bool | None = None
         self._ir_at = 0.0
-        self._last_display_warning = 0.0
 
     def start(self) -> None:
         try:
@@ -71,24 +66,8 @@ class PiHardware:
         self._servo_pwm = GPIO.PWM(self.servo_pin, 50)
         self._servo_pwm.start(self._servo_duty_cycle(self._servo_angle))
         time.sleep(0.05)
-        self._start_display()
         self._thread = threading.Thread(target=self._sample_loop, name="pi-sensors", daemon=True)
         self._thread.start()
-
-    def _start_display(self) -> None:
-        try:
-            from luma.core.interface.serial import i2c
-            from luma.core.render import canvas
-            from luma.oled.device import ssd1306
-            from PIL import ImageFont
-
-            serial = i2c(port=1, address=self.oled_address)
-            self._display = ssd1306(serial, width=128, height=64)
-            self._draw_canvas = canvas
-            self._font = ImageFont.load_default()
-        except Exception as error:  # Display failure must not stop telemetry.
-            print(f"OLED unavailable at I2C 0x{self.oled_address:02x}: {error}")
-            self._display = None
 
     def _wait_for_level(self, level: int, deadline: float) -> float | None:
         while time.perf_counter() < deadline:
@@ -157,61 +136,13 @@ class PiHardware:
             self._servo_pwm.ChangeDutyCycle(self._servo_duty_cycle(angle))
             self._servo_angle = angle
 
-    def render(self, packet: dict[str, Any]) -> None:
-        if self._display is None:
-            return
-        lines = oled_lines(packet)
-        try:
-            with self._draw_canvas(self._display) as draw:
-                for row, line in enumerate(lines):
-                    draw.text((0, row * 10), line, font=self._font, fill="white")
-        except Exception as error:
-            now = time.monotonic()
-            if now - self._last_display_warning >= 30:
-                print(f"OLED update failed: {error}")
-                self._last_display_warning = now
-
     def close(self) -> None:
         self._stop.set()
         if self._thread is not None:
             self._thread.join(timeout=1.0)
-        if self._display is not None:
-            try:
-                self._display.cleanup()
-            except Exception:
-                pass
         if self._servo_pwm is not None:
             self._servo_pwm.stop()
         if self._gpio is not None:
             self._gpio.cleanup(
                 (self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin)
             )
-
-
-def value_from(mapping: dict[str, Any], key: str, suffix: str = "") -> str:
-    item = mapping.get(key)
-    return f"{item}{suffix}" if item is not None else "--"
-
-
-def oled_lines(packet: dict[str, Any]) -> tuple[str, ...]:
-    """Build the six short status lines shown on the 128x64 Pi OLED."""
-
-    def measurement(key: str, unit: str) -> str:
-        item = packet.get(key)
-        return f"{item} {unit}" if item is not None else "--"
-
-    def state(value: Any, true_label: str = "ON", false_label: str = "OFF") -> str:
-        if not isinstance(value, bool):
-            return "--"
-        return true_label if value else false_label
-
-    system = packet.get("system") if isinstance(packet.get("system"), dict) else {}
-    alerts = packet.get("alerts") if isinstance(packet.get("alerts"), dict) else {}
-    return (
-        "PolarTwin LIVE",
-        f"Temperature: {measurement('temperature_c', 'C')}",
-        f"Humidity: {measurement('humidity_pct', '%')}",
-        f"Magnetic: {state(packet.get('hall_detected'), 'DETECTED', 'CLEAR')}",
-        f"Buzzer: {state(system.get('buzzer_on'))}",
-        f"Smoke: {state(alerts.get('gas'))}",
-    )
