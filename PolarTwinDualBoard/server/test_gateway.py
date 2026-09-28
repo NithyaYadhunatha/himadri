@@ -23,9 +23,42 @@ if "requests" not in sys.modules:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gateway
+import pi_hardware
 
 
 class GatewayContractTest(unittest.TestCase):
+    def test_pi_oled_lines_show_requested_uno_status(self) -> None:
+        packet = {
+            "temperature_c": 27.1,
+            "humidity_pct": 71.8,
+            "hall_detected": True,
+            "alerts": {"gas": True},
+            "system": {"buzzer_on": True},
+        }
+
+        self.assertEqual(
+            pi_hardware.oled_lines(packet),
+            (
+                "PolarTwin LIVE",
+                "Temperature: 27.1 C",
+                "Humidity: 71.8 %",
+                "Magnetic: DETECTED",
+                "Buzzer: ON",
+                "Smoke: ON",
+            ),
+        )
+
+    def test_pi_oled_lines_mark_missing_values_unavailable(self) -> None:
+        lines = pi_hardware.oled_lines({})
+
+        self.assertEqual(lines[1:], (
+            "Temperature: --",
+            "Humidity: --",
+            "Magnetic: --",
+            "Buzzer: --",
+            "Smoke: --",
+        ))
+
     def test_deployed_ingest_url_is_used_exactly(self) -> None:
         self.assertEqual(
             gateway.backend_ingest_urls(

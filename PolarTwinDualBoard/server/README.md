@@ -5,6 +5,10 @@ servo state owned by Pi GPIO/PWM, renders the combined state on the Pi-connected
 SSD1306 OLED, and sends it to HIMADRI over HTTP. The backend pushes changes to
 Maitri over WebSocket. It does not require MQTT or an ESP8266.
 
+The OLED shows the live Uno temperature, humidity, Hall/magnetic detection,
+buzzer ON/OFF state, and smoke/gas-alert ON/OFF state. Missing sensor values are
+shown as `--` rather than being fabricated.
+
 The legacy Node gateway below can still inspect an old Uno-only firmware packet
 and serve its local dashboard, but it does not access Raspberry Pi GPIO. Use
 `gateway.py` for the hybrid wiring.

@@ -160,21 +160,7 @@ class PiHardware:
     def render(self, packet: dict[str, Any]) -> None:
         if self._display is None:
             return
-
-        def value(key: str, suffix: str = "") -> str:
-            item = packet.get(key)
-            return f"{item}{suffix}" if item is not None else "--"
-
-        acceleration = packet.get("acceleration") or {}
-        system = packet.get("system") or {}
-        lines = (
-            "PolarTwin LIVE",
-            f"T {value('temperature_c', 'C')} H {value('humidity_pct', '%')}",
-            f"Gas {value('gas_raw')}  IR {value('ir_detected')}",
-            f"Dist {value('distance_cm', 'cm')}",
-            f"Tilt {value_from(acceleration, 'tilt_deg', 'deg')}",
-            f"Servo {system.get('servo_angle', '--')}  {system.get('status', '--')}",
-        )
+        lines = oled_lines(packet)
         try:
             with self._draw_canvas(self._display) as draw:
                 for row, line in enumerate(lines):
@@ -205,3 +191,27 @@ class PiHardware:
 def value_from(mapping: dict[str, Any], key: str, suffix: str = "") -> str:
     item = mapping.get(key)
     return f"{item}{suffix}" if item is not None else "--"
+
+
+def oled_lines(packet: dict[str, Any]) -> tuple[str, ...]:
+    """Build the six short status lines shown on the 128x64 Pi OLED."""
+
+    def measurement(key: str, unit: str) -> str:
+        item = packet.get(key)
+        return f"{item} {unit}" if item is not None else "--"
+
+    def state(value: Any, true_label: str = "ON", false_label: str = "OFF") -> str:
+        if not isinstance(value, bool):
+            return "--"
+        return true_label if value else false_label
+
+    system = packet.get("system") if isinstance(packet.get("system"), dict) else {}
+    alerts = packet.get("alerts") if isinstance(packet.get("alerts"), dict) else {}
+    return (
+        "PolarTwin LIVE",
+        f"Temperature: {measurement('temperature_c', 'C')}",
+        f"Humidity: {measurement('humidity_pct', '%')}",
+        f"Magnetic: {state(packet.get('hall_detected'), 'DETECTED', 'CLEAR')}",
+        f"Buzzer: {state(system.get('buzzer_on'))}",
+        f"Smoke: {state(alerts.get('gas'))}",
+    )
