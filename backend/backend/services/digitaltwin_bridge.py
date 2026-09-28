@@ -7,12 +7,12 @@ topic namespace (digitaltwin/# vs himadri/#), different data model (a small
 fixed room/device catalog vs the Postgres Station/Zone/Asset/Reading tables),
 same Mosquitto broker (backend.config.settings.MQTT_BROKER_HOST/PORT).
 
-Device catalog below is a hand-kept mirror of the 14 devices built in the
+Device catalog below mirrors the 14 devices built in the
 Unity project's Assets/Editor/DigitalTwinSceneBuilder.cs (the Data(...) calls
-in PopulateEnvironment/PopulateSafety/PopulateEquipment) -- keep the two in
-sync by hand; there is no shared schema across the C#/Python boundary.
+in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01`,
+which is a Pi-owned physical actuator exposed through the API.
 
-Only 8 of the 14 devices have a real sensor/actuator on the PolarTwinDualBoard
+Nine devices have a real sensor/actuator on the PolarTwinDualBoard
 rig (see PolarTwin/himadri/PolarTwinDualBoard/docs/architecture.md). The rest
 are either backend-derived from a sibling device's status (status-led-01,
 equipment-state-01, failure-indicator-01, occupancy-indicator-01, via
@@ -31,6 +31,7 @@ from __future__ import annotations
 import asyncio
 from collections import defaultdict, deque
 import json
+import math
 import time
 import uuid
 from typing import Any, Literal
@@ -65,7 +66,10 @@ DEVICE_CATALOG: dict[str, dict[str, Any]] = {
     "status-led-01": dict(name="RGB Status LED", deviceType="status-led", roomId="room-01", unit="state", warning=1, critical=1, kind="derived", inverse=False),
     "sensor-ultrasonic-01": dict(name="HC-SR04 Distance Sensor", deviceType="distance", roomId="room-02", unit="cm", warning=120, critical=40, kind="numeric", inverse=True),
     "sensor-ir-01": dict(name="IR Presence Sensor", deviceType="ir", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
-    "sensor-door-01": dict(name="Door / Object Detector", deviceType="door", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
+    "servo-01": dict(name="Position Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
+    # Keep the legacy Unity device ID so existing WebGL builds continue to
+    # receive updates; the physical channel is the Uno D10 Hall-effect module.
+    "sensor-door-01": dict(name="Hall Effect Sensor", deviceType="hall-effect", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
     "occupancy-indicator-01": dict(name="Occupancy Indicator", deviceType="occupancy", roomId="room-02", unit="state", warning=1, critical=1, kind="derived", inverse=False),
     "sensor-vibration-01": dict(name="Vibration / Tilt Sensor", deviceType="vibration", roomId="room-03", unit="deg", warning=4.5, critical=8, kind="numeric", inverse=False),
     "motor-01": dict(name="Drive Motor", deviceType="motor", roomId="room-03", unit="RPM", warning=1500, critical=1750, kind="virtual", inverse=False),
@@ -153,6 +157,10 @@ async def _set_device(device_id: str, value: float, display_value: str = "", sta
     if device_id not in DEVICE_CATALOG:
         return []
     meta = DEVICE_CATALOG[device_id]
+    if not display_value and device_id == "sensor-door-01":
+        display_value = "MAGNET DETECTED" if value >= 0.5 else "FIELD CLEAR"
+    elif not display_value and device_id == "servo-01":
+        display_value = f"{int(value)}°"
     if status is None:
         if meta["kind"] == "numeric":
             status = compute_numeric_status(value, meta["warning"], meta["critical"], meta["inverse"])
@@ -326,6 +334,25 @@ async def publish_command(device_id: str, command: str, value: Any) -> bool:
             "deviceId": device_id,
             "wireCommand": on_command if enabled else off_command,
             "value": enabled,
+            "queuedAt": _now_ms(),
+        })
+    elif device_id == "servo-01":
+        if (
+            command != "SET_ANGLE"
+            or isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or int(value) != value
+            or not 0 <= int(value) <= 180
+        ):
+            return False
+        angle = int(value)
+        _hardware_commands[_HARDWARE_GATEWAY_ID].append({
+            "commandId": uuid.uuid4().hex,
+            "gatewayId": _HARDWARE_GATEWAY_ID,
+            "deviceId": device_id,
+            "wireCommand": f"SERVO:{angle}",
+            "value": angle,
             "queuedAt": _now_ms(),
         })
 

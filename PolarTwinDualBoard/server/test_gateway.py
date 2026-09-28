@@ -52,7 +52,7 @@ class GatewayContractTest(unittest.TestCase):
             "https://himadri.aus1in.me/api/telemetry/commands/polar-twin-uno/next",
         )
 
-    def test_only_supported_buzzer_wire_commands_are_accepted(self) -> None:
+    def test_supported_hardware_wire_commands_are_accepted(self) -> None:
         envelope = {
             "gatewayId": "polar-twin-uno",
             "wireCommand": "BUZZER:ON",
@@ -61,11 +61,19 @@ class GatewayContractTest(unittest.TestCase):
             gateway._wire_command(envelope, "polar-twin-uno"),
             "BUZZER:ON",
         )
-        with self.assertRaises(ValueError):
+        self.assertEqual(
             gateway._wire_command(
                 {"gatewayId": "polar-twin-uno", "wireCommand": "SERVO:180"},
                 "polar-twin-uno",
-            )
+            ),
+            "SERVO:180",
+        )
+        for invalid in ("SERVO:-1", "SERVO:181", "SERVO:90.5", "RGB:1,2,3"):
+            with self.assertRaises(ValueError):
+                gateway._wire_command(
+                    {"gatewayId": "polar-twin-uno", "wireCommand": invalid},
+                    "polar-twin-uno",
+                )
 
     def test_hardware_packet_matches_backend_batch_contract(self) -> None:
         packet = {
@@ -78,14 +86,14 @@ class GatewayContractTest(unittest.TestCase):
             "ir_detected": True,
             "hall_detected": False,
             "acceleration": {"x": 0.1, "y": 0.2, "z": 9.7, "tilt_deg": 2.4},
-            "system": {"buzzer_on": False},
+            "system": {"buzzer_on": False, "servo_angle": 90},
         }
 
         payload = gateway.backend_payload(packet)
 
         self.assertEqual(payload["gatewayId"], "polar-twin-uno")
         self.assertTrue(payload["timestamp"].endswith("Z"))
-        self.assertEqual(len(payload["readings"]), 8)
+        self.assertEqual(len(payload["readings"]), 9)
         self.assertEqual(
             {reading["deviceId"] for reading in payload["readings"]},
             {
@@ -93,12 +101,49 @@ class GatewayContractTest(unittest.TestCase):
                 "sensor-humidity-01",
                 "sensor-mq2-01",
                 "buzzer-01",
+                "servo-01",
                 "sensor-ultrasonic-01",
                 "sensor-ir-01",
                 "sensor-door-01",
                 "sensor-vibration-01",
             },
         )
+
+    def test_pi_gpio_readings_replace_uno_placeholders(self) -> None:
+        packet = {
+            "device": "polar-twin-uno",
+            "distance_cm": None,
+            "ir_detected": None,
+            "alerts": {"proximity": False},
+            "state": {"occupancy": False},
+        }
+
+        merged = gateway.merge_pi_readings(
+            packet, {"distance_cm": 18.4, "ir_detected": True, "servo_angle": 135}
+        )
+
+        self.assertEqual(merged["distance_cm"], 18.4)
+        self.assertIs(merged["ir_detected"], True)
+        self.assertIs(merged["alerts"]["proximity"], True)
+        self.assertIs(merged["state"]["occupancy"], True)
+        self.assertEqual(merged["system"]["servo_angle"], 135)
+        self.assertIsNone(packet["distance_cm"])
+
+    def test_stale_pi_gpio_readings_remain_unavailable(self) -> None:
+        packet = {
+            "device": "polar-twin-uno",
+            "distance_cm": None,
+            "ir_detected": None,
+        }
+
+        merged = gateway.merge_pi_readings(
+            packet, {"distance_cm": None, "ir_detected": None, "servo_angle": 90}
+        )
+
+        self.assertIsNone(merged["distance_cm"])
+        self.assertIsNone(merged["ir_detected"])
+        self.assertIs(merged["alerts"]["proximity"], False)
+        self.assertIs(merged["state"]["occupancy"], False)
 
     def test_unavailable_sensor_values_are_not_fabricated(self) -> None:
         packet = {
@@ -107,17 +152,17 @@ class GatewayContractTest(unittest.TestCase):
             "humidity_pct": None,
             "gas_raw": 173,
             "distance_cm": None,
-            "ir_detected": False,
+            "ir_detected": None,
             "hall_detected": False,
             "acceleration": {"x": None, "y": None, "z": None, "tilt_deg": None},
-            "system": {"buzzer_on": False},
+            "system": {"buzzer_on": False, "servo_angle": None},
         }
 
         readings = gateway.backend_payload(packet)["readings"]
 
         self.assertEqual(
             {reading["deviceId"] for reading in readings},
-            {"sensor-mq2-01", "buzzer-01", "sensor-ir-01", "sensor-door-01"},
+            {"sensor-mq2-01", "buzzer-01", "sensor-door-01"},
         )
 
 

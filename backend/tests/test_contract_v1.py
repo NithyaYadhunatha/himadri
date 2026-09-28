@@ -17,6 +17,7 @@ from backend.models.tables import Station
 from backend.routers.contract_v1 import _series_for
 from backend.routers.sync import content_hash
 from backend.routers.devices import list_devices
+from backend.services import digitaltwin_bridge
 
 
 class FakeDatabase:
@@ -66,6 +67,7 @@ class ContractRoutesTest(unittest.TestCase):
             "readings": [
                 {"deviceId": "sensor-dht-01", "value": 21.5, "unit": "°C"},
                 {"deviceId": "sensor-humidity-01", "value": 48.0, "unit": "%"},
+                {"deviceId": "sensor-door-01", "value": 1, "unit": "state"},
             ],
         }
         with patch.object(settings, "DIGITAL_TWIN_INGEST_KEY", "test-device-key"):
@@ -78,12 +80,16 @@ class ContractRoutesTest(unittest.TestCase):
 
         self.assertEqual(rejected.status_code, 401)
         self.assertEqual(accepted.status_code, 200)
-        self.assertEqual(accepted.json()["accepted"], 2)
+        self.assertEqual(accepted.json()["accepted"], 3)
         latest = self.client.get("/api/telemetry/latest")
         self.assertEqual(latest.status_code, 200)
         devices = {device["deviceId"]: device for device in latest.json()}
         self.assertEqual(devices["sensor-dht-01"]["value"], 21.5)
         self.assertEqual(devices["sensor-humidity-01"]["value"], 48.0)
+        self.assertEqual(devices["sensor-door-01"]["deviceName"], "Hall Effect Sensor")
+        self.assertEqual(devices["sensor-door-01"]["deviceType"], "hall-effect")
+        self.assertEqual(devices["sensor-door-01"]["value"], 1)
+        self.assertEqual(devices["sensor-door-01"]["displayValue"], "MAGNET DETECTED")
 
         legacy = self.client.post(
             "/api/telemetry/ingest",
@@ -126,6 +132,34 @@ class ContractRoutesTest(unittest.TestCase):
             headers=headers,
         )
         self.assertEqual(legacy.status_code, 200)
+
+    def test_servo_command_is_queued_for_raspberry_pi_gateway(self):
+        while digitaltwin_bridge.take_hardware_command("polar-twin-uno") is not None:
+            pass
+        headers = {"Authorization": f"Bearer {settings.API_SECRET_KEY}"}
+        command = self.client.post(
+            "/api/v1/devices/servo-01/command",
+            json={"command": "SET_ANGLE", "value": 135},
+            headers=headers,
+        )
+        self.assertEqual(command.status_code, 200)
+
+        with patch.object(settings, "DIGITAL_TWIN_INGEST_KEY", "test-device-key"):
+            delivered = self.client.get(
+                "/api/telemetry/commands/polar-twin-uno/next",
+                headers={"X-Device-Key": "test-device-key"},
+            )
+
+        self.assertEqual(delivered.status_code, 200)
+        self.assertEqual(delivered.json()["wireCommand"], "SERVO:135")
+        self.assertEqual(delivered.json()["deviceId"], "servo-01")
+
+        invalid = self.client.post(
+            "/api/v1/devices/servo-01/command",
+            json={"command": "SET_ANGLE", "value": 181},
+            headers=headers,
+        )
+        self.assertEqual(invalid.status_code, 404)
 
     def test_series_keys_preserve_dotted_asset_ids(self):
         asset = SimpleNamespace(

@@ -18,7 +18,7 @@ import requests
 import serial
 
 
-ARDUINO_PORT = os.getenv("ARDUINO_PORT", "/dev/ttyACM0")
+ARDUINO_PORT = os.getenv("ARDUINO_PORT", "/dev/ttyUSB0")
 ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "115200"))
 # The currently deployed Swagger contract exposes this exact route.  Operators
 # can still provide an origin or /api/v1 base; backend_ingest_urls() supports
@@ -30,6 +30,9 @@ BACKEND_DEVICE_KEY = os.getenv("BACKEND_DEVICE_KEY", "")
 BACKEND_TIMEOUT = float(os.getenv("BACKEND_TIMEOUT", "5"))
 MAX_SERIAL_BUFFER = 16_384
 COMMAND_POLL_SECONDS = float(os.getenv("COMMAND_POLL_SECONDS", "1"))
+HALL_EFFECT_DEVICE_ID = "sensor-door-01"  # Legacy Unity ID; physical Hall module on Uno D10.
+PI_HARDWARE_ENABLED = os.getenv("PI_HARDWARE_ENABLED", "1") != "0"
+PI_PROXIMITY_WARNING_CM = float(os.getenv("PI_PROXIMITY_WARNING_CM", "20"))
 
 
 class SerialLineBuffer:
@@ -81,9 +84,13 @@ def _wire_command(body: Any, gateway_id: str) -> str:
     if not isinstance(body, dict) or body.get("gatewayId") != gateway_id:
         raise ValueError("invalid hardware command envelope")
     command = body.get("wireCommand")
-    if command not in {"BUZZER:ON", "BUZZER:OFF"}:
-        raise ValueError("unsupported hardware command")
-    return command
+    if command in {"BUZZER:ON", "BUZZER:OFF"}:
+        return command
+    if isinstance(command, str) and command.startswith("SERVO:"):
+        angle_text = command.removeprefix("SERVO:")
+        if angle_text.isdigit() and 0 <= int(angle_text) <= 180:
+            return command
+    raise ValueError("unsupported hardware command")
 
 
 def _finite_number(value: Any) -> bool:
@@ -94,6 +101,38 @@ def _reading(device_id: str, value: Any, unit: str) -> dict[str, Any] | None:
     if not _finite_number(value):
         return None
     return {"deviceId": device_id, "value": value, "unit": unit}
+
+
+def merge_pi_readings(
+    packet: dict[str, Any], snapshot: dict[str, float | bool | None]
+) -> dict[str, Any]:
+    """Replace the Uno's null placeholders with current Pi GPIO readings."""
+    merged = dict(packet)
+    distance = snapshot.get("distance_cm")
+    ir_detected = snapshot.get("ir_detected")
+    merged["distance_cm"] = distance if _finite_number(distance) else None
+    merged["ir_detected"] = ir_detected if isinstance(ir_detected, bool) else None
+
+    alerts = dict(merged.get("alerts") or {})
+    alerts["proximity"] = bool(
+        _finite_number(merged["distance_cm"])
+        and merged["distance_cm"] <= PI_PROXIMITY_WARNING_CM
+    )
+    merged["alerts"] = alerts
+    state = dict(merged.get("state") or {})
+    state["occupancy"] = merged["ir_detected"] is True
+    merged["state"] = state
+    system = dict(merged.get("system") or {})
+    servo_angle = snapshot.get("servo_angle")
+    system["servo_angle"] = (
+        servo_angle
+        if isinstance(servo_angle, int)
+        and not isinstance(servo_angle, bool)
+        and 0 <= servo_angle <= 180
+        else None
+    )
+    merged["system"] = system
+    return merged
 
 
 def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
@@ -113,11 +152,12 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
         _reading("buzzer-01", int(system["buzzer_on"]), "state")
         if isinstance(system.get("buzzer_on"), bool)
         else None,
+        _reading("servo-01", system.get("servo_angle"), "deg"),
         _reading("sensor-ultrasonic-01", packet.get("distance_cm"), "cm"),
         _reading("sensor-ir-01", int(packet["ir_detected"]), "state")
         if isinstance(packet.get("ir_detected"), bool)
         else None,
-        _reading("sensor-door-01", int(packet["hall_detected"]), "state")
+        _reading(HALL_EFFECT_DEVICE_ID, int(packet["hall_detected"]), "state")
         if isinstance(packet.get("hall_detected"), bool)
         else None,
         _reading("sensor-vibration-01", acceleration.get("tilt_deg"), "deg"),
@@ -143,18 +183,32 @@ def main() -> None:
     if BACKEND_DEVICE_KEY:
         headers["X-Device-Key"] = BACKEND_DEVICE_KEY
 
+    hardware = None
+    if PI_HARDWARE_ENABLED:
+        from pi_hardware import PiHardware
+
+        hardware = PiHardware()
+        hardware.start()
+        print(
+            f"Pi hardware: HC-SR04 BCM{hardware.trigger_pin}/{hardware.echo_pin}, "
+            f"IR BCM{hardware.ir_pin}, "
+            f"servo BCM{hardware.servo_pin}, "
+            f"OLED I2C 0x{hardware.oled_address:02x}"
+        )
+
     session = requests.Session()
-    with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
-        print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
-        print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
-        serial_lines = SerialLineBuffer()
-        invalid_packets = 0
-        last_invalid_warning = 0.0
-        failure_count = 0
-        next_backend_attempt = 0.0
-        next_command_poll = 0.0
-        last_command_warning = 0.0
-        while True:
+    try:
+      with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
+          print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
+          print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
+          serial_lines = SerialLineBuffer()
+          invalid_packets = 0
+          last_invalid_warning = 0.0
+          failure_count = 0
+          next_backend_attempt = 0.0
+          next_command_poll = 0.0
+          last_command_warning = 0.0
+          while True:
             now = time.monotonic()
             if now >= next_command_poll:
                 next_command_poll = now + max(0.25, COMMAND_POLL_SECONDS)
@@ -169,11 +223,16 @@ def main() -> None:
                             break
                         response.raise_for_status()
                         command = _wire_command(response.json(), gateway_id)
-                        arduino.write((command + "\n").encode("ascii"))
-                        arduino.flush()
+                        if command.startswith("SERVO:"):
+                            if hardware is None:
+                                raise ValueError("Pi servo hardware is disabled")
+                            hardware.set_servo_angle(int(command.removeprefix("SERVO:")))
+                        else:
+                            arduino.write((command + "\n").encode("ascii"))
+                            arduino.flush()
                         if index:
                             command_urls.insert(0, command_urls.pop(index))
-                        print(f"Arduino command: {command}")
+                        print(f"Hardware command: {command}")
                         break
                 except (requests.RequestException, ValueError, TypeError, json.JSONDecodeError) as error:
                     if now - last_command_warning >= 30:
@@ -192,6 +251,9 @@ def main() -> None:
                     if start < 0 or end <= start:
                         raise ValueError("incomplete JSON frame")
                     packet = json.loads(line[start : end + 1])
+                    if hardware is not None:
+                        packet = merge_pi_readings(packet, hardware.snapshot())
+                        hardware.render(packet)
                     payload = backend_payload(packet)
                 except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
                     invalid_packets += 1
@@ -233,6 +295,9 @@ def main() -> None:
                     retry_seconds = min(60, 2 ** min(failure_count, 6))
                     next_backend_attempt = time.monotonic() + retry_seconds
                     print(f"Backend error: {error}; retrying in {retry_seconds}s")
+    finally:
+        if hardware is not None:
+            hardware.close()
 
 
 if __name__ == "__main__":

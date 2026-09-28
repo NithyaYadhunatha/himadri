@@ -8,9 +8,6 @@ struct SensorData {
   float humidityPct;
   bool dhtValid;
   int gasRaw;
-  float distanceCm;
-  bool distanceValid;
-  bool irDetected;
   bool hallDetected;
   float accelerationX;
   float accelerationY;
@@ -21,7 +18,6 @@ struct SensorData {
 
   SensorData()
       : temperatureC(NAN), humidityPct(NAN), dhtValid(false), gasRaw(0),
-        distanceCm(NAN), distanceValid(false), irDetected(false),
         hallDetected(false), accelerationX(NAN), accelerationY(NAN),
         accelerationZ(NAN), tiltDeg(NAN), accelerationDeviation(NAN),
         accelerationValid(false) {}
