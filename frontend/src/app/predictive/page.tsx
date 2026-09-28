@@ -874,7 +874,7 @@ export default function PredictiveMaintenancePage() {
   }
 
   return (
-    <div className="h-[calc(100vh-3rem)] overflow-y-auto" style={{ background: 'transparent' }}>
+    <div className="h-screen overflow-y-auto" style={{ background: 'transparent' }}>
       <div className="px-6 py-5 max-w-[1600px] mx-auto space-y-5">
 
         {/* ── Header ── */}

@@ -73,7 +73,7 @@ export default function RiskHeatmapPage() {
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-screen overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-start justify-between">
           <div>

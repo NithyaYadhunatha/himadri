@@ -252,7 +252,7 @@ export default function AssetsPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-3rem)] flex flex-col overflow-hidden">
+      <div className="h-screen flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-brand-border bg-gradient-to-b from-brand-surface to-brand-bg shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>

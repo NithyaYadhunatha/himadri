@@ -228,7 +228,7 @@ export default function StationTwinPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-7rem)] flex flex-col overflow-hidden bg-brand-bg">
+      <div className="h-screen flex flex-col overflow-hidden bg-brand-bg">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-brand-border shrink-0 bg-brand-bg">
           <div className="flex items-center gap-2">
             <Activity size={16} className="text-cyan" />

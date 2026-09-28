@@ -72,7 +72,7 @@ export default function Twin3DPage() {
   }, [unityBuildPath, unityUrl])
 
   return (
-    <div className="h-[calc(100vh-7rem)] flex flex-col bg-brand-bg p-4">
+    <div className="h-screen flex flex-col bg-brand-bg p-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <Box size={16} className="text-cyan" />
