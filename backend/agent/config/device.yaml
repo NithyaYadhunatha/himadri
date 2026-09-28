@@ -6,9 +6,9 @@
 # This file only pre-fills that dialog's Backend URL field.
 
 # Backend server URL — set to the machine running docker-compose up
-# For local testing: http://localhost:8000
+# Override with http://localhost:8000 only for local backend testing.
 # For a multi-laptop demo: http://<HOST_IP>:8000
-backend_url: "http://localhost:8000"
+backend_url: "https://himadri.aus1in.me"
 
 # How often to send heartbeat telemetry (seconds)
 report_interval_seconds: 10

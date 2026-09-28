@@ -20,7 +20,8 @@ export default function Twin3DPage() {
   const station = useStationStore((s) => s.station)
   const [buildCheck, setBuildCheck] = useState<{ url: string; status: Exclude<UnityStatus, 'checking'> } | null>(null)
   const unityBuildPath = UNITY_BUILDS[station]
-  const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+  const backendApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
+  const backendUrl = new URL(backendApiUrl).origin
   const unityUrl = station === 'maitri'
     ? `${unityBuildPath}?backend=${encodeURIComponent(backendUrl)}`
     : unityBuildPath

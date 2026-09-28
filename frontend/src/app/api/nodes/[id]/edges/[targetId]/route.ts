@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentMembership } from '@/lib/auth/rbac'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 type Params = { params: Promise<{ id: string; targetId: string }> }
@@ -18,7 +18,7 @@ export async function DELETE(req: Request, { params }: Params) {
   
   let res: Response
   try {
-    res = await fetch(`${API_BASE}/nodes/${encodeURIComponent(id)}/edges/${encodeURIComponent(targetId)}`, {
+    res = await fetch(`${API_BASE}/assets/${encodeURIComponent(id)}/edges/${encodeURIComponent(targetId)}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${API_TOKEN}` },
       cache: 'no-store',

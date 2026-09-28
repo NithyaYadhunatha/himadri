@@ -42,7 +42,7 @@ function loadEnvLocal() {
 }
 loadEnvLocal()
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://himadri.aus1in.me/api/v1'
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN || ''
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URL
 
@@ -99,10 +99,10 @@ const ENTRIES = {
 }
 
 async function fetchNodeIds() {
-  const res = await fetch(`${API_BASE}/nodes`, {
+  const res = await fetch(`${API_BASE}/assets`, {
     headers: { Authorization: `Bearer ${API_TOKEN}` },
   })
-  if (!res.ok) throw new Error(`GET /nodes failed: ${res.status}`)
+  if (!res.ok) throw new Error(`GET /assets failed: ${res.status}`)
   const nodes = await res.json()
   const idByName = new Map(nodes.map((n) => [n.name, n.id]))
   return idByName

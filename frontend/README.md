@@ -16,10 +16,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-For the Maitri WebGL twin, set `NEXT_PUBLIC_API_BASE_URL` to the public HIMADRI
-backend base URL at frontend build/deploy time. The page passes that URL into
-the Unity wrapper, which connects to `<backend>/ws/digital-twin` (using `wss`
-when the backend URL uses HTTPS).
+`NEXT_PUBLIC_API_BASE_URL` defaults to the deployed versioned API at
+`https://himadri.aus1in.me/api/v1`. The Maitri WebGL page derives the backend
+origin from that URL and connects to `/ws/digital-twin` using `wss` for HTTPS.
+
+For local frontend development without the Mongo container, set
+`CLERK_METADATA_AUTH_FALLBACK=true`. Clerk remains enabled and grants access
+only to `ADMIN_EMAILS` or users carrying valid invitation metadata; other
+signed-in users remain on the approval screen.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -111,7 +111,7 @@ class DeviceSetupDialog(QDialog):
         self._api_key_edit.setEchoMode(QLineEdit.Password)
         form.addRow("API Key:", self._api_key_edit)
 
-        self._backend_edit = QLineEdit(defaults.get("backend_url", "http://localhost:8000"))
+        self._backend_edit = QLineEdit(defaults.get("backend_url", "https://himadri.aus1in.me"))
         form.addRow("Backend URL:", self._backend_edit)
 
         root.addLayout(form)
@@ -146,7 +146,7 @@ class DeviceSetupDialog(QDialog):
     def _on_accept(self) -> None:
         asset_id = self._asset_id_edit.text().strip()
         api_key = self._api_key_edit.text().strip()
-        backend_url = self._backend_edit.text().strip() or "http://localhost:8000"
+        backend_url = self._backend_edit.text().strip() or "https://himadri.aus1in.me"
 
         if not asset_id or not api_key:
             self._show_error("Both Asset ID and API Key are required.")

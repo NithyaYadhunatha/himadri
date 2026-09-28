@@ -20,7 +20,7 @@ import type { RemediationAction } from '@/types/nodes'
 import type { BackendAlertDetail } from '@/lib/backendAdapters'
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
 const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 interface BackendAssetDetail {

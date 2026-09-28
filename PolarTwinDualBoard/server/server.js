@@ -20,7 +20,7 @@ let activePort = requestedPort;
 const baudRate = Number(process.env.ARDUINO_BAUD || 115200);
 const staleAfterMs = Number(process.env.TELEMETRY_STALE_MS || 10000);
 const maxHistory = Number(process.env.HISTORY_LIMIT || 500);
-const backendBaseUrl = process.env.BACKEND_URL || '';
+const backendBaseUrl = process.env.BACKEND_URL || 'https://himadri.aus1in.me';
 const backendDeviceKey = process.env.BACKEND_DEVICE_KEY || '';
 const backendTimeoutMs = Number(process.env.BACKEND_TIMEOUT_MS || 5000);
 if (!Number.isFinite(backendTimeoutMs) || backendTimeoutMs < 250) {
