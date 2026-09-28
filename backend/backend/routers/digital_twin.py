@@ -4,7 +4,8 @@ Router: Digital Twin live-telemetry API (Unity / PolarTwinDualBoard bridge).
 GET  /api/devices, /api/devices/{deviceId}, /api/rooms,
      /api/rooms/{roomId}/devices, /api/telemetry/latest, /api/telemetry/{deviceId}
 POST /api/v1/telemetry/ingest (canonical), /api/telemetry/ingest (legacy alias)
-POST /api/devices/{deviceId}/command
+GET  /api/telemetry/commands/{gatewayId}/next
+POST /api/v1/devices/{deviceId}/command (canonical), /api/devices/{deviceId}/command (legacy)
 WS   /ws/digital-twin
 
 Two routers are defined here rather than one: `router` carries the `/api`
@@ -24,7 +25,7 @@ import math
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, Depends, Header, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel, Field, field_validator
 
 from backend.config import settings
@@ -135,8 +136,21 @@ async def ingest_telemetry_legacy(body: TelemetryIngest) -> dict:
     return await ingest_telemetry(body)
 
 
+@router.get(
+    "/telemetry/commands/{gateway_id}/next",
+    dependencies=[Depends(_require_ingest_key)],
+    operation_id="next_digital_twin_hardware_command",
+    responses={204: {"description": "No command queued"}},
+)
+async def next_hardware_command(gateway_id: str) -> Any:
+    command = digitaltwin_bridge.take_hardware_command(gateway_id)
+    if command is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return command
+
+
 @router.post(
-    "/devices/{device_id}/command",
+    "/v1/devices/{device_id}/command",
     dependencies=[Depends(require_bearer)],
     operation_id="send_digital_twin_command",
 )
@@ -145,6 +159,15 @@ async def send_command(device_id: str, body: DeviceCommand) -> dict:
     if not accepted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown device")
     return {"deviceId": device_id, "command": body.command, "value": body.value, "accepted": True}
+
+
+@router.post(
+    "/devices/{device_id}/command",
+    dependencies=[Depends(require_bearer)],
+    include_in_schema=False,
+)
+async def send_command_legacy(device_id: str, body: DeviceCommand) -> dict:
+    return await send_command(device_id, body)
 
 
 @ws_router.websocket("/ws/digital-twin")

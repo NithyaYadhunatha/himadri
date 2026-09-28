@@ -54,6 +54,7 @@ class ContractRoutesTest(unittest.TestCase):
             "/api/v1/reports/environmental": "get",
             "/api/telemetry/latest": "get",
             "/api/v1/telemetry/ingest": "post",
+            "/api/v1/devices/{device_id}/command": "post",
         }
         for path, method in expected.items():
             self.assertIn(method, paths[path])
@@ -88,6 +89,41 @@ class ContractRoutesTest(unittest.TestCase):
             "/api/telemetry/ingest",
             json=body,
             headers={"X-Device-Key": "test-device-key"},
+        )
+        self.assertEqual(legacy.status_code, 200)
+
+    def test_buzzer_command_is_queued_for_polartwin_gateway(self):
+        headers = {"Authorization": f"Bearer {settings.API_SECRET_KEY}"}
+        command = self.client.post(
+            "/api/v1/devices/buzzer-01/command",
+            json={"command": "SET_STATE", "value": True},
+            headers=headers,
+        )
+        self.assertEqual(command.status_code, 200)
+
+        with patch.object(settings, "DIGITAL_TWIN_INGEST_KEY", "test-device-key"):
+            missing_key = self.client.get(
+                "/api/telemetry/commands/polar-twin-uno/next"
+            )
+            delivered = self.client.get(
+                "/api/telemetry/commands/polar-twin-uno/next",
+                headers={"X-Device-Key": "test-device-key"},
+            )
+            empty = self.client.get(
+                "/api/telemetry/commands/polar-twin-uno/next",
+                headers={"X-Device-Key": "test-device-key"},
+            )
+
+        self.assertEqual(missing_key.status_code, 401)
+        self.assertEqual(delivered.status_code, 200)
+        self.assertEqual(delivered.json()["wireCommand"], "BUZZER:ON")
+        self.assertEqual(delivered.json()["deviceId"], "buzzer-01")
+        self.assertEqual(empty.status_code, 204)
+
+        legacy = self.client.post(
+            "/api/devices/buzzer-01/command",
+            json={"command": "SET_STATE", "value": False},
+            headers=headers,
         )
         self.assertEqual(legacy.status_code, 200)
 

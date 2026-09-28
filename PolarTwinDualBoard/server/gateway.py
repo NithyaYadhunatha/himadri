@@ -12,7 +12,7 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import requests
 import serial
@@ -20,10 +20,16 @@ import serial
 
 ARDUINO_PORT = os.getenv("ARDUINO_PORT", "/dev/ttyACM0")
 ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "115200"))
-BACKEND_URL = os.getenv("BACKEND_URL", "https://himadri.aus1in.me")
+# The currently deployed Swagger contract exposes this exact route.  Operators
+# can still provide an origin or /api/v1 base; backend_ingest_urls() supports
+# both the new versioned route and the deployed compatibility route.
+BACKEND_URL = os.getenv(
+    "BACKEND_URL", "https://himadri.aus1in.me/api/telemetry/ingest"
+)
 BACKEND_DEVICE_KEY = os.getenv("BACKEND_DEVICE_KEY", "")
 BACKEND_TIMEOUT = float(os.getenv("BACKEND_TIMEOUT", "5"))
 MAX_SERIAL_BUFFER = 16_384
+COMMAND_POLL_SECONDS = float(os.getenv("COMMAND_POLL_SECONDS", "1"))
 
 
 class SerialLineBuffer:
@@ -60,6 +66,24 @@ def backend_ingest_urls(base_url: str) -> list[str]:
     else:
         paths = [f"{path}/api/v1/telemetry/ingest", f"{path}/api/telemetry/ingest"]
     return list(dict.fromkeys(urlunsplit((parsed.scheme, parsed.netloc, candidate, "", "")) for candidate in paths))
+
+
+def backend_command_url(ingest_url: str, gateway_id: str) -> str:
+    parsed = urlsplit(ingest_url)
+    prefix, separator, _ = parsed.path.rpartition("/telemetry/ingest")
+    if not separator:
+        raise ValueError("ingest URL does not end in /telemetry/ingest")
+    path = f"{prefix}/telemetry/commands/{quote(gateway_id, safe='')}/next"
+    return urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
+
+
+def _wire_command(body: Any, gateway_id: str) -> str:
+    if not isinstance(body, dict) or body.get("gatewayId") != gateway_id:
+        raise ValueError("invalid hardware command envelope")
+    command = body.get("wireCommand")
+    if command not in {"BUZZER:ON", "BUZZER:OFF"}:
+        raise ValueError("unsupported hardware command")
+    return command
 
 
 def _finite_number(value: Any) -> bool:
@@ -113,12 +137,14 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> None:
     ingest_urls = backend_ingest_urls(BACKEND_URL)
+    gateway_id = "polar-twin-uno"
+    command_urls = [backend_command_url(url, gateway_id) for url in ingest_urls]
     headers = {"Content-Type": "application/json"}
     if BACKEND_DEVICE_KEY:
         headers["X-Device-Key"] = BACKEND_DEVICE_KEY
 
     session = requests.Session()
-    with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=2) as arduino:
+    with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
         print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
         print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
         serial_lines = SerialLineBuffer()
@@ -126,7 +152,34 @@ def main() -> None:
         last_invalid_warning = 0.0
         failure_count = 0
         next_backend_attempt = 0.0
+        next_command_poll = 0.0
+        last_command_warning = 0.0
         while True:
+            now = time.monotonic()
+            if now >= next_command_poll:
+                next_command_poll = now + max(0.25, COMMAND_POLL_SECONDS)
+                try:
+                    for index, command_url in enumerate(command_urls):
+                        response = session.get(command_url, headers=headers, timeout=BACKEND_TIMEOUT)
+                        if response.status_code in {404, 405}:
+                            continue
+                        if response.status_code == 204:
+                            if index:
+                                command_urls.insert(0, command_urls.pop(index))
+                            break
+                        response.raise_for_status()
+                        command = _wire_command(response.json(), gateway_id)
+                        arduino.write((command + "\n").encode("ascii"))
+                        arduino.flush()
+                        if index:
+                            command_urls.insert(0, command_urls.pop(index))
+                        print(f"Arduino command: {command}")
+                        break
+                except (requests.RequestException, ValueError, TypeError, json.JSONDecodeError) as error:
+                    if now - last_command_warning >= 30:
+                        print(f"Command polling unavailable: {error}")
+                        last_command_warning = now
+
             chunk = arduino.read(max(1, arduino.in_waiting))
             if not chunk:
                 continue

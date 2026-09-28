@@ -10,13 +10,21 @@ DHT11 + MQ-2 + HC-SR04 + IR + Hall + ADXL335
                          v
                   Node serial gateway
                          |
-          HTTPS POST /api/v1/telemetry/ingest
+          HTTPS POST /api/telemetry/ingest
                          v
              FastAPI digital-twin bridge
                          |
                WebSocket /ws/digital-twin
                          v
                     Maitri WebGL
+
+Maitri Buzzer ON/OFF -> authenticated command POST -> FastAPI queue
+                                                        |
+                                          Pi GET command poll
+                                                        v
+                                         USB serial BUZZER command
+                                                        v
+                                                   Arduino Uno
 ```
 
 The Uno is the sole hardware-value authority. On the Raspberry Pi, the Node

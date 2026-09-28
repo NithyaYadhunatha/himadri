@@ -19,9 +19,13 @@ let activePort = requestedPort;
 const baudRate = Number(process.env.ARDUINO_BAUD || 115200);
 const staleAfterMs = Number(process.env.TELEMETRY_STALE_MS || 10000);
 const maxHistory = Number(process.env.HISTORY_LIMIT || 500);
-const backendBaseUrl = process.env.BACKEND_URL || 'https://himadri.aus1in.me';
+// Match the route currently published by the deployed HIMADRI Swagger API.
+// resolveBackendIngestUrls() still accepts an origin, /api/v1, or either full
+// ingest URL so this remains forward-compatible with a newer backend image.
+const backendBaseUrl = process.env.BACKEND_URL || 'https://himadri.aus1in.me/api/telemetry/ingest';
 const backendDeviceKey = process.env.BACKEND_DEVICE_KEY || '';
 const backendTimeoutMs = Number(process.env.BACKEND_TIMEOUT_MS || 5000);
+const commandPollMs = Number(process.env.COMMAND_POLL_MS || 1000);
 if (!Number.isFinite(backendTimeoutMs) || backendTimeoutMs < 250) {
   throw Error('BACKEND_TIMEOUT_MS must be a number of at least 250');
 }
@@ -52,6 +56,16 @@ function resolveBackendIngestUrls(baseUrl) {
 }
 const backendIngestUrls = resolveBackendIngestUrls(backendBaseUrl);
 let preferredBackendIngestIndex = 0;
+function commandUrlFor(ingestUrl) {
+  const url = new URL(ingestUrl);
+  const suffix = '/telemetry/ingest';
+  if (!url.pathname.endsWith(suffix)) throw Error('Backend ingest URL has an invalid command base');
+  url.pathname = `${url.pathname.slice(0, -suffix.length)}/telemetry/commands/polar-twin-uno/next`;
+  return url;
+}
+const backendCommandUrls = backendIngestUrls.map(commandUrlFor);
+let preferredBackendCommandIndex = 0;
+let commandPollInFlight = false, lastCommandWarningAt = 0;
 
 function finite(v, lo, hi) { return typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi; }
 function bool(v) { return typeof v === 'boolean'; }
@@ -121,6 +135,64 @@ function postBackendTelemetryTo(url, body) {
     request.on('error', reject);
     request.end(body);
   });
+}
+function getBackendCommand(url) {
+  const transport = url.protocol === 'https:' ? https : http;
+  return new Promise((resolve, reject) => {
+    const headers = {};
+    if (backendDeviceKey) headers['X-Device-Key'] = backendDeviceKey;
+    const request = transport.request(url, {method:'GET', headers, timeout:backendTimeoutMs}, response => {
+      let responseBody = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { if (responseBody.length < 2048) responseBody += chunk; });
+      response.on('end', () => {
+        if (response.statusCode === 204) return resolve(null);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          try { return resolve(JSON.parse(responseBody)); }
+          catch { return reject(Error('backend returned an invalid command envelope')); }
+        }
+        const error = Error(`backend returned HTTP ${response.statusCode}${responseBody ? `: ${responseBody.slice(0, 200)}` : ''}`);
+        error.statusCode = response.statusCode;
+        reject(error);
+      });
+    });
+    request.on('timeout', () => request.destroy(Error('backend command request timed out')));
+    request.on('error', reject);
+    request.end();
+  });
+}
+async function pollBackendCommand() {
+  if (commandPollInFlight || !serialConnected || !serial || !backendCommandUrls.length) return;
+  commandPollInFlight = true;
+  try {
+    let lastError;
+    for (let offset = 0; offset < backendCommandUrls.length; offset += 1) {
+      const index = (preferredBackendCommandIndex + offset) % backendCommandUrls.length;
+      try {
+        const envelope = await getBackendCommand(backendCommandUrls[index]);
+        preferredBackendCommandIndex = index;
+        if (!envelope) return;
+        if (envelope.gatewayId !== 'polar-twin-uno' || !['BUZZER:ON', 'BUZZER:OFF'].includes(envelope.wireCommand)) {
+          throw Error('backend returned an unsupported hardware command');
+        }
+        serial.write(`${envelope.wireCommand}\n`);
+        console.log(`Arduino command: ${envelope.wireCommand}`);
+        return;
+      } catch (error) {
+        lastError = error;
+        if (![404, 405].includes(error.statusCode)) throw error;
+      }
+    }
+    throw lastError;
+  } catch (error) {
+    const now = Date.now();
+    if (now - lastCommandWarningAt >= 30000) {
+      console.warn(`Backend command polling unavailable: ${error.message}`);
+      lastCommandWarningAt = now;
+    }
+  } finally {
+    commandPollInFlight = false;
+  }
 }
 async function postBackendTelemetry(packet) {
   if (!backendIngestUrls.length) return;
@@ -220,6 +292,7 @@ function handleSerialLine(rawLine) {
 }
 async function connect(){try{const path=await findPort();serial=new SerialPort({path,baudRate,autoOpen:false});serial.open(err=>{if(err){console.error('Serial open failed:',err.message);setTimeout(connect,3000);return;}serialConnected=true;console.log(`Arduino connected: ${path} @ ${baudRate}`);let serialBuffer='';serial.on('data',chunk=>{serialBuffer+=chunk.toString('utf8');if(serialBuffer.length>16384){const lastNewline=serialBuffer.lastIndexOf('\n');serialBuffer=lastNewline>=0?serialBuffer.slice(lastNewline+1):'';rejectedSerialPackets+=1;}const lines=serialBuffer.split(/\r?\n/);serialBuffer=lines.pop()||'';for(const line of lines)handleSerialLine(line);});serial.on('close',()=>{serialConnected=false;console.warn('Arduino disconnected; retrying');setTimeout(connect,2000);});serial.on('error',e=>{serialConnected=false;console.error('Serial error:',e.message);});});}catch(e){serialConnected=false;console.warn(e.message,'Retrying in 3s');setTimeout(connect,3000);}}
 setInterval(()=>{if(latest){const stale=Date.now()-lastSeen>staleAfterMs;io.emit('iot:status',{...status(),deviceId:latest.deviceId});}},2000).unref();
+setInterval(pollBackendCommand, Math.max(250, commandPollMs)).unref();
 server.on('error', error => {
   if (error.code === 'EADDRINUSE' && activePort < requestedPort + 20) {
     console.warn(`Port ${activePort} is in use; trying ${activePort + 1}`);
