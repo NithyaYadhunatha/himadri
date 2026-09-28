@@ -13,7 +13,13 @@ export function Sidebar() {
   const { pathname, activeGroup } = useNavGroups()
 
   return (
-    <aside className="flex flex-col w-52 shrink-0 h-full bg-brand-surface-2 border-r border-brand-border overflow-y-auto">
+    // No explicit height here on purpose — the parent row's ancestor chain
+    // only sets min-h-screen (not h-screen), so a percentage height like
+    // h-full can't resolve against it and the sidebar collapses to its own
+    // content height instead of matching the page. Leaving height unset
+    // lets the flex row's default align-items: stretch size it to match
+    // `main` exactly, however tall the page's own content makes that row.
+    <aside className="flex flex-col w-52 shrink-0 self-stretch bg-brand-surface-2 border-r border-brand-border overflow-y-auto">
       <p className="font-mono text-[9.5px] text-cyan uppercase tracking-widest px-4 pt-4 pb-2">
         {activeGroup.label}
       </p>
