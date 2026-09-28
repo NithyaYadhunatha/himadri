@@ -62,15 +62,15 @@ export default function AssetPassportPage() {
     }
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center"><InlineLoader text="Loading asset passport…" /></div>
-  if (error || !passport) return <div className="h-screen flex items-center justify-center"><ErrorState message={error ?? 'Not found'} onRetry={load} /></div>
+  if (loading) return <div className="h-[calc(100vh-3.5rem)] flex items-center justify-center"><InlineLoader text="Loading asset passport…" /></div>
+  if (error || !passport) return <div className="h-[calc(100vh-3.5rem)] flex items-center justify-center"><ErrorState message={error ?? 'Not found'} onRetry={load} /></div>
 
   const provenance = passport.provenance as Provenance
 
   const healthColor = passport.health_score >= 80 ? '#1F9E6D' : passport.health_score >= 50 ? '#B8720F' : '#B23A2E'
 
   return (
-    <div className="h-screen overflow-y-auto bg-brand-bg p-6">
+    <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-3xl mx-auto space-y-5">
         {/* Header — the passport's actual substance (identity/telemetry/
             maintenance below) is the point of this page; the QR is just the

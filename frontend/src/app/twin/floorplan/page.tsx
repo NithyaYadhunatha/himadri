@@ -141,7 +141,7 @@ export default function FloorPlanPage() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-brand-bg p-6">
+    <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-6xl mx-auto space-y-5">
         <div>
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">

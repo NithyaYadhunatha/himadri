@@ -400,7 +400,7 @@ export default function RemoteControlPage() {
   const lifeSafetyCount = assets.filter((a) => a.lifeSafety).length
 
   return (
-    <div className="h-screen overflow-y-auto bg-brand-bg">
+    <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg">
       <div className="px-6 py-5 max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">

@@ -2,6 +2,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 import { MCPChatPanel } from '@/components/graph/MCPChatPanel'
 
@@ -18,11 +19,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex">
-      <Sidebar />
-      <main className="flex-1 min-w-0 overflow-hidden relative">
-        {children}
-      </main>
+    <div className="min-h-screen bg-brand-bg flex flex-col">
+      <Header />
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 min-w-0 overflow-hidden relative">
+          {children}
+        </main>
+      </div>
       {/* Operations Agent — a floating chat widget on every app page (not a
           nav destination — see constants.ts's NAV_GROUPS comment). */}
       <MCPChatPanel />

@@ -70,7 +70,7 @@ export default function QrSheetPage() {
   }, [filtered])
 
   return (
-    <div className="min-h-screen bg-brand-bg p-6 print:p-0 print:bg-white">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-brand-bg p-6 print:p-0 print:bg-white">
       <style>{`
         @media print {
           nav, header, .no-print { display: none !important; }

@@ -45,7 +45,7 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="h-screen overflow-y-auto bg-brand-bg p-6">
+    <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
