@@ -200,7 +200,7 @@ on every route below except `/health` and `/agent/*` (which use `X-API-Key`).
 | GET | `/agent/whoami` | Identify the caller from its `X-API-Key` |
 | POST | `/agent/heartbeat` | Device telemetry ingest, demo/simulator path (`X-API-Key`) |
 | POST | `/agent/command-result` | Device command ack/apply (`X-API-Key`) |
-| POST | `/api/telemetry/ingest` | PolarTwin Raspberry Pi batch ingest (`X-Device-Key`) |
+| POST | `/api/v1/telemetry/ingest` | PolarTwin Raspberry Pi batch ingest (`X-Device-Key`); `/api/telemetry/ingest` remains a compatibility alias |
 | MQTT | `himadri/{station_id}/{asset_id}/{series_name}` | Real sensor/gateway telemetry ingest — no HTTP route, see "Device Connectivity" above |
 | GET | `/stations`, `/stations/{id}` | Station detail, zones, twin graph |
 | GET | `/assets`, `/assets/{id}` | Asset list/detail, readings, dependencies, blast radius |

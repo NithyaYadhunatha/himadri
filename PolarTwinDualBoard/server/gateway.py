@@ -12,6 +12,7 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import requests
 import serial
@@ -19,9 +20,70 @@ import serial
 
 ARDUINO_PORT = os.getenv("ARDUINO_PORT", "/dev/ttyACM0")
 ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "115200"))
-BACKEND_URL = os.getenv("BACKEND_URL", "https://himadri.aus1in.me")
+# The currently deployed Swagger contract exposes this exact route.  Operators
+# can still provide an origin or /api/v1 base; backend_ingest_urls() supports
+# both the new versioned route and the deployed compatibility route.
+BACKEND_URL = os.getenv(
+    "BACKEND_URL", "https://himadri.aus1in.me/api/telemetry/ingest"
+)
 BACKEND_DEVICE_KEY = os.getenv("BACKEND_DEVICE_KEY", "")
 BACKEND_TIMEOUT = float(os.getenv("BACKEND_TIMEOUT", "5"))
+MAX_SERIAL_BUFFER = 16_384
+COMMAND_POLL_SECONDS = float(os.getenv("COMMAND_POLL_SECONDS", "1"))
+
+
+class SerialLineBuffer:
+    """Keep timeout-split serial fragments until a complete newline arrives."""
+
+    def __init__(self, max_bytes: int = MAX_SERIAL_BUFFER) -> None:
+        self._buffer = bytearray()
+        self._max_bytes = max_bytes
+        self.dropped_frames = 0
+
+    def feed(self, chunk: bytes) -> list[str]:
+        self._buffer.extend(chunk)
+        lines: list[str] = []
+        while b"\n" in self._buffer:
+            raw, _, remainder = self._buffer.partition(b"\n")
+            self._buffer = bytearray(remainder)
+            lines.append(raw.rstrip(b"\r").decode("utf-8", errors="ignore"))
+        if len(self._buffer) > self._max_bytes:
+            self._buffer.clear()
+            self.dropped_frames += 1
+        return lines
+
+
+def backend_ingest_urls(base_url: str) -> list[str]:
+    """Accept an origin, /api/v1 base, or a complete ingest URL."""
+    parsed = urlsplit(base_url.rstrip("/"))
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("BACKEND_URL must be an http(s) URL")
+    path = parsed.path.rstrip("/")
+    if path.endswith(("/api/v1/telemetry/ingest", "/api/telemetry/ingest")):
+        paths = [path]
+    elif path.endswith("/api/v1"):
+        paths = [f"{path}/telemetry/ingest", f"{path[:-3]}/telemetry/ingest"]
+    else:
+        paths = [f"{path}/api/v1/telemetry/ingest", f"{path}/api/telemetry/ingest"]
+    return list(dict.fromkeys(urlunsplit((parsed.scheme, parsed.netloc, candidate, "", "")) for candidate in paths))
+
+
+def backend_command_url(ingest_url: str, gateway_id: str) -> str:
+    parsed = urlsplit(ingest_url)
+    prefix, separator, _ = parsed.path.rpartition("/telemetry/ingest")
+    if not separator:
+        raise ValueError("ingest URL does not end in /telemetry/ingest")
+    path = f"{prefix}/telemetry/commands/{quote(gateway_id, safe='')}/next"
+    return urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
+
+
+def _wire_command(body: Any, gateway_id: str) -> str:
+    if not isinstance(body, dict) or body.get("gatewayId") != gateway_id:
+        raise ValueError("invalid hardware command envelope")
+    command = body.get("wireCommand")
+    if command not in {"BUZZER:ON", "BUZZER:OFF"}:
+        raise ValueError("unsupported hardware command")
+    return command
 
 
 def _finite_number(value: Any) -> bool:
@@ -74,42 +136,103 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
-    ingest_url = f"{BACKEND_URL.rstrip('/')}/api/telemetry/ingest"
+    ingest_urls = backend_ingest_urls(BACKEND_URL)
+    gateway_id = "polar-twin-uno"
+    command_urls = [backend_command_url(url, gateway_id) for url in ingest_urls]
     headers = {"Content-Type": "application/json"}
     if BACKEND_DEVICE_KEY:
         headers["X-Device-Key"] = BACKEND_DEVICE_KEY
 
     session = requests.Session()
-    with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=2) as arduino:
+    with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
         print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
-        print(f"Backend ingest: {ingest_url}")
+        print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
+        serial_lines = SerialLineBuffer()
+        invalid_packets = 0
+        last_invalid_warning = 0.0
+        failure_count = 0
+        next_backend_attempt = 0.0
+        next_command_poll = 0.0
+        last_command_warning = 0.0
         while True:
-            line = arduino.readline().decode("utf-8", errors="ignore").strip()
-            if not line:
-                continue
+            now = time.monotonic()
+            if now >= next_command_poll:
+                next_command_poll = now + max(0.25, COMMAND_POLL_SECONDS)
+                try:
+                    for index, command_url in enumerate(command_urls):
+                        response = session.get(command_url, headers=headers, timeout=BACKEND_TIMEOUT)
+                        if response.status_code in {404, 405}:
+                            continue
+                        if response.status_code == 204:
+                            if index:
+                                command_urls.insert(0, command_urls.pop(index))
+                            break
+                        response.raise_for_status()
+                        command = _wire_command(response.json(), gateway_id)
+                        arduino.write((command + "\n").encode("ascii"))
+                        arduino.flush()
+                        if index:
+                            command_urls.insert(0, command_urls.pop(index))
+                        print(f"Arduino command: {command}")
+                        break
+                except (requests.RequestException, ValueError, TypeError, json.JSONDecodeError) as error:
+                    if now - last_command_warning >= 30:
+                        print(f"Command polling unavailable: {error}")
+                        last_command_warning = now
 
-            try:
-                packet = json.loads(line)
-                payload = backend_payload(packet)
-            except json.JSONDecodeError:
-                print("Invalid JSON:", line)
+            chunk = arduino.read(max(1, arduino.in_waiting))
+            if not chunk:
                 continue
-            except (KeyError, TypeError, ValueError) as error:
-                print("Rejected Arduino packet:", error)
-                continue
+            for raw_line in serial_lines.feed(chunk):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                start, end = line.find("{"), line.rfind("}")
+                try:
+                    if start < 0 or end <= start:
+                        raise ValueError("incomplete JSON frame")
+                    packet = json.loads(line[start : end + 1])
+                    payload = backend_payload(packet)
+                except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+                    invalid_packets += 1
+                    now = time.monotonic()
+                    if now - last_invalid_warning >= 10:
+                        print(f"Rejected Arduino packet: {error} ({invalid_packets} rejected total)")
+                        last_invalid_warning = now
+                    continue
 
-            try:
-                response = session.post(
-                    ingest_url,
-                    json=payload,
-                    headers=headers,
-                    timeout=BACKEND_TIMEOUT,
-                )
-                response.raise_for_status()
-                print(f"Backend: {response.status_code}; readings: {len(payload['readings'])}")
-            except requests.RequestException as error:
-                print("Backend error:", error)
-                time.sleep(2)
+                if time.monotonic() < next_backend_attempt:
+                    continue
+                try:
+                    last_error: requests.RequestException | None = None
+                    for index, ingest_url in enumerate(ingest_urls):
+                        response = session.post(
+                            ingest_url,
+                            json=payload,
+                            headers=headers,
+                            timeout=BACKEND_TIMEOUT,
+                        )
+                        if response.status_code not in {404, 405}:
+                            response.raise_for_status()
+                            if index:
+                                ingest_urls.insert(0, ingest_urls.pop(index))
+                            break
+                        last_error = requests.HTTPError(
+                            f"{response.status_code} for {ingest_url}: {response.text[:200]}",
+                            response=response,
+                        )
+                    else:
+                        raise requests.RequestException(
+                            f"telemetry ingest route is unavailable; redeploy the backend ({last_error})"
+                        )
+                    failure_count = 0
+                    next_backend_attempt = 0.0
+                    print(f"Backend: {response.status_code}; readings: {len(payload['readings'])}")
+                except requests.RequestException as error:
+                    failure_count += 1
+                    retry_seconds = min(60, 2 ** min(failure_count, 6))
+                    next_backend_attempt = time.monotonic() + retry_seconds
+                    print(f"Backend error: {error}; retrying in {retry_seconds}s")
 
 
 if __name__ == "__main__":

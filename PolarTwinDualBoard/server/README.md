@@ -9,24 +9,27 @@ It does not require MQTT or an ESP8266.
 cd /Users/adityasingh/projects/SIH/PolarTwin/himadri/PolarTwinDualBoard/server
 ARDUINO_PORT=/dev/cu.usbserial-A5069RR4 \
 ARDUINO_BAUD=115200 \
-BACKEND_URL=https://himadri.aus1in.me \
+BACKEND_URL=https://himadri.aus1in.me/api/telemetry/ingest \
 npm start
 ```
 
-For a Raspberry Pi sending directly to the deployed backend, use its public
-base URL (without `/api/telemetry/ingest`) and the device key configured on
-the backend:
+For a Raspberry Pi sending directly to the deployed backend, use the exact
+ingest route shown in its Swagger page and the device key configured on the
+backend:
 
 ```bash
 cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
 ARDUINO_PORT=/dev/ttyACM0 \
 ARDUINO_BAUD=115200 \
-BACKEND_URL=https://himadri.aus1in.me \
+BACKEND_URL=https://himadri.aus1in.me/api/telemetry/ingest \
 BACKEND_DEVICE_KEY=replace-with-the-same-secret \
 npm start
 ```
 
-`BACKEND_URL` defaults to `https://himadri.aus1in.me`, so it may be omitted.
+`BACKEND_URL` defaults to
+`https://himadri.aus1in.me/api/telemetry/ingest`, so it may be omitted.
+An origin such as `https://himadri.aus1in.me` is also accepted; the gateway
+will try `/api/v1/telemetry/ingest` and fall back to `/api/telemetry/ingest`.
 Set it explicitly to `http://localhost:8000` only when running a local backend.
 Set `BACKEND_DEVICE_KEY` only when the deployed backend has
 `DIGITAL_TWIN_INGEST_KEY` configured; the values must match.
@@ -47,7 +50,7 @@ second serial-port connection.
 
 `gateway.py` is a lightweight alternative when only serial-to-backend relay is
 needed (it does not serve the local dashboard). It translates the Uno packet
-to the same `/api/telemetry/ingest` contract used by `server.js` and omits
+to the same telemetry-ingest contract used by `server.js` and omits
 readings for sensors that currently report `null`.
 
 ```bash
@@ -57,10 +60,23 @@ source venv/bin/activate
 pip install -r requirements.txt
 ARDUINO_PORT=/dev/ttyACM0 \
 ARDUINO_BAUD=115200 \
-BACKEND_URL=https://himadri.aus1in.me \
+BACKEND_URL=https://himadri.aus1in.me/api/telemetry/ingest \
 BACKEND_DEVICE_KEY=replace-with-the-same-secret \
 python gateway.py
 ```
 
 Do not run `gateway.py` and `server.js` against the same serial port at the
 same time. Only one process can own the Arduino connection.
+
+Both gateways preserve partial serial reads until a newline arrives, discard
+corrupt packets without flooding the terminal, and retry backend failures with
+exponential backoff. They prefer the versioned ingest route and automatically
+fall back to the legacy alias. If both return 404, the deployed backend image
+is stale and must be rebuilt/redeployed; changing the Raspberry Pi URL will not
+create a missing server route.
+
+Both gateways also poll the authenticated hardware-command endpoint once per
+second. A Buzzer ON/OFF action from the Maitri 3D twin is queued by HIMADRI,
+returned to `polar-twin-uno`, validated against a strict allow-list, and written
+to USB serial as `BUZZER:ON` or `BUZZER:OFF`. The backend and frontend must be
+redeployed before this command endpoint is available publicly.

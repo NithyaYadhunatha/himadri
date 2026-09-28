@@ -29,8 +29,10 @@ not duplicated into firmware where they could silently drift.
 from __future__ import annotations
 
 import asyncio
+from collections import defaultdict, deque
 import json
 import time
+import uuid
 from typing import Any, Literal
 
 import structlog
@@ -104,6 +106,17 @@ def _initial_state(device_id: str) -> dict[str, Any]:
 
 _state: dict[str, dict[str, Any]] = {device_id: _initial_state(device_id) for device_id in DEVICE_CATALOG}
 _lock = asyncio.Lock()
+
+# Hardware commands are deliberately delivered over the same authenticated
+# HTTP boundary as telemetry.  The Raspberry Pi polls this short in-memory
+# queue and writes the returned wire command to the Uno USB serial port.  This
+# keeps browser clients away from device credentials and works even when the
+# station cannot accept inbound connections.
+_hardware_commands: dict[str, deque[dict[str, Any]]] = defaultdict(deque)
+_HARDWARE_GATEWAY_ID = "polar-twin-uno"
+_HARDWARE_COMMANDS: dict[str, tuple[str, str]] = {
+    "buzzer-01": ("BUZZER:OFF", "BUZZER:ON"),
+}
 
 
 def compute_numeric_status(value: float, warning: float, critical: float, inverse: bool) -> str:
@@ -304,6 +317,18 @@ async def publish_command(device_id: str, command: str, value: Any) -> bool:
     if device_id not in DEVICE_CATALOG:
         return False
 
+    if device_id in _HARDWARE_COMMANDS and command == "SET_STATE":
+        off_command, on_command = _HARDWARE_COMMANDS[device_id]
+        enabled = bool(value)
+        _hardware_commands[_HARDWARE_GATEWAY_ID].append({
+            "commandId": uuid.uuid4().hex,
+            "gatewayId": _HARDWARE_GATEWAY_ID,
+            "deviceId": device_id,
+            "wireCommand": on_command if enabled else off_command,
+            "value": enabled,
+            "queuedAt": _now_ms(),
+        })
+
     if _publisher_client is not None:
         try:
             await _publisher_client.publish(
@@ -326,3 +351,11 @@ async def publish_command(device_id: str, command: str, value: Any) -> bool:
             await digital_twin_ws.broadcast(_device_update_message(device))
 
     return True
+
+
+def take_hardware_command(gateway_id: str) -> dict[str, Any] | None:
+    """Return the next serial command for a gateway using at-most-once delivery."""
+    queue = _hardware_commands.get(gateway_id)
+    if not queue:
+        return None
+    return queue.popleft()

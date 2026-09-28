@@ -17,6 +17,14 @@ DHT11 + MQ-2 + HC-SR04 + IR + Hall + ADXL335
                WebSocket /ws/digital-twin
                          v
                     Maitri WebGL
+
+Maitri Buzzer ON/OFF -> authenticated command POST -> FastAPI queue
+                                                        |
+                                          Pi GET command poll
+                                                        v
+                                         USB serial BUZZER command
+                                                        v
+                                                   Arduino Uno
 ```
 
 The Uno is the sole hardware-value authority. On the Raspberry Pi, the Node
