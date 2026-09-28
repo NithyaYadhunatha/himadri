@@ -12,6 +12,8 @@ frontend/InfraMind/*.tsbuildinfo
 frontend/InfraMind/next-env.d.ts
 
 # ─── Backend (FastAPI / Python) ─────────────────────────────────────────────
+**/__pycache__/
+*.py[cod]
 backend/**/__pycache__/
 backend/**/*.py[cod]
 backend/**/.venv/
@@ -30,3 +32,6 @@ Thumbs.db
 
 postman
 .postman
+
+# Local reference files
+outer visuals.png

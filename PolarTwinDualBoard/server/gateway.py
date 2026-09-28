@@ -192,8 +192,7 @@ def main() -> None:
         print(
             f"Pi hardware: HC-SR04 BCM{hardware.trigger_pin}/{hardware.echo_pin}, "
             f"IR BCM{hardware.ir_pin}, "
-            f"servo BCM{hardware.servo_pin}, "
-            f"OLED I2C 0x{hardware.oled_address:02x}"
+            f"servo BCM{hardware.servo_pin}"
         )
 
     session = requests.Session()
@@ -253,7 +252,6 @@ def main() -> None:
                     packet = json.loads(line[start : end + 1])
                     if hardware is not None:
                         packet = merge_pi_readings(packet, hardware.snapshot())
-                        hardware.render(packet)
                     payload = backend_payload(packet)
                 except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
                     invalid_packets += 1

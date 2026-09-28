@@ -1,0 +1,20 @@
+[Unit]
+Description=PolarTwin Raspberry Pi OLED system status
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=@POLARTWIN_USER@
+SupplementaryGroups=i2c
+WorkingDirectory=@POLARTWIN_SERVER_DIR@
+ExecStart=@POLARTWIN_PYTHON@ @POLARTWIN_SERVER_DIR@/polartwin_status.py
+Environment=PYTHONUNBUFFERED=1
+Environment=PI_OLED_I2C_ADDRESS=0x3c
+Environment=PI_OLED_REFRESH_SECONDS=2
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

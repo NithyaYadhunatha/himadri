@@ -1,5 +1,6 @@
 // PolarTwin Arduino node. The Uno owns the analogue/environment sensors and
-// actuators. HC-SR04, IR, servo and OLED are owned by the Raspberry Pi gateway.
+// actuators. HC-SR04, IR and servo are owned by the Raspberry Pi gateway. The
+// independent Pi status process owns the OLED.
 
 #include "core/PinConfig.h"
 #include "core/Scheduler.h"

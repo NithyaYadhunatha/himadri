@@ -37,7 +37,9 @@ connecting BCM24. A 3.3 V logic-level shifter is also suitable.
 
 Enable I2C with `sudo raspi-config` (Interface Options -> I2C), then confirm the
 OLED address with `i2cdetect -y 1`. It is normally `0x3c`; set
-`PI_OLED_I2C_ADDRESS=0x3d` when needed.
+`PI_OLED_I2C_ADDRESS=0x3d` when needed. The independent
+`server/polartwin_status.py` process owns this I2C device; the telemetry gateway
+does not read from or render to the OLED.
 
 ## Arduino Uno (remaining hardware)
 
