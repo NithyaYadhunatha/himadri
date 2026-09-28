@@ -1,29 +1,21 @@
-// Single-board PolarTwin node: every physical sensor and actuator is handled
-// by this Arduino Uno. JSONL telemetry and commands use USB Serial; no
-// ESP8266 or second sensor stream is required.
+// PolarTwin Arduino node. The Uno owns the analogue/environment sensors and
+// actuators. HC-SR04, IR, servo and OLED are owned by the Raspberry Pi gateway.
 
 #include "core/PinConfig.h"
 #include "core/Scheduler.h"
 #include "core/SensorData.h"
 #include "sensors/DHTSensor.h"
 #include "sensors/GasSensor.h"
-#include "sensors/UltrasonicSensor.h"
-#include "sensors/IRSensor.h"
 #include "sensors/HallSensor.h"
 #include "sensors/AccelerometerSensor.h"
 #include "actuators/BuzzerController.h"
 #include "actuators/RGBController.h"
-#include "actuators/ServoController.h"
 #include "actuators/StatusLED.h"
 #include <stdlib.h>
 #include <string.h>
 
 DHTSensor dhtSensor(PinConfig::DHT_DATA, SystemConfig::DHT_TYPE);
 GasSensor gasSensor(PinConfig::MQ2_ANALOG);
-UltrasonicSensor ultrasonicSensor(PinConfig::ULTRASONIC_TRIG,
-                                  PinConfig::ULTRASONIC_ECHO,
-                                  SystemConfig::ULTRASONIC_TIMEOUT_US);
-IRSensor irSensor(PinConfig::IR_OUT, SystemConfig::IR_ACTIVE_LOW);
 HallSensor hallSensor(PinConfig::HALL_DIGITAL, SystemConfig::HALL_ACTIVE_LOW);
 AccelerometerSensor accelerometer(PinConfig::ACCEL_X, PinConfig::ACCEL_Y,
                                   PinConfig::ACCEL_Z,
@@ -35,7 +27,6 @@ AccelerometerSensor accelerometer(PinConfig::ACCEL_X, PinConfig::ACCEL_Y,
 BuzzerController buzzer(PinConfig::BUZZER);
 RGBController rgb(PinConfig::RGB_RED, PinConfig::RGB_GREEN,
                   PinConfig::RGB_BLUE, SystemConfig::RGB_COMMON_ANODE);
-ServoController servo(PinConfig::SERVO_SIGNAL);
 StatusLED statusLed(PinConfig::STATUS_LED);
 
 SensorData sensorData;
@@ -43,7 +34,6 @@ AlertState alerts;
 
 PeriodicTask accelTask(SystemConfig::ACCEL_INTERVAL_MS);
 PeriodicTask digitalTask(SystemConfig::DIGITAL_INTERVAL_MS);
-PeriodicTask ultrasonicTask(SystemConfig::ULTRASONIC_INTERVAL_MS);
 PeriodicTask gasTask(SystemConfig::MQ2_INTERVAL_MS);
 PeriodicTask dhtTask(SystemConfig::DHT_INTERVAL_MS);
 PeriodicTask telemetryTask(SystemConfig::TELEMETRY_INTERVAL_MS);
@@ -61,8 +51,8 @@ void evaluateDigitalTwin() {
   } else if (sensorData.gasRaw >= SystemConfig::GAS_ALERT_ON_RAW) {
     alerts.gas = true;
   }
-  alerts.proximity = sensorData.distanceValid &&
-      sensorData.distanceCm <= SystemConfig::PROXIMITY_WARNING_CM;
+  // Proximity and occupancy are evaluated by the Pi from its local sensors.
+  alerts.proximity = false;
   if (!sensorData.accelerationValid) {
     alerts.structural = false;
   } else if (alerts.structural) {
@@ -76,7 +66,7 @@ void evaluateDigitalTwin() {
                  SystemConfig::ACCEL_DEVIATION_ALERT_ON_MS2) {
     alerts.structural = true;
   }
-  alerts.occupancy = sensorData.irDetected;
+  alerts.occupancy = false;
   alerts.hallEvent = sensorData.hallDetected;
   alerts.any = alerts.highTemperature || alerts.gas || alerts.proximity ||
                alerts.structural;
@@ -90,15 +80,6 @@ void evaluateDigitalTwin() {
   else if (alerts.highTemperature) rgb.applyAutomatic(255, 120, 0, true);
   else if (alerts.proximity) rgb.applyAutomatic(0, 0, 255, true);
   else rgb.applyAutomatic(0, 255, 0, false);
-}
-
-bool parseInteger(const char *text, long minimum, long maximum, long &value) {
-  if (*text == '\0') return false;
-  char *end = NULL;
-  const long parsed = strtol(text, &end, 10);
-  if (*end != '\0' || parsed < minimum || parsed > maximum) return false;
-  value = parsed;
-  return true;
 }
 
 bool parseRGB(const char *text, uint8_t &red, uint8_t &green, uint8_t &blue) {
@@ -122,10 +103,7 @@ bool parseRGB(const char *text, uint8_t &red, uint8_t &green, uint8_t &blue) {
 }
 
 void handleCommand(char *command) {
-  if (strncmp(command, "SERVO:", 6) == 0) {
-    long angle;
-    if (parseInteger(command + 6, 0, 180, angle)) servo.setAngle(angle);
-  } else if (strcmp(command, "BUZZER:ON") == 0) {
+  if (strcmp(command, "BUZZER:ON") == 0) {
     buzzer.setOverride(true);
   } else if (strcmp(command, "BUZZER:OFF") == 0) {
     buzzer.setOverride(false);
@@ -179,10 +157,9 @@ void emitTelemetry(Print &out) {
   printNullable(out, sensorData.humidityPct, sensorData.dhtValid, 1);
   out.print(F(",\"gas_raw\":"));
   out.print(sensorData.gasRaw);
-  out.print(F(",\"distance_cm\":"));
-  printNullable(out, sensorData.distanceCm, sensorData.distanceValid, 1);
-  out.print(F(",\"ir_detected\":"));
-  out.print(sensorData.irDetected ? F("true") : F("false"));
+  // These null placeholders make the ownership boundary explicit. The Pi
+  // gateway replaces them with its GPIO readings before HTTP ingestion.
+  out.print(F(",\"distance_cm\":null,\"ir_detected\":null"));
   out.print(F(",\"hall_detected\":"));
   out.print(sensorData.hallDetected ? F("true") : F("false"));
   out.print(F(",\"acceleration\":{\"x\":"));
@@ -209,8 +186,7 @@ void emitTelemetry(Print &out) {
   out.print(alerts.any ? F("true") : F("false"));
   out.print(F(",\"status\":\""));
   out.print(alerts.any ? F("WARNING") : F("NORMAL"));
-  out.print(F("\",\"servo_angle\":"));
-  out.print(servo.angle());
+  out.print(F("\",\"servo_angle\":null"));
   out.print(F(",\"buzzer_on\":"));
   out.print(buzzer.isOn() ? F("true") : F("false"));
   out.println(F("}}"));
@@ -220,36 +196,17 @@ void setup() {
   Serial.begin(SystemConfig::SERIAL_BAUD);
   dhtSensor.begin();
   gasSensor.begin();
-  ultrasonicSensor.begin();
-  irSensor.begin();
   hallSensor.begin();
   accelerometer.begin();
   buzzer.begin();
   rgb.begin();
-  servo.begin();
   statusLed.begin();
 }
 
 void loop() {
-  // Give the non-blocking sonar state machine short, exclusive iterations so
-  // its echo edges are captured without pulseIn() or delay().
-  ultrasonicSensor.update(micros());
-  float measuredDistance;
-  bool distanceValid;
-  if (ultrasonicSensor.takeReading(measuredDistance, distanceValid)) {
-    sensorData.distanceCm = measuredDistance;
-    sensorData.distanceValid = distanceValid;
-  }
-  if (ultrasonicSensor.isBusy()) return;
-
   drainCommands(Serial);
   const unsigned long nowMs = millis();
-  if (ultrasonicTask.due(nowMs)) {
-    ultrasonicSensor.start(micros());
-    return;
-  }
   if (digitalTask.due(nowMs)) {
-    sensorData.irDetected = irSensor.detected();
     sensorData.hallDetected = hallSensor.detected();
   }
   if (accelTask.due(nowMs)) {

@@ -1,2 +1,5 @@
 pyserial>=3.5,<4
 requests>=2.31,<3
+RPi.GPIO>=0.7.1,<0.8
+luma.oled>=3.13,<4
+Pillow>=10,<12

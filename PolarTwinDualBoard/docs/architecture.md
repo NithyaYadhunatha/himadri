@@ -1,37 +1,33 @@
-# Single-Arduino architecture
+# Hybrid Uno and Raspberry Pi architecture
 
-```
-DHT11 + MQ-2 + HC-SR04 + IR + Hall + ADXL335
-                         |
-                         v
-                    Arduino Uno
-                         |
-               USB JSONL at 115200 baud
-                         v
-                  Node serial gateway
-                         |
-          HTTPS POST /api/telemetry/ingest
-                         v
-             FastAPI digital-twin bridge
-                         |
-               WebSocket /ws/digital-twin
-                         v
-                    Maitri WebGL
-
-Maitri Buzzer ON/OFF -> authenticated command POST -> FastAPI queue
-                                                        |
-                                          Pi GET command poll
-                                                        v
-                                         USB serial BUZZER command
-                                                        v
-                                                   Arduino Uno
+```text
+DHT11 + MQ-2 + Hall + ADXL335       HC-SR04 + IR + Servo
+               |                         |
+               v                         v
+          Arduino Uno              Raspberry Pi GPIO
+               |                         |
+               +---- USB JSONL ----------+
+                                         |
+                              Python gateway merge
+                                   |           |
+                              SSD1306 OLED     | HTTPS POST
+                                               v
+                                  /api/telemetry/ingest
+                                               |
+                                  FastAPI -> WebSocket
+                                               |
+                                         Maitri WebGL
 ```
 
-The Uno is the sole hardware-value authority. On the Raspberry Pi, the Node
-gateway validates each complete packet and posts only finite, currently
-available readings to the deployed backend. The backend calculates status and
-broadcasts updates to Maitri over WebSocket. This path does not require MQTT
-or an ESP8266.
+The Uno emits `null` for `distance_cm`, `ir_detected`, and `servo_angle`.
+`gateway.py` replaces those placeholders with fresh Pi GPIO/PWM state, displays
+the combined packet on the OLED, and forwards `sensor-ultrasonic-01`,
+`sensor-ir-01`, and `servo-01` to the backend.
 
-No simulated value is substituted when a sensor returns invalid data; that
-device simply receives no new backend sample.
+The Hall-effect module remains on Uno D10 and appears as **Hall Effect Sensor**.
+Its backend/Unity identifier stays `sensor-door-01` for compatibility.
+
+Maitri Buzzer ON/OFF commands still travel from FastAPI through the Pi gateway
+to the Uno. Servo SET_ANGLE commands are applied directly to Pi BCM18. MQTT and
+ESP8266 are not in the runtime path. Missing or stale sensor values are omitted
+from ingestion rather than fabricated.
