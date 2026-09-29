@@ -10,8 +10,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const isChromeless =
     pathname === '/' ||
     pathname.startsWith('/sign-in') ||
-    pathname.startsWith('/sign-up') ||
-    pathname.startsWith('/waiting-approval')
+    pathname.startsWith('/sign-up')
 
   if (isChromeless) {
     return <div className="min-h-screen bg-brand-bg flex flex-col">{children}</div>

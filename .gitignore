@@ -30,6 +30,7 @@ backend/**/.pytest_cache/
 Thumbs.db
 *.log
 
+
 postman
 .postman
 

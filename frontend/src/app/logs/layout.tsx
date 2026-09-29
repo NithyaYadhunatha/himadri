@@ -1,8 +1,8 @@
 // src/app/logs/layout.tsx
 //
 // /logs is admin-only: it exposes the full ActivityLog across all actors and
-// departments. Non-admin active members are redirected to /digital-twin rather
-// than /waiting-approval (they're already active — they just lack the role).
+// departments. Active members without a permitted role are redirected to the
+// digital twin.
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import { requireActiveMembership } from '@/lib/auth/rbac'

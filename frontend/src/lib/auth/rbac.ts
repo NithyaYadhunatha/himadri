@@ -44,8 +44,8 @@ async function getClerkMetadataMembership(clerkUserId: string): Promise<ActiveMe
 }
 
 // Ensures a User + Membership doc exist for the current Clerk identity,
-// creating them (PENDING, unless the bootstrap-admin/email-invite rule
-// applies — see lib/auth/provisioning.ts) on first touch. Safe to call on
+// creating them with the open-access AUDITOR default unless a bootstrap-admin
+// or email-invite rule applies (see lib/auth/provisioning.ts). Safe to call on
 // every request — it's a no-op once both docs exist and are already ACTIVE.
 //
 // Deliberately avoids currentUser() on the common-case fast path (membership
@@ -57,7 +57,7 @@ async function getClerkMetadataMembership(clerkUserId: string): Promise<ActiveMe
 // for a value it almost never actually needed, which is what was tripping
 // Clerk's rate limit ("too many requests"/timeouts) under normal traffic.
 // currentUser() is now only reached for a brand-new membership or a
-// still-PENDING self-heal check — both rare compared to steady-state traffic
+// legacy-PENDING self-heal check — both rare compared to steady-state traffic
 // from already-provisioned ACTIVE users.
 async function ensureMembership(): Promise<MembershipDoc & { _id: unknown }> {
   const { userId: clerkUserId } = await auth()
@@ -153,8 +153,9 @@ export async function getCurrentMembership(): Promise<ActiveMembership | null> {
   }
 }
 
-// For server components/pages: redirects to /waiting-approval if the
-// current user isn't an ACTIVE member yet, and to /sign-in if unauthenticated.
+// For server components/pages: redirects unauthenticated users to sign-in.
+// A missing active membership can now only represent a revoked/invalid user,
+// because ordinary Clerk users receive the open-access AUDITOR default.
 export async function requireActiveMembership(): Promise<ActiveMembership> {
   if (DEV_BYPASS_AUTH) return MOCK_MEMBERSHIP
 
@@ -162,7 +163,7 @@ export async function requireActiveMembership(): Promise<ActiveMembership> {
   if (!clerkUserId) redirect('/sign-in')
 
   const membership = await getCurrentMembership()
-  if (!membership) redirect('/waiting-approval')
+  if (!membership) redirect('/')
 
   return membership
 }

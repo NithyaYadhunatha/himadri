@@ -10,7 +10,6 @@ import {
   GitBranch,
   Sparkles,
   ArrowRight,
-  Clock,
 } from 'lucide-react'
 import { ROUTES, LIVE_ASSET_COUNT } from '@/lib/constants'
 import { getCurrentMembership } from '@/lib/auth/rbac'
@@ -56,7 +55,6 @@ export default async function LandingPage() {
   const membership = DEV_BYPASS_AUTH || userId ? await getCurrentMembership() : null
 
   const isActive = !!membership
-  const isPending = !DEV_BYPASS_AUTH && !!userId && !membership
 
   return (
     <div className="min-h-screen bg-brand-bg text-white relative overflow-x-hidden">
@@ -93,16 +91,6 @@ export default async function LandingPage() {
                 Mission Control
               </Link>
               {!DEV_BYPASS_AUTH && <UserButton />}
-            </>
-          ) : isPending ? (
-            <>
-              <Link
-                href="/waiting-approval"
-                className="font-mono text-xs uppercase tracking-widest text-amber/80 hover:text-amber transition-colors px-3 py-2"
-              >
-                Awaiting Access
-              </Link>
-              <UserButton />
             </>
           ) : (
             <>
@@ -160,19 +148,6 @@ export default async function LandingPage() {
                 <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">Or go straight to a station</span>
                 <StationEntryButtons />
               </div>
-            </>
-          ) : isPending ? (
-            <>
-              <Link
-                href="/waiting-approval"
-                className="inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest bg-amber/10 border border-amber/40 text-amber rounded px-6 py-3 hover:bg-amber/20 active:scale-95 transition-all"
-              >
-                <Clock size={16} />
-                Check Access Status
-              </Link>
-              <p className="font-mono text-xs text-white/30 tracking-wider">
-                A Station Leader or HQ Operator will activate your account shortly.
-              </p>
             </>
           ) : (
             <>
