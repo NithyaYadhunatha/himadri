@@ -1,9 +1,8 @@
 // src/lib/models/Membership.ts
 //
-// The actual access-control record. A user gets no app access until an
-// Admin flips this to status: "ACTIVE" with a department + role assigned.
-// See lib/auth/rbac.ts for how this is enforced and lib/auth/permissions.ts
-// for what each role can do.
+// The actual access-control record. New authenticated users receive the
+// read-only HQ_NCPOR/AUDITOR default; explicit invitations and ADMIN_EMAILS
+// can grant broader roles. See lib/auth/rbac.ts and lib/auth/permissions.ts.
 
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose'
 import { DEPARTMENTS, ROLES, STATUSES } from '@/lib/auth/constants'

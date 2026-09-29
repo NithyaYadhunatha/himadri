@@ -24,7 +24,7 @@ import { getCurrentMembership } from '@/lib/auth/rbac'
 import { logActivity } from '@/lib/logging/activity'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
-const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
+const API_TOKEN = process.env.API_TOKEN ?? process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 async function queueStopSimulation(nodeId: string): Promise<void> {
   try {

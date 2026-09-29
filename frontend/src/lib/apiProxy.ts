@@ -25,7 +25,7 @@ import {
 } from '@/lib/graph/departmentScope'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
-const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
+const API_TOKEN = process.env.API_TOKEN ?? process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 export async function backendFetch(path: string, init?: RequestInit): Promise<Response> {
   return fetch(`${API_BASE}${path}`, {

@@ -18,7 +18,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
 const API_ORIGIN = new URL(API_BASE).origin
-const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
+const API_TOKEN = process.env.API_TOKEN ?? process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 const TOOL_CALL_TIMEOUT_MS = 15_000
 
 export interface McpTool {

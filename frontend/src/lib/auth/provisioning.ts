@@ -5,7 +5,7 @@
 // the lazy on-login path (src/lib/auth/rbac.ts's ensureMembership) so the
 // two never drift.
 //
-// Two ways a brand-new signup can skip the PENDING waiting room:
+// Explicit assignments take precedence over the open-access default:
 // 1. Bootstrap admin — email is in ADMIN_EMAILS (see project spec).
 // 2. Email invite — an admin pre-assigned department/role via
 //    /api/admin/invite-email, which stamps them onto the Clerk invitation's
@@ -60,5 +60,14 @@ export function resolveInitialMembershipState(
     }
   }
 
-  return { department: null, role: null, status: 'PENDING', invitedByEmail: null }
+  // Open deployment policy: every authenticated Clerk user can enter HIMADRI
+  // immediately. The default is deliberately read-only and cross-station;
+  // command/admin capabilities still require an explicit invitation or an
+  // ADMIN_EMAILS assignment.
+  return {
+    department: 'HQ_NCPOR',
+    role: 'AUDITOR',
+    status: 'ACTIVE',
+    invitedByEmail: null,
+  }
 }

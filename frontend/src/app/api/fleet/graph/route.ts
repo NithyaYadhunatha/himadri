@@ -16,7 +16,7 @@ import { defaultStationId, isStationRequestAllowed } from '@/lib/graph/departmen
 import type { BackendFullGraph } from '@/lib/backendAdapters'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://himadri.aus1in.me/api/v1'
-const API_TOKEN = process.env.NEXT_PUBLIC_API_TOKEN ?? ''
+const API_TOKEN = process.env.API_TOKEN ?? process.env.NEXT_PUBLIC_API_TOKEN ?? ''
 
 export async function GET(req: Request) {
   const membership = await getCurrentMembership()
