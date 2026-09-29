@@ -20,11 +20,10 @@ import serial
 
 ARDUINO_PORT = os.getenv("ARDUINO_PORT", "/dev/ttyUSB0")
 ARDUINO_BAUD = int(os.getenv("ARDUINO_BAUD", "115200"))
-# The currently deployed Swagger contract exposes this exact route.  Operators
-# can still provide an origin or /api/v1 base; backend_ingest_urls() supports
-# both the new versioned route and the deployed compatibility route.
+# Prefer the current deployed route. backend_ingest_urls() also tries the
+# compatibility route when an older deployment or explicit URL is used.
 BACKEND_URL = os.getenv(
-    "BACKEND_URL", "https://himadri.aus1in.me/api/telemetry/ingest"
+    "BACKEND_URL", "https://himadri.aus1in.me/api/v1/telemetry/ingest"
 )
 BACKEND_DEVICE_KEY = os.getenv("BACKEND_DEVICE_KEY", "")
 BACKEND_TIMEOUT = float(os.getenv("BACKEND_TIMEOUT", "5"))
@@ -62,8 +61,12 @@ def backend_ingest_urls(base_url: str) -> list[str]:
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError("BACKEND_URL must be an http(s) URL")
     path = parsed.path.rstrip("/")
-    if path.endswith(("/api/v1/telemetry/ingest", "/api/telemetry/ingest")):
-        paths = [path]
+    if path.endswith("/api/v1/telemetry/ingest"):
+        legacy = path.replace("/api/v1/telemetry/ingest", "/api/telemetry/ingest")
+        paths = [path, legacy]
+    elif path.endswith("/api/telemetry/ingest"):
+        versioned = path.replace("/api/telemetry/ingest", "/api/v1/telemetry/ingest")
+        paths = [versioned, path]
     elif path.endswith("/api/v1"):
         paths = [f"{path}/telemetry/ingest", f"{path[:-3]}/telemetry/ingest"]
     else:

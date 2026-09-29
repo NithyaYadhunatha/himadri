@@ -35,13 +35,13 @@ Locate the stable Uno USB name with `ls -l /dev/serial/by-id/`. Start one gatewa
 cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
 ARDUINO_PORT=/dev/ttyACM0 \
 ARDUINO_BAUD=115200 \
-BACKEND_URL=https://himadri.aus1in.me/api/telemetry/ingest \
+BACKEND_URL=https://himadri.aus1in.me/api/v1/telemetry/ingest \
 BACKEND_DEVICE_KEY=replace-with-the-same-secret \
 python gateway.py
 ```
 
 `BACKEND_URL` defaults to
-`https://himadri.aus1in.me/api/telemetry/ingest`, so it may be omitted.
+`https://himadri.aus1in.me/api/v1/telemetry/ingest`, so it may be omitted.
 An origin such as `https://himadri.aus1in.me` is also accepted; the gateway
 will try `/api/v1/telemetry/ingest` and fall back to `/api/telemetry/ingest`.
 Set it explicitly to `http://localhost:8000` only when running a local backend.
@@ -58,6 +58,72 @@ servo. Override it with `PI_ULTRASONIC_TRIGGER_BCM`,
 `PI_SERVO_BCM`. Servo settings are `PI_SERVO_START_ANGLE`,
 `PI_SERVO_MIN_PULSE_US`, and `PI_SERVO_MAX_PULSE_US`. Set
 `PI_HARDWARE_ENABLED=0` only for development on a non-Pi machine.
+
+### Standalone ultrasonic check
+
+Do not run this check while `gateway.py` or another GPIO program is running.
+HC-SR04 ECHO is about 5 V and must not be connected directly to a Raspberry Pi
+GPIO. First add the 1 kOhm/2 kOhm divider shown in `../docs/wiring.md` (or a
+proper 3.3 V level shifter), then run:
+
+```bash
+cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
+venv/bin/python ultrasonic_check.py --echo-protected
+```
+
+The defaults are TRIG BCM23 / physical pin 16 and ECHO BCM24 / physical pin 18.
+The output distinguishes a valid distance from `NO_ECHO_RISE`,
+`ECHO_STUCK_HIGH`, `ECHO_STUCK_HIGH_AFTER_RISE`, and `OUT_OF_RANGE`. To test a
+different BCM mapping, use `--trigger N --echo N`. The option
+`--echo-protected` is an explicit wiring-safety confirmation; it does not alter
+the voltage in software.
+
+### Standalone servo check
+
+Stop the Python/Node gateway before testing so it does not also control BCM18.
+Disconnect the servo horn from any mechanism for the first test. Wire the servo
+signal to BCM18 (physical pin 12), power it from a regulated external 5 V
+supply, and connect the supply ground to a Raspberry Pi ground. Do not power
+the servo from a 3.3 V GPIO pin.
+
+Run the safe 30 -> 90 -> 150 -> 90 degree test sequence:
+
+```bash
+cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
+venv/bin/python servo_check.py
+```
+
+Use `Ctrl+C` to stop; the script releases PWM and cleans up BCM18. A custom
+sequence can also be tested:
+
+```bash
+venv/bin/python servo_check.py --angles 45 90 135 90 --hold 1.5
+```
+
+The completion message confirms that the PWM commands ran; the servo's physical
+movement must be observed because a standard three-wire servo does not return
+position feedback to the Pi.
+
+The IR input is debounced over three samples by default; change this with
+`PI_IR_DEBOUNCE_SAMPLES` only if required. Most LM393-style obstacle modules
+are active-low. If the module's onboard detection LED switches correctly but
+PolarTwin shows the opposite state, start the gateway with
+`PI_IR_ACTIVE_LOW=0`. Values such as `false`, `no`, and `off` are also accepted.
+
+If IR always shows `DETECTED`, first remove all objects from in front of the
+sensor and turn its sensitivity potentiometer slowly until its detection LED
+turns off. Confirm `OUT` (not `AO`) is wired to BCM17 / physical pin 11. Then
+check the raw GPIO level without running the gateway:
+
+```bash
+cd /home/pi/PolarTwin/himadri/PolarTwinDualBoard/server
+venv/bin/python -c 'import RPi.GPIO as G; G.setmode(G.BCM); G.setup(17,G.IN,pull_up_down=G.PUD_UP); print("IR raw level:",G.input(17)); G.cleanup()'
+```
+
+For an active-low module, the expected value is `1` when clear and `0` when an
+object is detected. If those readings are reversed, run the gateway with
+`PI_IR_ACTIVE_LOW=0`. Stop any running gateway service before this raw test so
+only one process owns the GPIO pins.
 
 ## Raspberry Pi OLED system status
 

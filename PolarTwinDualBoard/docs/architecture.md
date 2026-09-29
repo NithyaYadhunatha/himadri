@@ -11,7 +11,7 @@ DHT11 + MQ-2 + Hall + ADXL335       HC-SR04 + IR + Servo
                               Python gateway merge
                                          | HTTPS POST
                                          v
-                            /api/telemetry/ingest
+                           /api/v1/telemetry/ingest
                                          |
                             FastAPI -> WebSocket
                                          |
