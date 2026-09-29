@@ -17,6 +17,30 @@ def _env_int(name: str, default: str, minimum: int, maximum: int) -> int:
     return value
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    raise ValueError(
+        f"{name} must be one of 1/0, true/false, yes/no, or on/off"
+    )
+
+
+def servo_duty_cycle(angle: int, min_pulse_us: int, max_pulse_us: int) -> float:
+    """Convert a 0-180 degree servo angle to a 50 Hz PWM duty cycle."""
+    if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
+        raise ValueError("servo angle must be an integer from 0 to 180")
+    if min_pulse_us >= max_pulse_us:
+        raise ValueError("minimum servo pulse must be below maximum servo pulse")
+    pulse_us = min_pulse_us + (max_pulse_us - min_pulse_us) * angle / 180.0
+    return pulse_us / 20_000.0 * 100.0
+
+
 class PiHardware:
     """Sample Pi-owned sensors and control the servo in the background."""
 
@@ -27,7 +51,10 @@ class PiHardware:
         self.servo_pin = _env_int("PI_SERVO_BCM", "18", 0, 27)
         if len({self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin}) != 4:
             raise ValueError("Pi sensor and servo GPIO numbers must be unique")
-        self.ir_active_low = os.getenv("PI_IR_ACTIVE_LOW", "1") != "0"
+        self.ir_active_low = _env_bool("PI_IR_ACTIVE_LOW", True)
+        self.ir_debounce_samples = _env_int(
+            "PI_IR_DEBOUNCE_SAMPLES", "3", 1, 20
+        )
         self.sample_seconds = max(0.1, float(os.getenv("PI_SAMPLE_SECONDS", "0.2")))
         self.stale_seconds = max(0.5, float(os.getenv("PI_SENSOR_STALE_SECONDS", "2")))
         self.echo_timeout = max(0.005, float(os.getenv("PI_ECHO_TIMEOUT_SECONDS", "0.03")))
@@ -47,6 +74,8 @@ class PiHardware:
         self._distance_at = 0.0
         self._ir_detected: bool | None = None
         self._ir_at = 0.0
+        self._ir_candidate: bool | None = None
+        self._ir_candidate_count = 0
 
     def start(self) -> None:
         try:
@@ -92,6 +121,16 @@ class PiHardware:
         distance_cm = (fall - rise) * 17150.0
         return round(distance_cm, 1) if 2.0 <= distance_cm <= 400.0 else None
 
+    def _record_ir_sample(self, detected: bool, sampled_at: float) -> None:
+        if detected == self._ir_candidate:
+            self._ir_candidate_count += 1
+        else:
+            self._ir_candidate = detected
+            self._ir_candidate_count = 1
+        if self._ir_candidate_count >= self.ir_debounce_samples:
+            self._ir_detected = detected
+            self._ir_at = sampled_at
+
     def _sample_loop(self) -> None:
         while not self._stop.is_set():
             started = time.monotonic()
@@ -104,8 +143,7 @@ class PiHardware:
                     self._distance_samples.append(distance)
                     self._distance_cm = round(statistics.median(self._distance_samples), 1)
                     self._distance_at = now
-                self._ir_detected = ir_detected
-                self._ir_at = now
+                self._record_ir_sample(ir_detected, now)
             self._stop.wait(max(0.0, self.sample_seconds - (time.monotonic() - started)))
 
     def snapshot(self) -> dict[str, float | bool | None]:
@@ -122,10 +160,11 @@ class PiHardware:
             }
 
     def _servo_duty_cycle(self, angle: int) -> float:
-        pulse_us = self.servo_min_pulse_us + (
-            (self.servo_max_pulse_us - self.servo_min_pulse_us) * angle / 180.0
+        return servo_duty_cycle(
+            angle,
+            self.servo_min_pulse_us,
+            self.servo_max_pulse_us,
         )
-        return pulse_us / 20_000.0 * 100.0
 
     def set_servo_angle(self, angle: int) -> None:
         if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
