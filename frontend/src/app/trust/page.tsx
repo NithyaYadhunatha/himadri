@@ -11,6 +11,8 @@ import { STATION_LABELS } from '@/lib/constants'
 import { useBackend } from '@/lib/hooks/usePoll'
 import { Kpi, Panel, PageHead, Pill, Provenance, Meter, Skeleton, type Tone } from '@/components/ui/kit'
 import { ago, fmtNum } from '@/lib/format'
+import { PERMISSIONS } from '@/lib/auth/permissions'
+import { ROLES } from '@/lib/auth/constants'
 
 interface AuditRow {
   seq: number
@@ -201,6 +203,36 @@ export default function TrustPage() {
             </Panel>
           </div>
         </div>
+
+
+        {/* RBAC matrix */}
+        <Panel className="mt-5" eyebrow="Role-based access" title="Who can do what" right={<Pill tone="primary">enforced at every proxy route</Pill>}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left">
+              <thead>
+                <tr>
+                  <th className="pb-2 pr-4 eyebrow">Capability</th>
+                  {ROLES.map((r) => (
+                    <th key={r} className="pb-2 px-2 eyebrow text-center">{r.replace("_", " ")}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(Object.entries(PERMISSIONS) as [string, readonly string[]][]).map(([cap, roles]) => (
+                  <tr key={cap} className="border-t border-brand-border/70">
+                    <td className="py-2 pr-4 text-[12.5px] text-white">{cap.replace(/([A-Z])/g, " $1").toLowerCase()}</td>
+                    {ROLES.map((r) => (
+                      <td key={r} className="py-2 px-2 text-center">
+                        {roles.includes(r) ? <span className="inline-block w-2.5 h-2.5 rounded-full bg-cyan" /> : <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-surface-3" />}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="font-mono text-[10.5px] text-white/45 mt-3">Station-locked roles can only read their own station — checked again on the server for every request, not just hidden in the interface.</p>
+        </Panel>
 
         {/* two-person pipeline */}
         <Panel className="mt-5" eyebrow="Remote actuation" title="The two-person pipeline" right={<Pill tone="warn">Life-safety assets</Pill>}>

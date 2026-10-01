@@ -8,6 +8,7 @@ import { DEV_BYPASS_AUTH } from '@/lib/auth/devBypass'
 import { StationEntryButtons } from '@/components/landing/StationEntryButtons'
 import { Constellation } from '@/components/landing/Constellation'
 import { LiveStrip } from '@/components/landing/LiveStrip'
+import { PolarMap } from '@/components/landing/PolarMap'
 import { HimadriMark } from '@/components/ui/HimadriMark'
 
 const PILLARS = [
@@ -100,12 +101,13 @@ export default async function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="max-w-[1240px] mx-auto px-6 pt-20 pb-14">
+      <section className="max-w-[1240px] mx-auto px-6 pt-16 pb-14 grid lg:grid-cols-[1.25fr_0.75fr] gap-10 items-center">
+        <div>
         <div className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-surface px-3.5 py-1.5 mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-marigold" />
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">Digital twin &amp; remote operations · Maitri + Bharati</span>
         </div>
-        <h1 className="font-display text-[44px] sm:text-[64px] lg:text-[84px] leading-[0.98] tracking-[-0.02em] max-w-[1000px] text-white">
+        <h1 className="font-display text-[44px] sm:text-[60px] lg:text-[68px] leading-[1.0] tracking-[-0.02em] max-w-[1000px] text-white">
           Two stations. Eleven thousand kilometres.{' '}
           <span className="italic text-cyan">One picture you can trust.</span>
         </h1>
@@ -130,6 +132,10 @@ export default async function LandingPage() {
               </Link>
             </>
           )}
+        </div>
+        </div>
+        <div className="hidden lg:block">
+          <PolarMap className="w-full h-auto" />
         </div>
       </section>
 
