@@ -125,7 +125,7 @@ export default async function LandingPage() {
 
         <h1 className="font-mono font-bold text-4xl md:text-6xl tracking-tight max-w-4xl leading-tight">
           Mission control for India&rsquo;s{' '}
-          <span className="text-cyan drop-shadow-[0_0_20px_rgba(31, 158, 109,0.4)]">Antarctic stations</span>
+          <span className="text-cyan drop-shadow-[0_0_20px_rgba(15,138,106,0.4)]">Antarctic stations</span>
         </h1>
 
         <p className="mt-6 max-w-2xl text-sm md:text-base font-sans text-white/50 leading-relaxed">

@@ -15,7 +15,7 @@ export function PanelStat({ icon: Icon, label, value, accent }: { icon: LucideIc
 }
 
 export function PanelGauge({ label, value, unit = '%' }: { label: string; value: number; unit?: string }) {
-  const color = value >= 90 ? '#B23A2E' : value >= 70 ? '#B8720F' : '#1F9E6D'
+  const color = value >= 90 ? '#C23B3B' : value >= 70 ? '#D4820A' : '#0F8A6A'
   return (
     <div className="flex items-center gap-3">
       <span className="font-mono text-[10px] text-white/50 w-16 shrink-0">{label}</span>

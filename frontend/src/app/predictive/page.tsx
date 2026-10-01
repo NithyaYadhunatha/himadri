@@ -32,15 +32,15 @@ function DarkTooltip({ active, payload, label }: {
   return (
     <div style={{
       background: 'rgba(247, 251, 253,0.98)',
-      border: '1px solid rgba(31, 158, 109,0.2)',
+      border: '1px solid rgba(15,138,106,0.2)',
       borderRadius: 8,
       padding: '8px 12px',
-      boxShadow: '0 0 20px rgba(31, 158, 109,0.1)',
+      boxShadow: '0 0 20px rgba(15,138,106,0.1)',
       backdropFilter: 'blur(12px)',
     }} className="text-xs font-mono">
       {label && <p className="text-white/50 mb-1">{label}</p>}
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color ?? '#1868A0' }}>
+        <p key={i} style={{ color: p.color ?? '#3A3AB8' }}>
           {p.name ? `${p.name}: ` : ''}{typeof p.value === 'number' ? p.value.toFixed(1) : p.value}
           {p.name === 'Accuracy' || (!p.name && !label?.includes('Imp')) ? '%' : ''}
         </p>
@@ -50,13 +50,13 @@ function DarkTooltip({ active, payload, label }: {
 }
 
 // ─── Stat Pill ────────────────────────────────────────────────────────────────
-function StatPill({ label, value, unit, color = '#1868A0', icon }: {
+function StatPill({ label, value, unit, color = '#3A3AB8', icon }: {
   label: string; value: string | number; unit?: string; color?: string; icon?: React.ReactNode
 }) {
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-0.5"
          style={{
-           background: 'linear-gradient(135deg, rgba(22, 40, 58,0.04) 0%, rgba(22, 40, 58,0.01) 100%)',
+           background: 'linear-gradient(135deg, rgba(28,31,51,0.04) 0%, rgba(28,31,51,0.01) 100%)',
            border: `1px solid ${color}25`,
            padding: '16px',
            backdropFilter: 'blur(10px)',
@@ -94,16 +94,16 @@ function SectionCard({ children, className = '', glow = false }: {
     <div
       className={`group relative rounded-2xl p-6 transition-all duration-500 hover:border-white/10 ${className}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(22, 40, 58,0.03) 0%, rgba(247, 251, 253,0.5) 100%)',
-        border: '1px solid rgba(22, 40, 58,0.05)',
+        background: 'linear-gradient(135deg, rgba(28,31,51,0.03) 0%, rgba(247, 251, 253,0.5) 100%)',
+        border: '1px solid rgba(28,31,51,0.05)',
         backdropFilter: 'blur(20px)',
         boxShadow: glow 
-          ? '0 8px 32px rgba(31, 158, 109,0.08), inset 0 1px 0 rgba(22, 40, 58,0.05)' 
-          : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(22, 40, 58,0.05)',
+          ? '0 8px 32px rgba(15,138,106,0.08), inset 0 1px 0 rgba(28,31,51,0.05)' 
+          : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(28,31,51,0.05)',
       }}
     >
       <div className="absolute top-0 left-1/4 right-1/4 h-[1px] opacity-30 transition-opacity duration-500 group-hover:opacity-100"
-           style={{ background: 'linear-gradient(90deg, transparent, rgba(31, 158, 109,0.6), transparent)' }} />
+           style={{ background: 'linear-gradient(90deg, transparent, rgba(15,138,106,0.6), transparent)' }} />
       {children}
     </div>
   )
@@ -118,10 +118,10 @@ function SectionHeader({ icon, title, subtitle, badge }: {
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl"
              style={{
-               background: 'linear-gradient(135deg, rgba(31, 158, 109,0.1) 0%, rgba(31, 158, 109,0.02) 100%)',
-               border: '1px solid rgba(31, 158, 109,0.2)',
-               color: '#1868A0',
-               boxShadow: 'inset 0 0 12px rgba(31, 158, 109,0.05)'
+               background: 'linear-gradient(135deg, rgba(15,138,106,0.1) 0%, rgba(15,138,106,0.02) 100%)',
+               border: '1px solid rgba(15,138,106,0.2)',
+               color: '#3A3AB8',
+               boxShadow: 'inset 0 0 12px rgba(15,138,106,0.05)'
              }}>
           {icon}
         </div>
@@ -144,7 +144,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
 
   const accuracy = metrics.classification?.accuracy || 0
   const isAboveTarget = accuracy >= 85
-  const color = accuracy >= 85 ? '#1F9E6D' : accuracy >= 60 ? '#B8720F' : '#B23A2E'
+  const color = accuracy >= 85 ? '#0F8A6A' : accuracy >= 60 ? '#D4820A' : '#C23B3B'
 
   return (
     <SectionCard glow>
@@ -154,13 +154,13 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
         subtitle="30-day rolling performance window"
         badge={
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{
-            background: isAboveTarget ? 'rgba(31, 158, 109,0.1)' : 'rgba(178, 58, 46,0.1)',
-            border: `1px solid ${isAboveTarget ? 'rgba(31, 158, 109,0.3)' : 'rgba(178, 58, 46,0.3)'}`,
+            background: isAboveTarget ? 'rgba(15,138,106,0.1)' : 'rgba(194,59,59,0.1)',
+            border: `1px solid ${isAboveTarget ? 'rgba(15,138,106,0.3)' : 'rgba(194,59,59,0.3)'}`,
           }}>
             {isAboveTarget
-              ? <CheckCircle size={11} style={{ color: '#1F9E6D' }} />
-              : <AlertTriangle size={11} style={{ color: '#B23A2E' }} />}
-            <span className="font-mono text-[10px]" style={{ color: isAboveTarget ? '#1F9E6D' : '#B23A2E' }}>
+              ? <CheckCircle size={11} style={{ color: '#0F8A6A' }} />
+              : <AlertTriangle size={11} style={{ color: '#C23B3B' }} />}
+            <span className="font-mono text-[10px]" style={{ color: isAboveTarget ? '#0F8A6A' : '#C23B3B' }}>
               {isAboveTarget ? 'Above Target' : 'Below Target'}
             </span>
           </div>
@@ -172,8 +172,8 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
         
         {/* Left Side: Precision & Recall */}
         <div className="space-y-3">
-          <StatPill label="Precision" value={metrics.classification?.precision.toFixed(1) ?? 0} unit="%" color="#1868A0" icon={<Target size={11} />} />
-          <StatPill label="Recall" value={metrics.classification?.recall.toFixed(1) ?? 0} unit="%" color="#1F9E6D" icon={<Activity size={11} />} />
+          <StatPill label="Precision" value={metrics.classification?.precision.toFixed(1) ?? 0} unit="%" color="#3A3AB8" icon={<Target size={11} />} />
+          <StatPill label="Recall" value={metrics.classification?.recall.toFixed(1) ?? 0} unit="%" color="#0F8A6A" icon={<Activity size={11} />} />
         </div>
 
         {/* Centerpiece: Prominent Accuracy Gauge */}
@@ -198,7 +198,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
           </div>
 
           <div className="flex items-center gap-4 mt-4 px-4 py-2 rounded-full z-10 backdrop-blur-md" 
-               style={{ background: 'rgba(217, 233, 242,0.6)', border: '1px solid rgba(22, 40, 58,0.08)' }}>
+               style={{ background: 'rgba(217, 233, 242,0.6)', border: '1px solid rgba(28,31,51,0.08)' }}>
             <div className="flex items-center gap-1.5">
               <span className="font-mono text-[10px] text-white/40 uppercase tracking-wider">Current:</span>
               <span className="font-mono text-sm font-bold" style={{ color }}>{accuracy.toFixed(1)}%</span>
@@ -214,7 +214,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
         {/* Right Side: F1 Score & MAE */}
         <div className="space-y-3">
           <StatPill label="F1 Score" value={metrics.classification?.f1.toFixed(1) ?? 0} unit="%" color="#A78BFA" icon={<Zap size={11} />} />
-          <StatPill label="MAE" value={metrics.runtime_prediction?.mae_minutes.toFixed(1) ?? 0} unit="min" color="#B8720F" icon={<Clock size={11} />} />
+          <StatPill label="MAE" value={metrics.runtime_prediction?.mae_minutes.toFixed(1) ?? 0} unit="min" color="#D4820A" icon={<Clock size={11} />} />
         </div>
 
       </div>
@@ -230,7 +230,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
                 <span className="font-mono text-[10px] text-white/40">Accuracy Trend</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div style={{ width: 16, height: 2, borderTop: '2px dashed #B8720F', opacity: 0.8 }} />
+                <div style={{ width: 16, height: 2, borderTop: '2px dashed #D4820A', opacity: 0.8 }} />
                 <span className="font-mono text-[10px] text-white/40">Target (85%)</span>
               </div>
             </div>
@@ -246,20 +246,20 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
               </defs>
               <XAxis
                 dataKey="day"
-                tick={{ fill: '#16283A66', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#1C1F3366', fontSize: 9, fontFamily: 'JetBrains Mono' }}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fill: '#16283A66', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#1C1F3366', fontSize: 9, fontFamily: 'JetBrains Mono' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${v}%`}
               />
               <Tooltip content={<DarkTooltip />} />
-              <ReferenceLine y={85} stroke="#B8720F" strokeDasharray="4 4" strokeOpacity={0.7} />
+              <ReferenceLine y={85} stroke="#D4820A" strokeDasharray="4 4" strokeOpacity={0.7} />
               <Area
                 type="monotone"
                 dataKey="value"
@@ -302,7 +302,7 @@ function ImpactPreviewModal({ system, onClose }: { system: ForecastSystem; onClo
   }, [])
 
   const nodeExists = graph?.nodes.some((n) => n.id === system.asset_id) ?? false
-  const riskColor = system.risk_level === 'CRITICAL' ? '#B23A2E' : '#B8720F'
+  const riskColor = system.risk_level === 'CRITICAL' ? '#C23B3B' : '#D4820A'
 
   return (
     <Dialog open onClose={onClose} title="Impact Radius Preview" width="max-w-4xl">
@@ -374,7 +374,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
   const stable = forecast.systems.filter(s => s.risk_level === 'LOW')
 
   const riskColor = (level: string) =>
-    level === 'CRITICAL' ? '#B23A2E' : level === 'HIGH' ? '#B8720F' : '#1F9E6D'
+    level === 'CRITICAL' ? '#C23B3B' : level === 'HIGH' ? '#D4820A' : '#0F8A6A'
 
   return (
     <div className="space-y-4">
@@ -387,8 +387,8 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
           badge={
             highRisk.length > 0 ? (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{
-                background: 'rgba(178, 58, 46,0.12)',
-                border: '1px solid rgba(178, 58, 46,0.3)',
+                background: 'rgba(194,59,59,0.12)',
+                border: '1px solid rgba(194,59,59,0.3)',
               }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
                 <span className="font-mono text-[10px] text-red-400">{highRisk.length} SYSTEMS AT RISK</span>
@@ -401,18 +401,18 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
           <div className="flex items-center gap-3 py-5">
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
-              background: 'rgba(31, 158, 109,0.1)',
-              border: '1px solid rgba(31, 158, 109,0.3)',
+              background: 'rgba(15,138,106,0.1)',
+              border: '1px solid rgba(15,138,106,0.3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Shield size={18} style={{ color: '#1F9E6D' }} />
+              <Shield size={18} style={{ color: '#0F8A6A' }} />
             </div>
             <p className="text-white/50 font-mono text-xs">All systems nominal — no high risk predictions in the next 24 hours.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {/* Header */}
-            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr_2fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(22, 40, 58,0.03)' }}>
+            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr_2fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(28,31,51,0.03)' }}>
               {['System', 'Risk', 'Failure Prob', 'Predicted Lifetime(Days)', 'Confidence', 'Risk Factors'].map(h => (
                 <span key={h} className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
               ))}
@@ -436,7 +436,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
                   <span className="font-mono text-sm font-bold" style={{ color: riskColor(sys.risk_level) }}>
                     {(sys.failure_probability * 100).toFixed(1)}%
                   </span>
-                  <div className="h-1 rounded-full" style={{ background: 'rgba(22, 40, 58,0.08)', width: '80%' }}>
+                  <div className="h-1 rounded-full" style={{ background: 'rgba(28,31,51,0.08)', width: '80%' }}>
                     <div className="h-full rounded-full" style={{
                       width: `${Math.min(sys.failure_probability * 100, 100)}%`,
                       background: `linear-gradient(90deg, ${riskColor(sys.risk_level)}, ${riskColor(sys.risk_level)}88)`,
@@ -454,8 +454,8 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
                 <div className="flex flex-wrap gap-1">
                   {sys.risk_factors.map((rf, i) => (
                     <span key={i} className="font-mono text-[9px] px-2 py-0.5 rounded-full" style={{
-                      background: 'rgba(178, 58, 46,0.1)',
-                      border: '1px solid rgba(178, 58, 46,0.2)',
+                      background: 'rgba(194,59,59,0.1)',
+                      border: '1px solid rgba(194,59,59,0.2)',
                       color: '#FCA5A5',
                     }}>{rf}</span>
                   ))}
@@ -475,8 +475,8 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
           badge={
             stable.length > 0 ? (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{
-                background: 'rgba(31, 158, 109,0.1)',
-                border: '1px solid rgba(31, 158, 109,0.25)',
+                background: 'rgba(15,138,106,0.1)',
+                border: '1px solid rgba(15,138,106,0.25)',
               }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 <span className="font-mono text-[10px] text-emerald-400">{stable.length} STABLE</span>
@@ -489,21 +489,21 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
           <p className="text-white/30 font-mono text-xs py-3">No stable systems found.</p>
         ) : (
           <div className="space-y-2">
-            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(22, 40, 58,0.03)' }}>
+            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(28,31,51,0.03)' }}>
               {['System', 'Health', 'Failure Prob', 'Predicted Lifetime(Days)', 'Confidence'].map(h => (
                 <span key={h} className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
               ))}
             </div>
             {stable.map((sys) => (
               <div key={sys.asset_id} className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-3 rounded-lg items-center"
-                style={{ background: 'rgba(31, 158, 109,0.03)', border: '1px solid rgba(31, 158, 109,0.08)' }}>
+                style={{ background: 'rgba(15,138,106,0.03)', border: '1px solid rgba(15,138,106,0.08)' }}>
                 <div>
                   <p className="text-xs font-sans text-white font-semibold">{sys.asset_name}</p>
                   <p className="font-mono text-[9px] text-white/30 mt-0.5">{sys.asset_id}</p>
                 </div>
-                <div className="font-mono text-sm" style={{ color: '#1F9E6D' }}>{sys.current_health_score}</div>
+                <div className="font-mono text-sm" style={{ color: '#0F8A6A' }}>{sys.current_health_score}</div>
                 <div className="font-mono text-sm text-white/70">{(sys.failure_probability * 100).toFixed(1)}%</div>
-                <div className="font-mono text-sm" style={{ color: '#1F9E6D' }}>
+                <div className="font-mono text-sm" style={{ color: '#0F8A6A' }}>
                   {sys.estimated_remaining_runtime_minutes ? (sys.estimated_remaining_runtime_minutes / 1440).toFixed(0) : 'Stable'}
                 </div>
                 <div className="font-mono text-sm text-white/70">
@@ -566,7 +566,7 @@ function PredictionsTable({
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
             className="p-1.5 rounded-lg text-white/40 hover:text-white disabled:opacity-30 transition-colors"
-            style={{ background: 'rgba(22, 40, 58,0.05)', border: '1px solid rgba(22, 40, 58,0.08)' }}
+            style={{ background: 'rgba(28,31,51,0.05)', border: '1px solid rgba(28,31,51,0.08)' }}
           >
             <ChevronLeft size={13} />
           </button>
@@ -574,7 +574,7 @@ function PredictionsTable({
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
             className="p-1.5 rounded-lg text-white/40 hover:text-white disabled:opacity-30 transition-colors"
-            style={{ background: 'rgba(22, 40, 58,0.05)', border: '1px solid rgba(22, 40, 58,0.08)' }}
+            style={{ background: 'rgba(28,31,51,0.05)', border: '1px solid rgba(28,31,51,0.08)' }}
           >
             <ChevronRight size={13} />
           </button>
@@ -582,7 +582,7 @@ function PredictionsTable({
       </div>
 
       {/* Header */}
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg mb-1 px-4 py-2" style={{ background: 'rgba(22, 40, 58,0.03)' }}>
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg mb-1 px-4 py-2" style={{ background: 'rgba(28,31,51,0.03)' }}>
         {['Scenario', 'Predicted', 'Actual', 'Deviation', 'Outcome'].map((h) => (
           <div key={h}>
             <span className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
@@ -599,12 +599,12 @@ function PredictionsTable({
       ) : (
         <div className="space-y-1 mt-1">
           {predictions.map((pred) => {
-            const devColor = pred.deviationPct > 30 ? '#B23A2E' : pred.deviationPct > 10 ? '#B8720F' : '#1F9E6D'
+            const devColor = pred.deviationPct > 30 ? '#C23B3B' : pred.deviationPct > 10 ? '#D4820A' : '#0F8A6A'
             return (
               <div
                 key={pred.id}
                 className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg px-4 py-3 items-center transition-all hover:scale-[1.002]"
-                style={{ background: 'rgba(22, 40, 58,0.02)', border: '1px solid rgba(22, 40, 58,0.04)' }}
+                style={{ background: 'rgba(28,31,51,0.02)', border: '1px solid rgba(28,31,51,0.04)' }}
               >
                 <div>
                   <p className="text-xs font-sans text-white font-medium leading-tight line-clamp-1">{pred.scenario}</p>
@@ -653,8 +653,8 @@ function DriftSection({ drift, onRetrain }: {
   }
 
   const driftColor =
-    drift.driftStatus === 'critical' ? '#B23A2E' :
-      drift.driftStatus === 'warning' ? '#B8720F' : '#1F9E6D'
+    drift.driftStatus === 'critical' ? '#C23B3B' :
+      drift.driftStatus === 'warning' ? '#D4820A' : '#0F8A6A'
 
   const chartData = drift.featureImportance.map((f) => ({
     name: f.feature,
@@ -700,11 +700,11 @@ function DriftSection({ drift, onRetrain }: {
 
       {drift.driftAlert && (
         <div className="rounded-xl p-4 mb-5 flex items-start gap-3" style={{
-          background: 'rgba(184, 114, 15,0.06)',
-          border: '1px solid rgba(184, 114, 15,0.25)',
+          background: 'rgba(212,130,10,0.06)',
+          border: '1px solid rgba(212,130,10,0.25)',
         }}>
-          <AlertTriangle size={14} style={{ color: '#B8720F', marginTop: 1, flexShrink: 0 }} />
-          <p className="text-xs font-sans" style={{ color: 'rgba(22, 40, 58,0.75)' }}>{drift.driftAlert}</p>
+          <AlertTriangle size={14} style={{ color: '#D4820A', marginTop: 1, flexShrink: 0 }} />
+          <p className="text-xs font-sans" style={{ color: 'rgba(28,31,51,0.75)' }}>{drift.driftAlert}</p>
         </div>
       )}
 
@@ -713,11 +713,11 @@ function DriftSection({ drift, onRetrain }: {
           <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-3">Feature Importance & Drift</p>
           <div className="flex items-center gap-4 mb-3">
             <div className="flex items-center gap-1.5">
-              <div style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(31, 158, 109,0.7)' }} />
+              <div style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(15,138,106,0.7)' }} />
               <span className="font-mono text-[10px] text-white/40">Importance</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(178, 58, 46,0.6)' }} />
+              <div style={{ width: 10, height: 10, borderRadius: 3, background: 'rgba(194,59,59,0.6)' }} />
               <span className="font-mono text-[10px] text-white/40">Drift %</span>
             </div>
           </div>
@@ -726,7 +726,7 @@ function DriftSection({ drift, onRetrain }: {
               <XAxis
                 type="number"
                 domain={[0, 40]}
-                tick={{ fill: '#16283A44', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#1C1F3344', fontSize: 9, fontFamily: 'JetBrains Mono' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${v}%`}
@@ -735,21 +735,21 @@ function DriftSection({ drift, onRetrain }: {
                 type="category"
                 dataKey="name"
                 width={130}
-                tick={{ fill: '#16283AAA', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#1C1F33AA', fontSize: 10, fontFamily: 'JetBrains Mono' }}
                 axisLine={false}
                 tickLine={false}
               />
               <Tooltip content={<DarkTooltip />} />
-              <Bar dataKey="importance" name="Importance" fill="#1868A0" fillOpacity={0.75} radius={[0, 3, 3, 0]} barSize={8} />
-              <Bar dataKey="drift" name="Drift" fill="#B23A2E" fillOpacity={0.65} radius={[0, 3, 3, 0]} barSize={8} />
+              <Bar dataKey="importance" name="Importance" fill="#3A3AB8" fillOpacity={0.75} radius={[0, 3, 3, 0]} barSize={8} />
+              <Bar dataKey="drift" name="Drift" fill="#C23B3B" fillOpacity={0.65} radius={[0, 3, 3, 0]} barSize={8} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="w-52 space-y-3">
           <div className="rounded-xl p-4 space-y-3" style={{
-            background: 'rgba(22, 40, 58,0.03)',
-            border: '1px solid rgba(22, 40, 58,0.07)',
+            background: 'rgba(28,31,51,0.03)',
+            border: '1px solid rgba(28,31,51,0.07)',
           }}>
             <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Retraining Status</p>
             <div className="flex items-center gap-2">
@@ -786,18 +786,18 @@ function KPIStrip({ metrics, forecast }: { metrics: AccuracyMetrics; forecast: F
   const stableCount = forecast?.systems?.filter(s => s.risk_level === 'LOW').length ?? 0
 
   const kpis = [
-    { label: 'Overall Accuracy', value: `${accuracy.toFixed(1)}%`, color: accuracy >= 85 ? '#1F9E6D' : '#B23A2E', icon: <Target size={16} /> },
-    { label: 'High Risk Systems', value: String(highRiskCount), color: highRiskCount > 0 ? '#B23A2E' : '#1F9E6D', icon: <AlertTriangle size={16} /> },
-    { label: 'Stable Systems', value: String(stableCount), color: '#1F9E6D', icon: <Shield size={16} /> },
+    { label: 'Overall Accuracy', value: `${accuracy.toFixed(1)}%`, color: accuracy >= 85 ? '#0F8A6A' : '#C23B3B', icon: <Target size={16} /> },
+    { label: 'High Risk Systems', value: String(highRiskCount), color: highRiskCount > 0 ? '#C23B3B' : '#0F8A6A', icon: <AlertTriangle size={16} /> },
+    { label: 'Stable Systems', value: String(stableCount), color: '#0F8A6A', icon: <Shield size={16} /> },
     { label: 'F1 Score', value: `${metrics.classification?.f1.toFixed(1) ?? 0}%`, color: '#A78BFA', icon: <Zap size={16} /> },
-    { label: 'Model Version', value: metrics.model_version, color: '#1868A0', icon: <Cpu size={16} /> },
+    { label: 'Model Version', value: metrics.model_version, color: '#3A3AB8', icon: <Cpu size={16} /> },
   ]
 
   return (
     <div className="grid grid-cols-5 gap-4">
       {kpis.map((k) => (
         <div key={k.label} className="group relative rounded-2xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1" style={{
-          background: 'linear-gradient(135deg, rgba(22, 40, 58,0.03) 0%, rgba(22, 40, 58,0.01) 100%)',
+          background: 'linear-gradient(135deg, rgba(28,31,51,0.03) 0%, rgba(28,31,51,0.01) 100%)',
           border: `1px solid ${k.color}25`,
           boxShadow: `0 8px 24px -4px ${k.color}10`,
           backdropFilter: 'blur(12px)',
@@ -874,7 +874,7 @@ export default function PredictiveMaintenancePage() {
   }
 
   return (
-    <div className="h-[calc(100vh-3rem)] overflow-y-auto" style={{ background: 'transparent' }}>
+    <div className="h-full overflow-y-auto" style={{ background: 'transparent' }}>
       <div className="px-6 py-5 max-w-[1600px] mx-auto space-y-5">
 
         {/* ── Header ── */}
@@ -889,10 +889,10 @@ export default function PredictiveMaintenancePage() {
             </div>
             <h1 className="font-mono font-bold tracking-tight mb-2" style={{
               fontSize: 28,
-              background: 'linear-gradient(to right, #16283A, #1868A0)',
+              background: 'linear-gradient(to right, #1C1F33, #3A3AB8)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 40px rgba(31, 158, 109, 0.2)'
+              textShadow: '0 0 40px rgba(15,138,106, 0.2)'
             }}>
               Predictive Maintenance
             </h1>
@@ -904,8 +904,8 @@ export default function PredictiveMaintenancePage() {
           <div className="flex items-center gap-3">
             {/* Live badge */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-full" style={{
-              background: 'rgba(31, 158, 109,0.08)',
-              border: '1px solid rgba(31, 158, 109,0.2)',
+              background: 'rgba(15,138,106,0.08)',
+              border: '1px solid rgba(15,138,106,0.2)',
             }}>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" />
               <span className="font-mono text-[10px] text-cyan/70 uppercase tracking-widest">Weekly Retrain Active</span>

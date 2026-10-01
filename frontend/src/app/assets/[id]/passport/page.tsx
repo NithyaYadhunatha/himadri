@@ -62,22 +62,22 @@ export default function AssetPassportPage() {
     }
   }
 
-  if (loading) return <div className="h-[calc(100vh-7rem)] flex items-center justify-center"><InlineLoader text="Loading asset passport…" /></div>
-  if (error || !passport) return <div className="h-[calc(100vh-7rem)] flex items-center justify-center"><ErrorState message={error ?? 'Not found'} onRetry={load} /></div>
+  if (loading) return <div className="h-full flex items-center justify-center"><InlineLoader text="Loading asset passport…" /></div>
+  if (error || !passport) return <div className="h-full flex items-center justify-center"><ErrorState message={error ?? 'Not found'} onRetry={load} /></div>
 
   const provenance = passport.provenance as Provenance
 
-  const healthColor = passport.health_score >= 80 ? '#1F9E6D' : passport.health_score >= 50 ? '#B8720F' : '#B23A2E'
+  const healthColor = passport.health_score >= 80 ? '#0F8A6A' : passport.health_score >= 50 ? '#D4820A' : '#C23B3B'
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-3xl mx-auto space-y-5">
         {/* Header — the passport's actual substance (identity/telemetry/
             maintenance below) is the point of this page; the QR is just the
             printable entry mechanism, so it's a small corner trigger here,
             not a permanently-rendered code (see /assets/qr-sheet for the
             printable version this is meant to travel with). */}
-        <div className="relative overflow-hidden rounded-xl border border-brand-border p-5" style={{ background: 'linear-gradient(135deg, #16283A08 0%, #1868A00a 100%)' }}>
+        <div className="relative overflow-hidden rounded-xl border border-brand-border p-5" style={{ background: 'linear-gradient(135deg, #1C1F3308 0%, #3A3AB80a 100%)' }}>
           <button
             onClick={() => setQrOpen(true)}
             title="Show this passport's QR code"
@@ -121,8 +121,8 @@ export default function AssetPassportPage() {
           </div>
         </Dialog>
 
-        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#6E7FCE' }}>
-          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#6E7FCE' }}>
+        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#A04FB8' }}>
+          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#A04FB8' }}>
             <ShieldCheck size={12} /> Identity
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -138,8 +138,8 @@ export default function AssetPassportPage() {
           </div>
         </section>
 
-        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#1868A0' }}>
-          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#1868A0' }}>
+        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#3A3AB8' }}>
+          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#3A3AB8' }}>
             <Clock size={12} /> 30-Day Telemetry History
           </p>
           {passport.telemetry_history.length === 0 ? (
@@ -158,8 +158,8 @@ export default function AssetPassportPage() {
           )}
         </section>
 
-        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#B8720F' }}>
-          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#B8720F' }}>
+        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#D4820A' }}>
+          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#D4820A' }}>
             <Wrench size={12} /> Maintenance / Fault Log
           </p>
           <div className="space-y-2 mb-4">

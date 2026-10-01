@@ -35,10 +35,10 @@ function verdictVariant(verdict: string | null): BadgeVariant {
 function DarkTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name?: string; color?: string }>; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#F7FBFDfa] border border-brand-border rounded-lg px-3 py-2 shadow-lg backdrop-blur-sm">
+    <div className="bg-[#FFFEFBfa] border border-brand-border rounded-lg px-3 py-2 shadow-lg backdrop-blur-sm">
       <p className="font-mono text-[10px] text-ink/50 mb-1">Day {label}</p>
       {payload.map((p, i) => (
-        <p key={i} className="font-mono text-xs" style={{ color: p.color ?? '#1868A0' }}>
+        <p key={i} className="font-mono text-xs" style={{ color: p.color ?? '#3A3AB8' }}>
           {p.name}: {typeof p.value === 'number' ? p.value.toLocaleString() : p.value}
         </p>
       ))}
@@ -110,10 +110,10 @@ function ScenarioDetailPanel({ result }: { result: ScenarioResult }) {
 
       {cost && (
         <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-          <CostBreakdownBar label="Fuel" value={cost.fuel} total={cost.total} color="#1868A0" />
-          <CostBreakdownBar label="Logistics" value={cost.logistics} total={cost.total} color="#6E7FCE" />
-          <CostBreakdownBar label="Spares" value={cost.spares} total={cost.total} color="#B8720F" />
-          <CostBreakdownBar label="Avoided Failure" value={cost.avoided_failure} total={cost.total} color="#B23A2E" />
+          <CostBreakdownBar label="Fuel" value={cost.fuel} total={cost.total} color="#3A3AB8" />
+          <CostBreakdownBar label="Logistics" value={cost.logistics} total={cost.total} color="#A04FB8" />
+          <CostBreakdownBar label="Spares" value={cost.spares} total={cost.total} color="#D4820A" />
+          <CostBreakdownBar label="Avoided Failure" value={cost.avoided_failure} total={cost.total} color="#C23B3B" />
         </div>
       )}
 
@@ -122,17 +122,17 @@ function ScenarioDetailPanel({ result }: { result: ScenarioResult }) {
           <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-2">Fuel &amp; Food Projection</p>
           <ResponsiveContainer width="100%" height={220} minWidth={0} minHeight={0}>
             <LineChart data={outputs.timeline} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#B9D6E655" />
-              <XAxis dataKey="day" tick={{ fill: '#16283A66', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(d: number) => `D${d}`} />
-              <YAxis yAxisId="fuel" tick={{ fill: '#1868A099', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
-              <YAxis yAxisId="food" orientation="right" tick={{ fill: '#1F9E6D99', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#DDD5C255" />
+              <XAxis dataKey="day" tick={{ fill: '#1C1F3366', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(d: number) => `D${d}`} />
+              <YAxis yAxisId="fuel" tick={{ fill: '#3A3AB899', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
+              <YAxis yAxisId="food" orientation="right" tick={{ fill: '#0F8A6A99', fontSize: 9, fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} />
               <Tooltip content={<DarkTooltip />} />
               <Legend wrapperStyle={{ fontSize: 10, fontFamily: 'var(--font-mono)' }} />
               {result.first_failure_at_day !== null && (
-                <ReferenceLine yAxisId="fuel" x={result.first_failure_at_day} stroke="#B23A2E" strokeDasharray="4 4" label={{ value: 'FAILURE', fontSize: 9, fill: '#B23A2E', position: 'top' }} />
+                <ReferenceLine yAxisId="fuel" x={result.first_failure_at_day} stroke="#C23B3B" strokeDasharray="4 4" label={{ value: 'FAILURE', fontSize: 9, fill: '#C23B3B', position: 'top' }} />
               )}
-              <Line yAxisId="fuel" type="monotone" dataKey="fuel_liters" name="Fuel (L)" stroke="#1868A0" strokeWidth={2} dot={false} />
-              <Line yAxisId="food" type="monotone" dataKey="food_days_left" name="Food (days)" stroke="#1F9E6D" strokeWidth={2} dot={false} />
+              <Line yAxisId="fuel" type="monotone" dataKey="fuel_liters" name="Fuel (L)" stroke="#3A3AB8" strokeWidth={2} dot={false} />
+              <Line yAxisId="food" type="monotone" dataKey="food_days_left" name="Food (days)" stroke="#0F8A6A" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -322,7 +322,7 @@ function NLScenarioChat({ onBuild }: { onBuild: (parsed: ReturnType<typeof parse
 
   return (
     <div className="bg-brand-surface border border-brand-border rounded-lg overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-brand-border" style={{ background: 'linear-gradient(90deg, #1868A00c, transparent)' }}>
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-brand-border" style={{ background: 'linear-gradient(90deg, #3A3AB80c, transparent)' }}>
         <MessageCircle size={13} className="text-cyan" />
         <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest">Describe a scenario</span>
         <span className="font-mono text-[9px] text-white/30 ml-auto">keyword-based, not an LLM</span>
@@ -483,7 +483,7 @@ export default function SimulationPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">

@@ -70,16 +70,16 @@ function ZoneBandOverlay({ boxes }: { boxes: ZoneLayoutBox[] }) {
             top: box.y,
             width: box.width,
             height: box.height,
-            border: box.kind === 'band' ? '2px dashed #1868A055' : '1.5px dashed #6E8AA077',
+            border: box.kind === 'band' ? '2px dashed #3A3AB855' : '1.5px dashed #8A857677',
             borderRadius: box.kind === 'band' ? 10 : 6,
-            background: box.kind === 'band' ? 'rgba(24,104,160,0.05)' : 'rgba(110,138,160,0.05)',
+            background: box.kind === 'band' ? 'rgba(58,58,184,0.05)' : 'rgba(110,138,160,0.05)',
           }}
         >
           <div
             className={`absolute -top-1 left-2.5 -translate-y-full font-mono uppercase tracking-wider flex items-center gap-1 rounded px-1.5 py-0.5 ${
               box.kind === 'band'
-                ? 'text-[11px] text-[#1868A0] font-bold bg-[#F7FBFDee] border border-[#1868A033]'
-                : 'text-[9px] text-[#16283A99] bg-[#F7FBFDcc]'
+                ? 'text-[11px] text-[#3A3AB8] font-bold bg-[#FFFEFBee] border border-[#3A3AB833]'
+                : 'text-[9px] text-[#1C1F3399] bg-[#FFFEFBcc]'
             }`}
           >
             {box.restricted && <Lock size={box.kind === 'band' ? 9 : 8} />}
@@ -172,8 +172,8 @@ function toFlowEdge(
   const color = isDependencyEdge
     ? '#00D4FF'
     : isImpactEdge
-      ? '#B8720F'
-      : score >= 80 ? '#1F9E6D' : score >= 50 ? '#B8720F' : '#B23A2E'
+      ? '#D4820A'
+      : score >= 80 ? '#0F8A6A' : score >= 50 ? '#D4820A' : '#C23B3B'
   const isPathHighlighted = isDependencyEdge || isImpactEdge
 
   return {
@@ -182,8 +182,8 @@ function toFlowEdge(
     target: e.target,
     type: 'smoothstep',
     label: showLabel ? e.type : undefined,
-    labelStyle: showLabel ? { fill: '#16283A66', fontSize: 9, fontFamily: 'var(--font-mono)' } : undefined,
-    labelBgStyle: showLabel ? { fill: '#F7FBFD', fillOpacity: 0.9 } : undefined,
+    labelStyle: showLabel ? { fill: '#1C1F3366', fontSize: 9, fontFamily: 'var(--font-mono)' } : undefined,
+    labelBgStyle: showLabel ? { fill: '#FFFEFB', fillOpacity: 0.9 } : undefined,
     style: {
       stroke: color,
       strokeWidth: isSelected || isPathHighlighted ? 2.75 : 2,
@@ -256,7 +256,7 @@ function ImpactLegend({ dependencyCount, impactCount }: { dependencyCount: numbe
           <span className="font-mono text-[9px] text-white/60">Depends on ({dependencyCount})</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#B8720F' }} />
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#D4820A' }} />
           <span className="font-mono text-[9px] text-white/60">Impacted if it fails ({impactCount})</span>
         </div>
       </div>
@@ -522,11 +522,11 @@ function FlowCanvasInner({
         nodesConnectable={!readOnly}
         elementsSelectable
         proOptions={{ hideAttribution: true }}
-        style={{ background: '#E7F1F8' }}
+        style={{ background: '#F3EFE6' }}
       >
         {/* Keep the actual crossing-line grid (dots read as a different,
             less "graph paper" texture) but faded well below the original
-            solid #B9D6E6 — that saturation was visually loud enough to
+            solid #DDD5C2 — that saturation was visually loud enough to
             compete with the nodes themselves instead of sitting behind
             them. Alpha, not a duller hex, so it stays proportionally light
             at any zoom level. */}
@@ -534,7 +534,7 @@ function FlowCanvasInner({
           variant={BackgroundVariant.Lines}
           gap={40}
           size={1}
-          color="#B9D6E655"
+          color="#DDD5C255"
         />
         <ViewportPortal>
           <ZoneBandOverlay boxes={zoneBoxes} />
@@ -548,9 +548,9 @@ function FlowCanvasInner({
           nodeColor={(node) => {
             const data = node.data as unknown as GraphNodeData
             if (colorMode === 'health') {
-              return HEALTH_COLORS[data?.health] ?? '#6E8AA0'
+              return HEALTH_COLORS[data?.health] ?? '#8A8576'
             }
-            return HEALTH_COLORS[data?.health] ?? '#6E8AA0'
+            return HEALTH_COLORS[data?.health] ?? '#8A8576'
           }}
           maskColor="rgba(217, 233, 242,0.8)"
         />

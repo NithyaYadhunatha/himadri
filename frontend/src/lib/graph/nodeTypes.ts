@@ -56,7 +56,7 @@ export interface NodeTypeConfig {
 export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   power: {
     icon: Battery,
-    color: '#1868A0',
+    color: '#3A3AB8',
     label: 'Power',
     actions: [
       {
@@ -88,7 +88,7 @@ export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   },
   heating: {
     icon: Flame,
-    color: '#B8720F',
+    color: '#D4820A',
     label: 'Heating',
     actions: [
       {
@@ -189,7 +189,7 @@ export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   },
   instrument: {
     icon: Telescope,
-    color: '#6E7FCE',
+    color: '#A04FB8',
     label: 'Science Instrument',
     actions: [
       {
@@ -239,7 +239,7 @@ export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   },
   medical: {
     icon: HeartPulse,
-    color: '#B23A2E',
+    color: '#C23B3B',
     label: 'Medical',
     actions: [
       {
@@ -297,7 +297,7 @@ export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   },
   custom: {
     icon: Sparkles,
-    color: '#6E7FCE',
+    color: '#A04FB8',
     label: 'Custom Asset',
     actions: [],
   },

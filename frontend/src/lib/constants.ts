@@ -58,16 +58,16 @@ export const PROVENANCE_LABELS: Record<Provenance, string> = {
 // wherever a JS-level color is needed (SVG stroke/fill, Recharts) instead of
 // a Tailwind class.
 export const HEALTH_COLORS = {
-  healthy: '#1F9E6D',
-  degraded: '#B8720F',
-  warning: '#B8720F',
-  critical: '#B23A2E',
-  unreachable: '#6E8AA0',
+  healthy: '#0F8A6A',
+  degraded: '#D4820A',
+  warning: '#D4820A',
+  critical: '#C23B3B',
+  unreachable: '#8A8576',
   // "cyan" is the design-token name for "Interactive / AI / Simulated" (a
   // glacier blue here) — used for assets whose readings are synthetic
   // (isSimulating === true / a device agent is injecting a fault) so they
   // don't read as healthy-green or degrade into the amber/crimson buckets.
-  simulating: '#1868A0',
+  simulating: '#3A3AB8',
 } as const
 
 export const ASSET_CATEGORY_ABBREV: Record<string, string> = {
@@ -85,6 +85,11 @@ export const ASSET_CATEGORY_ABBREV: Record<string, string> = {
 }
 
 export const ROUTES = {
+  MISSION: '/mission',
+  RESILIENCE: '/resilience',
+  TRUST: '/trust',
+  ML_LAB: '/ml',
+  ARCHITECTURE: '/architecture',
   TWIN: '/twin',
   TWIN_3D: '/twin/3d',
   TWIN_FLOORPLAN: '/twin/floorplan',
@@ -122,6 +127,16 @@ export const ROUTES = {
 // rarely-used printable-sheet generator, not a page people navigate to
 // directly.
 export const NAV_GROUPS = [
+  {
+    label: 'COMMAND',
+    items: [
+      { label: 'Mission Control', href: ROUTES.MISSION },
+      { label: 'Resilience', href: ROUTES.RESILIENCE },
+      { label: 'Trust Center', href: ROUTES.TRUST },
+      { label: 'ML Lab', href: ROUTES.ML_LAB },
+      { label: 'Architecture', href: ROUTES.ARCHITECTURE },
+    ],
+  },
   {
     label: 'STATION TWIN',
     items: [

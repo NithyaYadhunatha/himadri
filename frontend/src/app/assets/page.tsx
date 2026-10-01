@@ -243,7 +243,7 @@ export default function AssetsPage() {
 
   const statCards = summary
     ? [
-        { label: 'Total Assets', value: summary.total, color: '#1868A0', icon: <Server size={18} />, key: 'all' as HealthFilter },
+        { label: 'Total Assets', value: summary.total, color: '#3A3AB8', icon: <Server size={18} />, key: 'all' as HealthFilter },
         { label: 'Critical', value: summary.critical, color: HEALTH_COLORS.critical, icon: <AlertCircle size={18} />, key: 'critical' as HealthFilter },
         { label: 'At Risk', value: summary.atRisk, color: HEALTH_COLORS.degraded, icon: <AlertTriangle size={18} />, key: 'degraded' as HealthFilter },
         { label: 'Healthy', value: summary.healthy, color: HEALTH_COLORS.healthy, icon: <CheckCircle size={18} />, key: 'healthy' as HealthFilter },
@@ -252,7 +252,7 @@ export default function AssetsPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-3rem)] flex flex-col overflow-hidden">
+      <div className="h-full flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-brand-border bg-gradient-to-b from-brand-surface to-brand-bg shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -353,7 +353,7 @@ export default function AssetsPage() {
                   { color: HEALTH_COLORS.critical, label: `${summary.critical} critical` },
                   { color: HEALTH_COLORS.degraded, label: `${summary.atRisk} at risk` },
                   { color: HEALTH_COLORS.healthy, label: `${summary.healthy} healthy` },
-                  { color: '#6E8AA0', label: `${summary.unreachable} unreachable` },
+                  { color: '#8A8576', label: `${summary.unreachable} unreachable` },
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />

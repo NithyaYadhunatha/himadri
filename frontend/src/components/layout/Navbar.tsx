@@ -95,7 +95,7 @@ export function Navbar() {
   const activeItem = findActiveItem(pathname, activeGroup.items)
 
   return (
-    <div className="flex flex-col w-full z-30 shrink-0 shadow-[0_4px_20px_rgba(22,40,58,0.10)] relative">
+    <div className="flex flex-col w-full z-30 shrink-0 shadow-[0_4px_20px_rgba(28,31,51,0.10)] relative">
       {/* ─── Top Navbar ────────────────────────────────────────────── */}
       <header className="h-14 bg-brand-surface border-b border-brand-border grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-5 relative overflow-hidden">
         {/* Faint dot-grid texture — the header's original design language,
@@ -104,7 +104,7 @@ export function Navbar() {
         <div
           className="absolute inset-0 opacity-[0.12] pointer-events-none"
           style={{
-            backgroundImage: 'linear-gradient(#B9D6E6 1px, transparent 1px), linear-gradient(90deg, #B9D6E6 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(#DDD5C2 1px, transparent 1px), linear-gradient(90deg, #DDD5C2 1px, transparent 1px)',
             backgroundSize: '14px 14px',
           }}
         />
@@ -119,12 +119,12 @@ export function Navbar() {
             space equally, so the middle column is always the row's true
             center regardless of how wide the logo or right cluster are. */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0 relative z-10 justify-self-start">
-          <div className="w-8 h-8 rounded-lg bg-cyan/10 border border-cyan/40 flex items-center justify-center shadow-cyan-glow">
-            <HimadriMark className="w-[18px] h-[18px] text-cyan" />
+          <div className="w-8 h-8 rounded-[9px] bg-white text-brand-surface flex items-center justify-center shadow-cyan-glow">
+            <HimadriMark className="w-[19px] h-[19px] text-marigold" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="font-mono font-bold text-white text-sm tracking-widest">HIMADRI</span>
-            <span className="font-mono text-[8px] text-cyan/70 tracking-widest uppercase mt-0.5">SIH 2026</span>
+            <span className="font-display font-semibold text-white text-[19px] tracking-tight">Himadri</span>
+            <span className="font-mono text-[8px] text-white/45 tracking-[0.22em] uppercase mt-0.5">Station Command</span>
           </div>
         </Link>
 

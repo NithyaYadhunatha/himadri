@@ -224,7 +224,7 @@ function CommandConfirmDialog({
 function AssetCard({ asset, onAction }: { asset: RemoteAsset; onAction: (asset: RemoteAsset, action: CommandAction) => void }) {
   const config = getNodeTypeConfig(asset.category)
   const Icon = config.icon
-  const statusColor = asset.status === 'running' ? '#1F9E6D' : asset.status === 'stopped' ? '#6E8AA0' : '#B8720F'
+  const statusColor = asset.status === 'running' ? '#0F8A6A' : asset.status === 'stopped' ? '#8A8576' : '#D4820A'
 
   return (
     <div className="rounded border border-brand-border bg-brand-surface p-4 flex flex-col gap-3 hover:border-white/20 transition-colors">
@@ -400,7 +400,7 @@ export default function RemoteControlPage() {
   const lifeSafetyCount = assets.filter((a) => a.lifeSafety).length
 
   return (
-    <div className="h-[calc(100vh-3rem)] overflow-y-auto bg-brand-bg">
+    <div className="h-full overflow-y-auto bg-brand-bg">
       <div className="px-6 py-5 max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">

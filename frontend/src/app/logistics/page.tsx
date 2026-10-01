@@ -70,7 +70,7 @@ export default function LogisticsPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">

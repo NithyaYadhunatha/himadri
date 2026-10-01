@@ -3,6 +3,7 @@
 
 import { usePathname } from 'next/navigation'
 import { Navbar } from './Navbar'
+import { StatusBar } from './StatusBar'
 import { MCPChatPanel } from '@/components/graph/MCPChatPanel'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -17,9 +18,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col">
+    <div className="h-screen bg-brand-bg flex flex-col">
       <Navbar />
-      <main className="flex-1 overflow-hidden relative">
+      <StatusBar />
+      <main className="flex-1 min-h-0 overflow-hidden relative">
         {children}
       </main>
       {/* Operations Agent — a floating chat widget on every app page (not a

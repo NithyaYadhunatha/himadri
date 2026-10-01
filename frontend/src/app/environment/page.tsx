@@ -125,7 +125,7 @@ export default function EnvironmentPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
@@ -189,7 +189,7 @@ export default function EnvironmentPage() {
                   <Thermometer size={13} /> AWS Instrument Health — {aws.name}
                 </h2>
                 <div className="bg-brand-surface border border-brand-border rounded p-4">
-                  <Sparkline data={aws.trend} color="#1868A0" height={60} />
+                  <Sparkline data={aws.trend} color="#3A3AB8" height={60} />
                   <p className="font-mono text-[10px] text-white/30 mt-2">Health score {aws.healthScore} · {aws.health}</p>
                 </div>
               </section>

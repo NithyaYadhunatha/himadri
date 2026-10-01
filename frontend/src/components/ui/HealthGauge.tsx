@@ -10,9 +10,9 @@ interface HealthGaugeProps {
 }
 
 function getColor(score: number): string {
-  if (score >= 85) return '#1F9E6D' // emerald
-  if (score >= 60) return '#B8720F' // amber
-  return '#B23A2E' // crimson
+  if (score >= 85) return '#0F8A6A' // emerald
+  if (score >= 60) return '#D4820A' // amber
+  return '#C23B3B' // crimson
 }
 
 export function HealthGauge({
@@ -43,7 +43,7 @@ export function HealthGauge({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#B9D6E6"
+          stroke="#DDD5C2"
           strokeWidth={strokeWidth}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}

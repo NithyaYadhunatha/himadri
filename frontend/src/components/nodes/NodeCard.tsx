@@ -51,7 +51,7 @@ function formatSync(iso: string): string {
 export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
   const [remediating, setRemediating] = useState(false)
   const abbrev = ASSET_CATEGORY_ABBREV[node.type] ?? node.type.slice(0, 3).toUpperCase()
-  const healthColor = HEALTH_COLORS[node.health] ?? '#6E8AA0'
+  const healthColor = HEALTH_COLORS[node.health] ?? '#8A8576'
   const sparkColor = healthColor
   const weightedRisk = computeWeightedRisk(node.healthScore, node.type)
 

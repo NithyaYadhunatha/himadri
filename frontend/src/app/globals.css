@@ -1,78 +1,82 @@
 @import "tailwindcss";
 
-/* ── Tailwind v4: Custom theme tokens ─────────────────────────── */
+/* ── Tailwind v4: design tokens ───────────────────────────────── */
 /*
- * Antarctic ice-blue theme (HIMADRI). Token NAMES are kept as-is (brand-*,
- * cyan, amber, crimson, emerald, white) so this is a value-only repaint —
- * every component already styled through these tokens (the vast majority of
- * the app) picks up the new palette automatically, with zero JSX changes.
- * `cyan` is kept as the name for the primary interactive accent — it is
- * genuinely a cool blue again here (glacier blue), unlike the previous
- * cream/forest-green repaint where the name had drifted from the color.
+ * HIMADRI 'Paper & Ink' — a light, editorial mission-control palette:
+ * warm paper surfaces, deep ink text, ultramarine as the single interactive
+ * accent and marigold as the brand highlight. Deliberately NOT the usual
+ * icy-blue polar theme. Token NAMES (brand-*, cyan, amber, crimson, emerald,
+ * white=ink) are unchanged so every component repaints from here.
  */
 @theme {
-  /* Brand colors — cool ice/glacier surface hierarchy */
-  --color-brand-bg: #E7F1F8;        /* page background — pale ice blue */
-  --color-brand-surface: #F7FBFD;   /* card surface — near-white, lightest, "raised" (snow) */
-  --color-brand-surface-2: #EDF5FA; /* secondary panel */
-  --color-brand-surface-3: #D9E9F2; /* tertiary / hover / elevated */
-  --color-brand-border: #B9D6E6;    /* soft glacier-blue border */
+  --color-brand-bg: #F3EFE6;        /* paper */
+  --color-brand-surface: #FFFEFB;   /* raised card */
+  --color-brand-surface-2: #F7F3EA; /* inset panel */
+  --color-brand-surface-3: #ECE6D8; /* hover / elevated */
+  --color-brand-border: #DDD5C2;    /* hairline */
 
-  /* Core text color — `white`/`text-white` etc. render as deep slate-navy
-     ink on the ice surfaces above, so every existing text-white/NN opacity
-     utility keeps working as "muted ink" with no rewrite needed. */
-  --color-white: #16283A;
+  /* ink: 'white' renders as deep ink; text-white/NN stays muted ink */
+  --color-white: #1C1F33;
 
-  /* Accent palette */
-  --color-cyan: #1868A0;         /* primary accent — glacier/polar blue */
-  --color-cyan-dim: #1868A033;
-  --color-cyan-glow: #1868A066;
-  --color-amber: #B8720F;        /* warning — kept warm on purpose for contrast against the cool blue field */
-  --color-amber-dim: #B8720F33;
-  --color-crimson: #B23A2E;      /* critical — brick red, unchanged: alarms stay warm regardless of theme */
-  --color-crimson-dim: #B23A2E33;
-  --color-emerald: #1F9E6D;      /* status: healthy — cool sea-green so it reads distinct from the primary blue */
-  --color-emerald-dim: #1F9E6D33;
-  --color-violet-brand: #6E7FCE; /* rare secondary accent (chart pills), cooled to sit with the ice palette */
+  --color-cyan: #3A3AB8;            /* primary — ultramarine */
+  --color-cyan-dim: #3A3AB833;
+  --color-cyan-glow: #3A3AB866;
+  --color-amber: #D4820A;           /* warning */
+  --color-amber-dim: #D4820A33;
+  --color-crimson: #C23B3B;         /* critical */
+  --color-crimson-dim: #C23B3B33;
+  --color-emerald: #0F8A6A;         /* healthy */
+  --color-emerald-dim: #0F8A6A33;
+  --color-violet-brand: #A04FB8;    /* secondary data accent */
+  --color-marigold: #F2A71B;        /* brand highlight */
+  --color-marigold-dim: #F2A71B2E;
 
-  /* Fonts */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', Menlo, Monaco, monospace;
+  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', Menlo, Monaco, monospace;
+  --font-display: var(--font-fraunces), 'Fraunces', Georgia, serif;
 
-  /* Border radius — softened from the old sharp 4px "terminal" look to a
-     warmer, more beautified feel that matches the cream/beige palette. */
-  --radius: 8px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 14px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 22px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-cyan-glow: 0 0 20px #1868A033;
-  --shadow-amber-glow: 0 0 20px #B8720F33;
-  --shadow-crimson-glow: 0 0 20px #B23A2E33;
-  --shadow-emerald-glow: 0 0 20px #1F9E6D33;
+  /* soft, paper-like elevation instead of neon glow */
+  --shadow-cyan-glow: 0 1px 2px #3A3AB822, 0 6px 18px -6px #3A3AB838;
+  --shadow-amber-glow: 0 1px 2px #D4820A22, 0 6px 18px -6px #D4820A38;
+  --shadow-crimson-glow: 0 1px 2px #C23B3B22, 0 6px 18px -6px #C23B3B38;
+  --shadow-emerald-glow: 0 1px 2px #0F8A6A22, 0 6px 18px -6px #0F8A6A38;
+  --shadow-panel: 0 1px 0 #FFFFFF inset, 0 1px 2px rgba(28,31,51,0.05), 0 8px 24px -12px rgba(28,31,51,0.14);
 
-  /* Animations */
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-shimmer: shimmer 2s infinite;
-  --animate-fade-in: fadeIn 0.2s ease-out;
+  --animate-fade-in: fadeIn 0.25s ease-out;
   --animate-slide-in-right: slideInRight 0.3s ease-out;
   --animate-glow-pulse: glowPulse 2s ease-in-out infinite;
+  --animate-flow: flow 1.2s linear infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both;
 }
 
 /* ── Base ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
+  color-scheme: light;
   height: 100%;
-  background-color: #E7F1F8;
-  color: #16283A;
+  background-color: #F3EFE6;
+  color: #1C1F33;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
+}
+
+body {
+  background-image:
+    radial-gradient(1200px 500px at 85% -10%, rgba(242,167,27,0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 0%, rgba(58,58,184,0.07), transparent 55%);
+  background-attachment: fixed;
 }
 
 /* ── Keyframes ────────────────────────────────────────────────── */
@@ -91,6 +95,9 @@ html, body {
   100% { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes flow { to { stroke-dashoffset: -16; } }
+@keyframes rise { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+
 @keyframes glowPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -99,9 +106,15 @@ html, body {
 /* ── Utility classes ──────────────────────────────────────────── */
 .font-sans { font-family: var(--font-sans); }
 .font-mono { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); font-optical-sizing: auto; }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
+.eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28,31,51,0.5); }
+.panel { background: var(--color-brand-surface); border: 1px solid var(--color-brand-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
+.stagger > * { animation: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both; }
+.stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.1s}.stagger > *:nth-child(4){animation-delay:.15s}.stagger > *:nth-child(5){animation-delay:.2s}.stagger > *:nth-child(6){animation-delay:.25s}.stagger > *:nth-child(n+7){animation-delay:.3s}
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #EDF5FA 25%, #D9E9F2 50%, #EDF5FA 75%);
+  background: linear-gradient(90deg, #F7F3EA 25%, #ECE6D8 50%, #F7F3EA 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -113,43 +126,43 @@ html, body {
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #E7F1F8; }
-::-webkit-scrollbar-thumb { background: #B9D6E6; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #93BFD8; }
+::-webkit-scrollbar-track { background: #F3EFE6; }
+::-webkit-scrollbar-thumb { background: #DDD5C2; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #C7BDA5; }
 
 /* ── React Flow overrides ─────────────────────────────────────── */
 .react-flow__attribution { display: none; }
 .react-flow__controls button {
-  background: #F7FBFD !important;
-  border-color: #B9D6E6 !important;
-  color: rgba(22,40,58,0.6) !important;
+  background: #FFFEFB !important;
+  border-color: #DDD5C2 !important;
+  color: rgba(28,31,51,0.6) !important;
 }
 .react-flow__controls button:hover {
-  background: #EDF5FA !important;
-  color: #16283A !important;
+  background: #F7F3EA !important;
+  color: #1C1F33 !important;
 }
-.react-flow__minimap { border-color: #B9D6E6 !important; }
+.react-flow__minimap { border-color: #DDD5C2 !important; }
 .react-flow__handle { opacity: 0 !important; }
 
 /* ── Recharts overrides ───────────────────────────────────────── */
 .recharts-tooltip-wrapper { outline: none; }
 .recharts-default-tooltip {
-  background: #F7FBFD !important;
-  border: 1px solid #B9D6E6 !important;
+  background: #FFFEFB !important;
+  border: 1px solid #DDD5C2 !important;
   border-radius: 8px !important;
-  color: #16283A !important;
+  color: #1C1F33 !important;
   font-family: 'JetBrains Mono', monospace !important;
   font-size: 11px !important;
 }
 
 /* ── Selection ────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(24, 104, 160, 0.2);
-  color: #16283A;
+  background: rgba(58,58,184, 0.2);
+  color: #1C1F33;
 }
 
 /* ── Focus ring ───────────────────────────────────────────────── */
 :focus-visible {
-  outline: 1px solid rgba(24, 104, 160, 0.5);
+  outline: 1px solid rgba(58,58,184, 0.5);
   outline-offset: 2px;
 }

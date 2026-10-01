@@ -7,9 +7,9 @@ import { riskService, type RiskCell } from '@/services/risk.service'
 import { useStationStore } from '@/store/useStationStore'
 
 function scoreColor(score: number): string {
-  if (score >= 70) return '#B23A2E'
-  if (score >= 40) return '#B8720F'
-  return '#1F9E6D'
+  if (score >= 70) return '#C23B3B'
+  if (score >= 40) return '#D4820A'
+  return '#0F8A6A'
 }
 
 // Heat-scaled alpha: the tile's fill saturation rises with score (a real
@@ -73,7 +73,7 @@ export default function RiskHeatmapPage() {
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-start justify-between">
           <div>

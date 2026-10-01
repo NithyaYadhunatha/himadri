@@ -99,8 +99,8 @@ function fallbackEntry(nodeId: string, label: string): GenericAssetEntry {
 }
 
 function failureAccent(pct: number): string | undefined {
-  if (pct >= 30) return '#B23A2E'
-  if (pct >= 10) return '#B8720F'
+  if (pct >= 30) return '#C23B3B'
+  if (pct >= 10) return '#D4820A'
   return undefined
 }
 
@@ -173,7 +173,7 @@ export function createGenericAssetPanel(curatedData: Record<string, GenericAsset
                   <div key={i} className="bg-brand-bg border border-brand-border rounded p-2 flex items-start gap-2">
                     <span
                       className="font-mono text-[9px] uppercase tracking-wide shrink-0 w-16"
-                      style={{ color: e.severity === 'CRITICAL' ? '#B23A2E' : e.severity === 'WARNING' ? '#B8720F' : '#6E8AA0' }}
+                      style={{ color: e.severity === 'CRITICAL' ? '#C23B3B' : e.severity === 'WARNING' ? '#D4820A' : '#8A8576' }}
                     >
                       {e.severity}
                     </span>

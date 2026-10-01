@@ -32,7 +32,7 @@ const OVERLAY_MODES: Array<{ id: OverlayMode; label: string; icon: React.Compone
   { id: 'risk', label: 'Risk', icon: Gauge },
 ]
 
-const NEUTRAL = '#6E8AA0'
+const NEUTRAL = '#8A8576'
 
 function avgHealthColor(assets: GraphNode[]): { color: string; value: string } {
   if (assets.length === 0) return { color: NEUTRAL, value: 'n/a' }
@@ -141,7 +141,7 @@ export default function FloorPlanPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-6xl mx-auto space-y-5">
         <div>
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
@@ -159,15 +159,15 @@ export default function FloorPlanPage() {
           <>
             {/* Stat strip */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1868A040', background: 'linear-gradient(155deg, #1868A014 0%, #1868A004 100%)' }}>
+              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#3A3AB840', background: 'linear-gradient(155deg, #3A3AB814 0%, #3A3AB804 100%)' }}>
                 <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Fuel size={10} /> Fuel Endurance</p>
                 <p className="font-mono text-xl font-bold text-white mt-1">{fuelDays ?? '—'} <span className="text-[10px] text-white/40">days</span></p>
               </div>
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#B23A2E40', background: 'linear-gradient(155deg, #B23A2E14 0%, #B23A2E04 100%)' }}>
+              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#C23B3B40', background: 'linear-gradient(155deg, #C23B3B14 0%, #C23B3B04 100%)' }}>
                 <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><AlertTriangle size={10} /> Open Alerts</p>
                 <p className="font-mono text-xl font-bold text-white mt-1">{openAlerts.length}</p>
               </div>
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1F9E6D40', background: 'linear-gradient(155deg, #1F9E6D14 0%, #1F9E6D04 100%)' }}>
+              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#0F8A6A40', background: 'linear-gradient(155deg, #0F8A6A14 0%, #0F8A6A04 100%)' }}>
                 <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Truck size={10} /> Active Convoys</p>
                 <p className="font-mono text-xl font-bold text-white mt-1">{activeConvoys}</p>
               </div>
