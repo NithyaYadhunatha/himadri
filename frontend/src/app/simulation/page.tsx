@@ -96,7 +96,7 @@ function ScenarioDetailPanel({ result }: { result: ScenarioResult }) {
         </div>
         <div className="bg-brand-bg border border-brand-border rounded p-2.5">
           <p className="font-mono text-[9px] text-white/40 uppercase flex items-center gap-1"><Wheat size={10} /> Food Endurance</p>
-          <p className="font-mono text-base text-white mt-0.5">{result.food_endurance_days ?? '—'} <span className="text-[10px] text-white/30">days</span></p>
+          <p className="font-mono text-base text-white mt-0.5">{result.food_endurance_days === null ? '—' : result.food_endurance_days > 3650 ? 'no stock data' : result.food_endurance_days} {result.food_endurance_days !== null && result.food_endurance_days <= 3650 && <span className="text-[10px] text-white/30">days</span>}</p>
         </div>
         <div className="bg-brand-bg border border-brand-border rounded p-2.5">
           <p className="font-mono text-[9px] text-white/40 uppercase flex items-center gap-1"><IndianRupee size={10} /> Total Cost</p>

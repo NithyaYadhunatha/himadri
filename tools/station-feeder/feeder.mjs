@@ -65,6 +65,8 @@ const diurnal = () => Math.sin(((hourOfDay() - 9) / 24) * 2 * Math.PI) // peaks 
 
 // ── per-series state & generators ────────────────────────────────────────
 const state = new Map() // key -> number
+const poweredOff = new Set() // asset ids the operator has stopped from HQ
+const setpoints = new Map() // asset id -> last commanded setpoint
 
 function incidentName() {
   try {
@@ -106,6 +108,7 @@ function genValue(assetId, label, unit, base) {
 
   // ---- power -----------------------------------------------------------
   if (label === 'power_kw') {
+    if (poweredOff.has(assetId)) return 0.2 + Math.abs(noise(0.1))
     if (inc === 'generator_fault' && /maitri-power-generator-01/.test(assetId)) {
       cur = Math.max(2, (cur ?? 46) - 8)
       state.set(key, cur)
@@ -210,7 +213,33 @@ async function beat(a) {
     status: 'ok',
     simulation_active: false,
   }
-  return api('/agent/heartbeat', { method: 'POST', body: JSON.stringify(body), headers: { 'X-API-Key': a.key } }, '')
+  const res = await api('/agent/heartbeat', { method: 'POST', body: JSON.stringify(body), headers: { 'X-API-Key': a.key } }, '')
+  if (res && res.pending_command) await executeCommand(a, res.pending_command)
+  return res
+}
+
+// The station side of the two-phase command round trip: apply it to local
+// state, then ack + report the result so the backend can mark it applied.
+async function executeCommand(a, cmd) {
+  let result = { applied: true }
+  if (cmd.action === "stop") {
+    poweredOff.add(a.id)
+    result = { applied: true, powered: false }
+  } else if (cmd.action === "start") {
+    poweredOff.delete(a.id)
+    result = { applied: true, powered: true }
+  } else if (cmd.action === "setpoint") {
+    setpoints.set(a.id, cmd.payload)
+    result = { applied: true, setpoint: cmd.payload }
+  } else if (cmd.action === "mode") {
+    result = { applied: true, mode: cmd.payload?.mode ?? null }
+  }
+  try {
+    await api("/agent/command-result", { method: "POST", body: JSON.stringify({ command_id: cmd.command_id, success: true, result }), headers: { "X-API-Key": a.key } }, "")
+    log("command applied:", cmd.action, a.id)
+  } catch (e) {
+    log("command-result failed", a.id, e.message)
+  }
 }
 
 async function backfill(fleet) {

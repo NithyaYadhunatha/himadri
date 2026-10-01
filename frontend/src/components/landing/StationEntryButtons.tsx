@@ -20,7 +20,7 @@ export function StationEntryButtons() {
 
   const enter = (station: StationId) => {
     forceSetStation(station)
-    router.push(ROUTES.TWIN)
+    router.push(ROUTES.MISSION)
   }
 
   return (
@@ -29,7 +29,7 @@ export function StationEntryButtons() {
         <button
           key={s}
           onClick={() => enter(s)}
-          className="inline-flex items-center gap-2.5 font-mono text-sm uppercase tracking-widest bg-brand-surface border border-brand-border text-white rounded px-6 py-3 hover:border-cyan/50 hover:bg-cyan/5 active:scale-95 transition-all group"
+          className="inline-flex items-center gap-2.5 font-mono text-[12px] uppercase tracking-wider bg-brand-surface border border-brand-border text-white rounded-xl px-6 py-4 hover:border-cyan hover:text-cyan active:scale-95 transition-all group"
         >
           <Building2 size={16} className="text-cyan/70 group-hover:text-cyan transition-colors" />
           {STATION_LABELS[s]}

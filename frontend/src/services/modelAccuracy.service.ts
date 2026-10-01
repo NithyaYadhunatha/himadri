@@ -17,7 +17,7 @@ import type {
 import type { PaginatedResponse } from '@/types/common'
 
 // All routes served by backend/routers/predictive_maintenance.py under prefix /model-accuracy
-const BASE = '/api/model-accuracy'
+const BASE = '/model-accuracy'
 
 export const modelAccuracyService = {
   getAccuracyMetrics: async (simId?: string): Promise<AccuracyMetrics> => {

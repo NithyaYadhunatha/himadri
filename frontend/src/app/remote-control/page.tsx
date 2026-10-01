@@ -20,7 +20,7 @@ import {
   Radio, Play, Square, SlidersHorizontal, ShieldAlert, RefreshCw,
   ArrowRight, Send, UserCheck, AlertTriangle,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
+import { Kpi, Panel, PageHead, Pill, Skeleton, type Tone } from '@/components/ui/kit'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { InlineLoader, ErrorState, EmptyState } from '@/components/ui/Loader'
@@ -33,7 +33,7 @@ import { STATION_LABELS } from '@/lib/constants'
 import type { NodeType } from '@/types/graph'
 import type { BadgeVariant } from '@/types/common'
 
-const POLL_MS = 2000
+const POLL_MS = 3000
 
 const ACTION_META: Record<CommandActionKind, { label: string; icon: React.ElementType }> = {
   start: { label: 'Start', icon: Play },
@@ -224,51 +224,49 @@ function CommandConfirmDialog({
 function AssetCard({ asset, onAction }: { asset: RemoteAsset; onAction: (asset: RemoteAsset, action: CommandAction) => void }) {
   const config = getNodeTypeConfig(asset.category)
   const Icon = config.icon
-  const statusColor = asset.status === 'running' ? '#0F8A6A' : asset.status === 'stopped' ? '#8A8576' : '#D4820A'
+  const tone: Tone = asset.status === 'running' || asset.status === 'ok' ? 'ok' : asset.status === 'stopped' ? 'mute' : 'warn'
 
   return (
-    <div className="rounded border border-brand-border bg-brand-surface p-4 flex flex-col gap-3 hover:border-white/20 transition-colors">
+    <div className="panel p-4 flex flex-col gap-3 hover:-translate-y-0.5 transition-transform">
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded flex items-center justify-center shrink-0" style={{ background: `${config.color}18`, border: `1px solid ${config.color}30` }}>
-            <Icon size={16} style={{ color: config.color }} />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${config.color}16` }}>
+            <Icon size={17} style={{ color: config.color }} />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-sans text-white font-medium leading-tight truncate">{asset.name}</p>
-            <p className="font-mono text-[9px] text-white/30 mt-0.5 uppercase tracking-wider">{config.label}{asset.subtype ? ` · ${asset.subtype}` : ''}</p>
+            <p className="text-[14px] text-white font-medium leading-tight truncate">{asset.name}</p>
+            <p className="font-mono text-[10px] text-white/40 mt-0.5 uppercase tracking-wider">{config.label}{asset.subtype ? ` · ${asset.subtype}` : ''}</p>
           </div>
         </div>
         {asset.lifeSafety && (
-          <Badge variant="critical" size="sm">
-            <ShieldAlert size={9} /> Life-Safety
-          </Badge>
+          <Pill tone="crit">
+            <ShieldAlert size={10} /> 2-person
+          </Pill>
         )}
       </div>
 
-      <div className="flex items-center justify-between rounded bg-brand-bg border border-brand-border px-3 py-2">
-        <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Status</span>
-        <span className="font-mono text-xs font-semibold capitalize" style={{ color: statusColor }}>{asset.status}</span>
-      </div>
-      <div className="flex items-center justify-between px-1">
-        <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Primary Value</span>
-        <span className="font-mono text-sm text-white">{fmtValue(asset.primaryValue, asset.primaryUnit)}</span>
+      <div className="flex items-end justify-between rounded-xl bg-brand-surface-2/70 border border-brand-border px-3.5 py-2.5">
+        <div>
+          <p className="eyebrow">Live value</p>
+          <p className="font-display text-[26px] leading-none text-white num mt-1">{fmtValue(asset.primaryValue, asset.primaryUnit)}</p>
+        </div>
+        <Pill tone={tone} dot>{asset.status || 'unknown'}</Pill>
       </div>
 
-      <div className="flex gap-2 pt-1">
+      <div className="flex gap-2">
         {asset.actions.map((action) => {
           const meta = ACTION_META[action]
           const ActionIcon = meta.icon
+          const danger = action === 'stop'
           return (
-            <Button
+            <button
               key={action}
-              variant={action === 'stop' ? 'danger' : 'secondary'}
-              size="sm"
-              className="flex-1"
-              icon={<ActionIcon size={12} />}
               onClick={() => onAction(asset, action as CommandAction)}
+              className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 font-mono text-[10.5px] uppercase tracking-wider transition ${danger ? 'border-crimson/30 text-crimson hover:bg-crimson/10' : 'border-brand-border bg-brand-surface text-white/75 hover:border-cyan hover:text-cyan'}`}
             >
+              <ActionIcon size={12} />
               {meta.label}
-            </Button>
+            </button>
           )
         })}
       </div>
@@ -276,9 +274,36 @@ function AssetCard({ asset, onAction }: { asset: RemoteAsset; onAction: (asset: 
   )
 }
 
-// ─── Command Journal row ────────────────────────────────────────────────────
+// ─── Command lifecycle card ─────────────────────────────────────────────────
 
-function JournalRow({
+const STAGES: { id: string; label: string }[] = [
+  { id: 'queued', label: 'Queued' },
+  { id: 'approved', label: 'Co-approved' },
+  { id: 'sent', label: 'Sent' },
+  { id: 'acked', label: 'Acked' },
+  { id: 'applied', label: 'Applied' },
+]
+
+function stageIndex(c: CommandRecord): number {
+  if (c.state === 'applied') return 4
+  if (c.state === 'acked') return 3
+  if (c.state === 'sent') return 2
+  if (c.requires_second_approval && c.approved_at) return 1
+  return c.state === 'queued' ? 0 : 2
+}
+
+function Countdown({ to }: { to: string }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const end = new Date(/Z$|[+-]\d\d:\d\d$/.test(to) ? to : to + 'Z').getTime()
+  const s = Math.max(0, Math.round((end - now) / 1000))
+  return <span className={`num ${s < 120 ? 'text-crimson' : 'text-amber'}`}>{`${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`}</span>
+}
+
+function JournalCard({
   command, assetName, onApprove,
 }: {
   command: CommandRecord
@@ -291,7 +316,10 @@ function JournalRow({
 
   const needsApproval = command.state === 'queued' && command.requires_second_approval && !command.approved_at
   const trimmed = approverName.trim()
-  const canApprove = trimmed.length > 1 && trimmed.toLowerCase() !== command.issued_by.trim().toLowerCase()
+  const sameUser = trimmed.length > 0 && trimmed.toLowerCase() === command.issued_by.trim().toLowerCase()
+  const canApprove = trimmed.length > 1 && !sameUser
+  const failed = command.state === 'failed' || command.state === 'expired'
+  const idx = stageIndex(command)
 
   const handleApprove = async () => {
     setApproving(true)
@@ -306,42 +334,61 @@ function JournalRow({
   }
 
   return (
-    <div className="grid grid-cols-[1.6fr_0.9fr_1.2fr_1fr_0.9fr_0.9fr_2fr] gap-3 px-3 py-2.5 items-center border-b border-brand-border/60 text-xs">
-      <div className="min-w-0">
-        <p className="text-white font-sans truncate">{assetName}</p>
-        <p className="font-mono text-[9px] text-white/30 truncate">{command.asset_id}</p>
+    <div className="px-5 py-4 border-b border-brand-border/70 last:border-b-0">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-mono text-[12.5px] text-white">
+            <b>{command.action.toUpperCase()}</b> · {assetName}
+            {Object.keys(command.payload).length > 0 && <span className="text-white/45"> {JSON.stringify(command.payload)}</span>}
+          </p>
+          <p className="font-mono text-[10.5px] text-white/45 mt-0.5">
+            issued by <b className="text-white/75">{command.issued_by}</b> ({command.issued_role}) · {fmtTime(command.created_at)}
+            {command.approved_by && <> · co-approved by <b className="text-emerald">{command.approved_by}</b></>}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {command.requires_second_approval ? <Pill tone="warn"><ShieldAlert size={10} /> needs 2nd approver</Pill> : <Pill tone="mute">single approver class</Pill>}
+          <Pill tone={failed ? 'crit' : command.state === 'applied' ? 'ok' : 'primary'} dot={command.state === 'sent' || command.state === 'acked'}>{command.state}</Pill>
+        </div>
       </div>
-      <div className="font-mono text-white/70 capitalize">{command.action}</div>
-      <div className="font-mono text-[10px] text-white/40 truncate" title={JSON.stringify(command.payload)}>
-        {Object.keys(command.payload).length ? JSON.stringify(command.payload) : '{}'}
+
+      <div className="grid grid-cols-5 gap-1.5 mt-3">
+        {STAGES.map((s, i) => (
+          <div key={s.id}>
+            <div className={`h-1.5 rounded-full ${failed ? 'bg-crimson/30' : i <= idx ? 'bg-cyan' : 'bg-brand-surface-3'}`} />
+            <p className={`font-mono text-[9px] uppercase tracking-wider mt-1 ${i <= idx && !failed ? 'text-white/70' : 'text-white/30'}`}>{s.label}</p>
+          </div>
+        ))}
       </div>
-      <div className="font-sans text-white/60 truncate">
-        {command.issued_by}
-        {command.requires_second_approval && <ShieldAlert size={10} className="inline ml-1 text-crimson/70" />}
-      </div>
-      <div><Badge variant={STATE_BADGE[command.state]} size="sm" dot={command.state === 'sent' || command.state === 'acked'}>{command.state}</Badge></div>
-      <div className="font-mono text-[10px] text-white/40">{fmtTime(command.created_at)}</div>
-      <div>
-        {needsApproval ? (
-          <div className="flex items-center gap-1.5">
+
+      {needsApproval && (
+        <div className="mt-4 rounded-xl border-2 border-amber/40 bg-amber/5 p-4 flex flex-wrap items-center gap-4">
+          <div className="flex-1 min-w-[220px]">
+            <p className="font-display text-[17px] text-white">Waiting for a second person.</p>
+            <p className="font-mono text-[10.5px] text-white/55 mt-0.5">
+              The issuer can never approve their own command. Window closes in <Countdown to={command.expires_at} />.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
             <input
               type="text"
               value={approverName}
               onChange={(e) => setApproverName(e.target.value)}
-              placeholder="Different approver name…"
-              className="w-32 bg-brand-bg border border-brand-border rounded px-2 py-1 text-[10px] font-sans text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/50"
+              placeholder="Second approver's name…"
+              className={`w-52 rounded-lg border px-3 py-2 text-[12px] bg-brand-surface text-white placeholder:text-white/30 focus:outline-none ${sameUser ? 'border-crimson focus:border-crimson' : 'border-brand-border focus:border-cyan'}`}
             />
-            <Button variant="primary" size="sm" disabled={!canApprove} loading={approving} onClick={handleApprove} icon={<UserCheck size={11} />}>
-              Approve
-            </Button>
+            <button
+              disabled={!canApprove || approving}
+              onClick={handleApprove}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white text-brand-surface px-4 py-2 font-mono text-[10.5px] uppercase tracking-wider disabled:opacity-35 hover:opacity-90"
+            >
+              <UserCheck size={12} /> {approving ? 'Approving…' : 'Co-approve'}
+            </button>
           </div>
-        ) : command.approved_by ? (
-          <span className="font-mono text-[10px] text-emerald">approved by {command.approved_by}</span>
-        ) : (
-          <span className="font-mono text-[10px] text-white/20">—</span>
-        )}
-        {error && <p className="text-[9px] text-crimson mt-1">{error}</p>}
-      </div>
+          {sameUser && <p className="w-full font-mono text-[10.5px] text-crimson">Refused: the approver must be a different person than the issuer ({command.issued_by}).</p>}
+          {error && <p className="w-full font-mono text-[10.5px] text-crimson">{error}</p>}
+        </div>
+      )}
     </div>
   )
 }
@@ -398,97 +445,68 @@ export default function RemoteControlPage() {
   const filteredAssets = categoryFilter ? assets.filter((a) => a.category === categoryFilter) : assets
   const assetNameById = new Map(assets.map((a) => [a.id, a.name]))
   const lifeSafetyCount = assets.filter((a) => a.lifeSafety).length
+  const awaiting = commands.filter((c) => c.state === 'queued' && c.requires_second_approval && !c.approved_at).length
+  const inFlight = commands.filter((c) => ['queued', 'sent', 'acked'].includes(c.state)).length
 
   return (
-    <div className="h-full overflow-y-auto bg-brand-bg">
-      <div className="px-6 py-5 max-w-[1600px] mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
-              <Radio size={16} className="text-cyan" />
-              Remote Control — {STATION_LABELS[station]}
-            </h1>
-            <p className="text-white/40 text-xs mt-1 font-sans max-w-2xl leading-relaxed">
-              Issue supervised setpoint/start/stop commands to controllable station assets. Life-safety assets require
-              a second authorised approver.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {lifeSafetyCount > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-crimson/10 border border-crimson/25">
-                <ShieldAlert size={11} className="text-crimson" />
-                <span className="font-mono text-[10px] text-crimson">{lifeSafetyCount} LIFE-SAFETY ASSET{lifeSafetyCount === 1 ? '' : 'S'}</span>
-              </div>
-            )}
-            <Button variant="secondary" size="sm" icon={<RefreshCw size={12} />} onClick={() => refresh(true)}>
-              Refresh
-            </Button>
-          </div>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-[1500px] mx-auto px-6 py-7">
+        <PageHead
+          eyebrow={`Remote control · ${STATION_LABELS[station]}`}
+          title="Act from 11,000 km away — never alone."
+          sub="Supervised start / stop / setpoint commands to controllable assets. Life-safety assets need a second, different authorised person inside 15 minutes; the backend enforces it and chains every step into the audit ledger."
+          right={
+            <button onClick={() => refresh(true)} className="inline-flex items-center gap-2 rounded-lg border border-brand-border bg-brand-surface px-4 py-2 font-mono text-[11px] uppercase tracking-wider text-white/70 hover:text-cyan hover:border-cyan transition">
+              <RefreshCw size={12} /> Refresh
+            </button>
+          }
+        />
+
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 stagger">
+          <Kpi label="Controllable assets" value={loading ? null : assets.length} tone="primary" icon={<Radio size={15} />} hint="start · stop · setpoint · mode" />
+          <Kpi label="Life-safety (2-person)" value={loading ? null : lifeSafetyCount} tone="crit" icon={<ShieldAlert size={15} />} hint="second approver required" />
+          <Kpi label="Awaiting co-approval" value={awaiting} tone={awaiting ? 'warn' : 'ok'} icon={<UserCheck size={15} />} hint="15-minute window then expiry" />
+          <Kpi label="Commands in flight" value={inFlight} tone="ink" icon={<Send size={15} />} hint="queued → sent → acked → applied" />
         </div>
 
-        {error && <ErrorState message={error} onRetry={() => refresh(true)} />}
+        {error && <div className="mt-4"><ErrorState message={error} onRetry={() => refresh(true)} /></div>}
 
-        {/* Category filter */}
-        {categories.length > 1 && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              onClick={() => setCategoryFilter('')}
-              className={`px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-wider transition-colors ${categoryFilter === '' ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/40 hover:text-white border border-transparent'}`}
-            >
-              All
+        <div className="flex items-center gap-2 flex-wrap mt-6">
+          <button onClick={() => setCategoryFilter('')} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === '' ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/60 hover:text-white'}`}>
+            All
+          </button>
+          {categories.map((c) => (
+            <button key={c} onClick={() => setCategoryFilter(c)} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === c ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/60 hover:text-white'}`}>
+              {getNodeTypeConfig(c).label}
             </button>
-            {categories.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCategoryFilter(c)}
-                className={`px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-wider transition-colors ${categoryFilter === c ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/40 hover:text-white border border-transparent'}`}
-              >
-                {getNodeTypeConfig(c).label}
-              </button>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
 
-        {/* Asset grid */}
         {loading ? (
-          <div className="flex items-center justify-center h-32"><InlineLoader text="Loading controllable assets…" /></div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-44" />)}
+          </div>
         ) : filteredAssets.length === 0 ? (
-          <EmptyState message="No controllable assets for this station" hint="Try clearing the category filter" />
+          <div className="mt-5"><EmptyState message="No controllable assets for this station" hint="Try clearing the category filter" /></div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-5">
             {filteredAssets.map((asset) => (
               <AssetCard key={asset.id} asset={asset} onAction={(a, action) => setPending({ asset: a, action })} />
             ))}
           </div>
         )}
 
-        {/* Command Journal */}
-        <div className="rounded border border-brand-border bg-brand-surface">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-brand-border">
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={13} className="text-white/30" />
-              <h2 className="font-mono text-xs font-semibold text-white uppercase tracking-widest">Command Journal</h2>
-            </div>
-            <span className="font-mono text-[10px] text-white/30">{commands.length} command{commands.length === 1 ? '' : 's'} · auto-refresh every {POLL_MS / 1000}s</span>
-          </div>
-
-          <div className="grid grid-cols-[1.6fr_0.9fr_1.2fr_1fr_0.9fr_0.9fr_2fr] gap-3 px-3 py-2 bg-brand-bg border-b border-brand-border">
-            {['Asset', 'Action', 'Payload', 'Issuer', 'State', 'Created', 'Approval'].map((h) => (
-              <span key={h} className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
-            ))}
-          </div>
-
+        <Panel className="mt-7" pad={false} eyebrow="Audited & tamper-evident" title="Command journal" right={<span className="font-mono text-[10.5px] text-white/45">{commands.length} command{commands.length === 1 ? '' : 's'} · live every {POLL_MS / 1000}s</span>}>
           {commands.length === 0 ? (
             <div className="py-8"><EmptyState message="No commands issued yet" hint="Issue a command from an asset card above" /></div>
           ) : (
             <div>
               {commands.map((c) => (
-                <JournalRow key={c.id} command={c} assetName={assetNameById.get(c.asset_id) ?? c.asset_id} onApprove={handleApprove} />
+                <JournalCard key={c.id} command={c} assetName={assetNameById.get(c.asset_id) ?? c.asset_id} onApprove={handleApprove} />
               ))}
             </div>
           )}
-        </div>
+        </Panel>
       </div>
 
       {pending && (

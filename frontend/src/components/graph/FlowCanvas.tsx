@@ -24,7 +24,7 @@ import '@xyflow/react/dist/style.css'
 import { LayoutGrid, Lock } from 'lucide-react'
 import { GraphNode, type GraphNodeRenderData } from './GraphNode'
 import { layoutWithDagre, layoutCircular } from '@/lib/graph/layout'
-import { canUseZoneBands, computeZoneBandedLayout, type ZoneLayoutBox } from '@/lib/graph/zoneLayout'
+import { canUseZoneBands, computeCategoryLayout, computeZoneBandedLayout, type ZoneLayoutBox } from '@/lib/graph/zoneLayout'
 import { computeBlastRadius, computeDependencyChain } from '@/lib/graph/blastRadius'
 import type { GraphNode as GraphNodeData, GraphEdge, ZoneMeta } from '@/types/graph'
 import { HEALTH_COLORS } from '@/lib/constants'
@@ -44,10 +44,16 @@ function runLayout(
   preset: LayoutPreset,
   zones: ZoneMeta[] | undefined,
 ): { nodes: Node[]; boxes: ZoneLayoutBox[] } {
-  if (preset === 'TB' && canUseZoneBands(graphNodesData, zones)) {
+  const zoned = graphNodesData.filter((n) => !!n.zoneId).length
+  if (preset === 'TB' && canUseZoneBands(graphNodesData, zones) && zoned >= graphNodesData.length * 0.5) {
     return computeZoneBandedLayout(built, graphNodesData, zones)
   }
   if (preset === 'circular') return { nodes: layoutCircular(built), boxes: [] }
+  // No zone data and a sparse dependency graph: dagre would stack every asset
+  // into one rank, so cluster by category instead.
+  if (preset === 'TB' && graphNodesData.length > 12 && edges.length < graphNodesData.length / 2) {
+    return computeCategoryLayout(built, graphNodesData)
+  }
   return { nodes: layoutWithDagre(built, toStructuralEdges(edges), { direction: preset === 'LR' ? 'LR' : 'TB' }), boxes: [] }
 }
 

@@ -1,291 +1,189 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import {
-  Telescope, Recycle, FileText, Check, X as XIcon, Thermometer,
-  Sun, Cloud, CloudFog, CloudRain, CloudSnow, CloudLightning,
-  Wind, Droplets, Gauge, Navigation, RefreshCw,
-} from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import { Sparkline } from '@/components/ui/Sparkline'
-import { ErrorState, InlineLoader, EmptyState } from '@/components/ui/Loader'
-import { environmentService, type WasteRecord, type Advisory, type ReportSummary, type StationWeather } from '@/services/environment.service'
-import { nodeHealthService } from '@/services/nodeHealth.service'
+// Environment — real conditions around the station (Open-Meteo, keyless), a
+// 7-day storm watch derived from the hourly forecast, and what that weather
+// means for the station: outdoor work, convoy windows and heating load.
+import { useMemo } from 'react'
+import { Area, CartesianGrid, ComposedChart, Line, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Droplets, Gauge, Navigation, Snowflake, Thermometer, Wind } from 'lucide-react'
 import { useStationStore } from '@/store/useStationStore'
-import type { NodeHealth } from '@/types/nodes'
+import { STATION_LABELS } from '@/lib/constants'
+import { usePoll, useBackend } from '@/lib/hooks/usePoll'
+import { Kpi, Panel, PageHead, Pill, Provenance, Skeleton, type Tone } from '@/components/ui/kit'
+import { ago, fmtNum } from '@/lib/format'
 
-const WEATHER_POLL_MS = 5 * 60_000
-
-function weatherIcon(code: number) {
-  if (code === 0 || code === 1) return Sun
-  if (code === 2 || code === 3) return Cloud
-  if (code === 45 || code === 48) return CloudFog
-  if (code >= 51 && code <= 67) return CloudRain
-  if (code >= 71 && code <= 86) return CloudSnow
-  if (code >= 95) return CloudLightning
-  return Cloud
+interface Weather {
+  temperatureC: number
+  feelsLikeC: number
+  windSpeedKmh: number
+  windGustKmh: number
+  windDirectionDeg: number
+  humidityPct: number
+  pressureHpa: number
+  snowfallCm: number
+  weatherLabel: string
+  observedAt: string
+  isDay: boolean
+}
+interface Pt {
+  t: number
+  temp: number
+  wind: number
+  gust: number
+  pressure: number
+  snow: number
+}
+interface Forecast {
+  points: Pt[]
+}
+interface Asset {
+  id: string
+  name: string
+  category: string
+  status: string
+  last_seen: string | null
+  primary_value: number | null
 }
 
-function compass(deg: number): string {
-  const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
-  return dirs[Math.round(deg / 22.5) % 16]
-}
+const compass = (deg: number) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16]
 
-function StatTile({ icon: Icon, label, value, sub }: { icon: React.ElementType; label: string; value: string; sub?: string }) {
-  return (
-    <div className="flex items-center gap-2.5 rounded border border-brand-border bg-brand-bg px-3 py-2.5">
-      <Icon size={15} className="text-cyan shrink-0" />
-      <div className="min-w-0">
-        <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">{label}</p>
-        <p className="font-mono text-sm text-white leading-tight">{value}{sub && <span className="text-white/40 text-xs ml-1">{sub}</span>}</p>
-      </div>
-    </div>
-  )
-}
+// Operational wind bands (km/h gusts) — the thresholds the advice below keys off
+const BANDS: { max: number; label: string; tone: Tone; advice: string }[] = [
+  { max: 40, label: 'Calm', tone: 'ok', advice: 'Normal outdoor operations and convoy movement.' },
+  { max: 70, label: 'Watch', tone: 'warn', advice: 'Limit exposed work; secure loose equipment; buddy rule outdoors.' },
+  { max: 100, label: 'Warning', tone: 'crit', advice: 'Hold convoys. Outdoor work only if essential and tethered.' },
+  { max: Infinity, label: 'Severe', tone: 'crit', advice: 'Station lockdown. Indoor only; pre-position fuel & check heat trace.' },
+]
+const band = (g: number) => BANDS.find((b) => g < b.max) ?? BANDS[BANDS.length - 1]
 
 export default function EnvironmentPage() {
   const station = useStationStore((s) => s.station)
-  const [instruments, setInstruments] = useState<NodeHealth[]>([])
-  const [waste, setWaste] = useState<WasteRecord[]>([])
-  const [advisories, setAdvisories] = useState<Advisory[]>([])
-  const [reports, setReports] = useState<ReportSummary[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [generating, setGenerating] = useState(false)
-  const [advisoryBusy, setAdvisoryBusy] = useState<string | null>(null)
+  const wx = usePoll<Weather>(`/api/environment/weather?station=${station}`, 300000)
+  const fc = usePoll<Forecast>(`/api/environment/forecast?station=${station}`, 900000)
+  const assets = useBackend<Asset[]>(`assets?station=${station}`, 60000)
 
-  const [weather, setWeather] = useState<StationWeather | null>(null)
-  const [weatherError, setWeatherError] = useState<string | null>(null)
-  const [weatherLoading, setWeatherLoading] = useState(true)
+  const pts = fc.data?.points ?? []
+  const now = Date.now()
+  const future = pts.filter((p) => p.t >= now - 3600000)
+  const next72 = future.filter((p) => p.t <= now + 72 * 3600000)
+  const maxGust = next72.length ? Math.max(...next72.map((p) => p.gust)) : null
+  const peak = next72.find((p) => p.gust === maxGust)
+  const outlook = maxGust !== null ? band(maxGust) : null
+  const nextLull = future.find((p) => p.t > now && p.gust < 40)
+  const aws = (assets.data ?? []).filter((a) => a.category === 'instrument').slice(0, 8)
+  const w = wx.data
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const [nodes, wasteRes, advRes, repRes] = await Promise.allSettled([
-        nodeHealthService.getNodes({ type: ['instrument'] }),
-        environmentService.getWaste(station),
-        environmentService.getAdvisories(station),
-        environmentService.getReports(station),
-      ])
-      setInstruments(nodes.status === 'fulfilled' ? nodes.value.filter((n) => !n.stationId || n.stationId === station) : [])
-      setWaste(wasteRes.status === 'fulfilled' ? wasteRes.value : [])
-      setAdvisories(advRes.status === 'fulfilled' ? advRes.value : [])
-      setReports(repRes.status === 'fulfilled' ? repRes.value : [])
-    } finally {
-      setLoading(false)
-    }
-  }, [station])
-
-  const loadWeather = useCallback(async (showLoader = false) => {
-    if (showLoader) setWeatherLoading(true)
-    try {
-      const w = await environmentService.getCurrentConditions(station)
-      setWeather(w)
-      setWeatherError(null)
-    } catch (err) {
-      setWeatherError(err instanceof Error ? err.message : 'Failed to fetch live conditions')
-    } finally {
-      if (showLoader) setWeatherLoading(false)
-    }
-  }, [station])
-
-  useEffect(() => { load() }, [load])
-  useEffect(() => { loadWeather(true) }, [loadWeather])
-  useEffect(() => {
-    const id = setInterval(() => loadWeather(false), WEATHER_POLL_MS)
-    return () => clearInterval(id)
-  }, [loadWeather])
-
-  const aws = instruments.find((i) => i.name.toLowerCase().includes('weather') || i.name.toLowerCase().includes('aws'))
-
-  const handleGenerateReport = async () => {
-    setGenerating(true)
-    setError(null)
-    try {
-      await environmentService.generateReport(station, 'environmental')
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate report')
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  const handleAdvisory = async (id: string, action: 'accept' | 'reject') => {
-    setAdvisoryBusy(id)
-    try {
-      if (action === 'accept') await environmentService.acceptAdvisory(id)
-      else await environmentService.rejectAdvisory(id)
-      await load()
-    } finally {
-      setAdvisoryBusy(null)
-    }
-  }
+  const chart = useMemo(() => pts.filter((p) => p.t >= now - 24 * 3600000), [pts, now])
 
   return (
-    <div className="h-full overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
-            Environmental Monitoring — {station.toUpperCase()}
-          </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">Live regional conditions, science-instrument health, waste/carbon reporting, and advisories.</p>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-[1400px] mx-auto px-6 py-7">
+        <PageHead
+          eyebrow={`Environment · ${STATION_LABELS[station]}`}
+          title={w ? `${w.temperatureC.toFixed(0)}°C and ${w.weatherLabel.toLowerCase()}.` : 'Reading the sky…'}
+          sub="Real conditions at the station's coordinates, a seven-day storm watch, and what the weather means for work outdoors, the convoy and the heating load."
+          right={
+            <>
+              <Provenance kind="live" />
+              <span className="font-mono text-[10.5px] text-white/45">Open-Meteo · {w ? `observed ${ago(w.observedAt)}` : '…'}</span>
+            </>
+          }
+        />
+
+        <div className="grid grid-cols-2 xl:grid-cols-6 gap-4 stagger">
+          <Kpi label="Temperature" value={w?.temperatureC ?? null} unit="°C" digits={1} tone="primary" icon={<Thermometer size={15} />} hint={w ? `feels like ${w.feelsLikeC.toFixed(0)}°C` : ''} />
+          <Kpi label="Wind" value={w?.windSpeedKmh ?? null} unit="km/h" digits={0} tone="ink" icon={<Wind size={15} />} hint={w ? `from ${compass(w.windDirectionDeg)} · gusts ${w.windGustKmh.toFixed(0)}` : ''} />
+          <Kpi label="Humidity" value={w?.humidityPct ?? null} unit="%" digits={0} tone="ink" icon={<Droplets size={15} />} hint="relative" />
+          <Kpi label="Pressure" value={w?.pressureHpa ?? null} unit="hPa" digits={0} tone="ink" icon={<Gauge size={15} />} hint="surface" />
+          <Kpi label="Snowfall" value={w?.snowfallCm ?? null} unit="cm/h" digits={1} tone="ink" icon={<Snowflake size={15} />} hint={w ? (w.isDay ? 'daylight' : 'polar night / dark') : ''} />
+          <Kpi label="Peak gust · 72 h" value={maxGust} unit="km/h" digits={0} tone={outlook?.tone ?? 'mute'} icon={<Navigation size={15} />} hint={peak ? `at ${new Date(peak.t).toISOString().slice(5, 16).replace('T', ' ')} UTC` : ''} />
         </div>
 
-        {loading && <div className="flex justify-center py-16"><InlineLoader text="Loading environmental data…" /></div>}
-        {error && <ErrorState message={error} onRetry={load} />}
-
-        {!loading && (
-          <>
-            <section>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest flex items-center gap-1.5">
-                  {(() => { const Icon = weatherIcon(weather?.weatherCode ?? 0); return <Icon size={13} /> })()} Live Conditions — Around the Station
-                </h2>
-                <div className="flex items-center gap-2">
-                  {weather && !weatherLoading && (
-                    <span className="font-mono text-[9px] text-white/30">
-                      {new Date(weather.observedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC · {weather.source}
-                    </span>
-                  )}
-                  <Button variant="ghost" size="sm" icon={<RefreshCw size={11} />} onClick={() => loadWeather(true)} loading={weatherLoading}>
-                    Refresh
-                  </Button>
-                </div>
+        <div className="grid xl:grid-cols-[1.6fr_1fr] gap-5 mt-5">
+          <Panel eyebrow="Storm watch" title="Wind & gusts · yesterday → next 7 days" right={outlook && <Pill tone={outlook.tone} dot>{outlook.label} next 72 h</Pill>}>
+            {fc.loading && !fc.data ? (
+              <Skeleton className="h-64" />
+            ) : (
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={pts} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                    <CartesianGrid stroke="#DDD5C2" strokeDasharray="3 5" vertical={false} />
+                    <ReferenceArea y1={70} y2={100} fill="#D4820A" fillOpacity={0.07} />
+                    <ReferenceArea y1={100} y2={200} fill="#C23B3B" fillOpacity={0.08} />
+                    <ReferenceLine y={70} stroke="#D4820A" strokeDasharray="4 4" />
+                    <ReferenceLine y={100} stroke="#C23B3B" strokeDasharray="4 4" />
+                    <ReferenceLine x={now} stroke="#1C1F33" strokeDasharray="2 3" label={{ value: 'now', fontSize: 10, fill: '#1C1F33', position: 'insideTopRight' }} />
+                    <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} minTickGap={50} />
+                    <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} width={42} unit="" domain={[0, (d: number) => Math.max(110, Math.ceil(d / 10) * 10)]} />
+                    <Tooltip contentStyle={{ background: '#FFFEFB', border: '1px solid #DDD5C2', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v, n) => [`${Number(v).toFixed(0)} km/h`, n === 'gust' ? 'Gust' : 'Wind']} />
+                    <Area dataKey="gust" stroke="#C23B3B" strokeWidth={1.4} fill="#C23B3B" fillOpacity={0.12} isAnimationActive={false} />
+                    <Line dataKey="wind" stroke="#1C1F33" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
               </div>
-
-              {weatherLoading ? (
-                <div className="flex items-center justify-center py-10 bg-brand-surface border border-brand-border rounded"><InlineLoader text="Fetching live conditions…" /></div>
-              ) : weatherError ? (
-                <ErrorState message={weatherError} onRetry={() => loadWeather(true)} />
-              ) : weather ? (
-                <div className="bg-brand-surface border border-brand-border rounded p-4">
-                  <div className="flex items-center gap-4 mb-4">
-                    {(() => { const Icon = weatherIcon(weather.weatherCode); return <Icon size={34} className="text-cyan shrink-0" /> })()}
-                    <div>
-                      <p className="font-mono text-3xl text-white leading-none">{Math.round(weather.temperatureC)}°C</p>
-                      <p className="text-xs font-sans text-white/50 mt-1">{weather.weatherLabel} · feels like {Math.round(weather.feelsLikeC)}°C</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    <StatTile icon={Wind} label="Wind" value={`${Math.round(weather.windSpeedKmh)}`} sub="km/h" />
-                    <StatTile icon={Navigation} label="Direction" value={compass(weather.windDirectionDeg)} sub={`${Math.round(weather.windDirectionDeg)}°`} />
-                    <StatTile icon={Wind} label="Gusts" value={`${Math.round(weather.windGustKmh)}`} sub="km/h" />
-                    <StatTile icon={Droplets} label="Humidity" value={`${Math.round(weather.humidityPct)}%`} />
-                    <StatTile icon={Gauge} label="Pressure" value={`${Math.round(weather.pressureHpa)}`} sub="hPa" />
-                  </div>
-                  <p className="font-mono text-[9px] text-white/25 mt-3">
-                    {weather.latitude.toFixed(2)}°S, {weather.longitude.toFixed(2)}°E · auto-refreshes every {WEATHER_POLL_MS / 60_000} min
-                  </p>
-                </div>
-              ) : null}
-            </section>
-
-            {aws && (
-              <section>
-                <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                  <Thermometer size={13} /> AWS Instrument Health — {aws.name}
-                </h2>
-                <div className="bg-brand-surface border border-brand-border rounded p-4">
-                  <Sparkline data={aws.trend} color="#3A3AB8" height={60} />
-                  <p className="font-mono text-[10px] text-white/30 mt-2">Health score {aws.healthScore} · {aws.health}</p>
-                </div>
-              </section>
             )}
+            <div className="flex flex-wrap gap-4 mt-2 font-mono text-[10.5px] text-white/50">
+              <span><i className="inline-block w-2.5 h-0.5 bg-white align-middle mr-1.5" />sustained wind</span>
+              <span><i className="inline-block w-2.5 h-2.5 bg-crimson/30 align-middle mr-1.5" />gusts</span>
+              <span><i className="inline-block w-2.5 h-0.5 bg-amber align-middle mr-1.5" />70 km/h warning</span>
+              <span><i className="inline-block w-2.5 h-0.5 bg-crimson align-middle mr-1.5" />100 km/h severe</span>
+            </div>
+          </Panel>
 
-            <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                <Telescope size={13} /> Science Instrument Health
-              </h2>
-              {instruments.length === 0 ? (
-                <EmptyState message="No science instruments registered for this station" />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {instruments.map((i) => (
-                    <div key={i.id} className="bg-brand-surface border border-brand-border rounded p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-sans text-white truncate">{i.name}</span>
-                        <Badge variant={i.health === 'healthy' ? 'healthy' : i.health === 'degraded' ? 'warning' : 'critical'} size="sm">{i.health}</Badge>
-                      </div>
-                      <p className="font-mono text-[10px] text-white/40">Health {i.healthScore}</p>
-                      {i.alerts.length > 0 && (
-                        <p className="text-[10px] font-mono text-amber mt-1">{i.alerts.length} alert(s)</p>
-                      )}
-                    </div>
-                  ))}
+          <Panel eyebrow="Derived advice" title="What this means on the ground" right={<Provenance kind="derived" />}>
+            {outlook ? (
+              <div className="space-y-4">
+                <div className={`rounded-xl border-2 p-4 ${outlook.tone === 'ok' ? 'border-emerald/40 bg-emerald/5' : outlook.tone === 'warn' ? 'border-amber/40 bg-amber/5' : 'border-crimson/40 bg-crimson/5'}`}>
+                  <p className="eyebrow">Next 72 hours</p>
+                  <p className="font-display text-3xl text-white">{outlook.label}</p>
+                  <p className="text-[13px] text-white/70 mt-1 leading-relaxed">{outlook.advice}</p>
                 </div>
-              )}
-            </section>
-
-            <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                <Recycle size={13} /> Waste &amp; Carbon
-              </h2>
-              {waste.length === 0 ? (
-                <EmptyState message="No waste records" />
-              ) : (
-                <div className="bg-brand-surface border border-brand-border rounded overflow-hidden mb-3">
-                  <table className="w-full text-xs">
-                    <thead className="bg-brand-bg text-white/40 font-mono uppercase text-[10px]">
-                      <tr><th className="text-left px-3 py-2">Category</th><th className="text-right px-3 py-2">Quantity (kg)</th><th className="text-left px-3 py-2">Method</th><th className="text-left px-3 py-2">Recorded</th></tr>
-                    </thead>
-                    <tbody>
-                      {waste.map((w) => (
-                        <tr key={w.id} className="border-t border-brand-border">
-                          <td className="px-3 py-2 text-white/80 font-mono">{w.category}</td>
-                          <td className="px-3 py-2 text-right font-mono text-white/70">{w.quantity_kg}</td>
-                          <td className="px-3 py-2 text-white/50">{w.method}</td>
-                          <td className="px-3 py-2 text-white/30 font-mono">{new Date(w.recorded_at).toLocaleDateString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              <div className="flex items-center gap-3">
-                <Button variant="secondary" size="sm" icon={<FileText size={13} />} loading={generating} onClick={handleGenerateReport}>
-                  Generate Environmental Report
-                </Button>
-                {reports.length > 0 && (
-                  <span className="font-mono text-[10px] text-white/30">{reports.length} report(s) on file</span>
-                )}
+                <ul className="space-y-3 text-[13px] text-white/75">
+                  <li className="flex gap-2.5"><span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan shrink-0" />Convoy window: {maxGust !== null && maxGust < 70 ? 'open — gusts stay under 70 km/h for the next 72 h.' : nextLull ? `holds until gusts fall below 40 km/h (≈ ${new Date(nextLull.t).toISOString().slice(5, 13).replace('T', ' ')}h UTC).` : 'no calm window in the 7-day outlook.'}</li>
+                  <li className="flex gap-2.5"><span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan shrink-0" />Heating load: {w && w.temperatureC < -25 ? 'high — boilers and heat trace working hard; watch fuel burn.' : 'moderate at current temperatures.'}</li>
+                  <li className="flex gap-2.5"><span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan shrink-0" />Wind chill now: {w ? `${w.feelsLikeC.toFixed(0)}°C equivalent — exposed skin risk ${w.feelsLikeC < -35 ? 'within minutes' : 'in under an hour'}.` : '—'}</li>
+                </ul>
+                <p className="font-mono text-[10px] text-white/40">Thresholds are operational conventions for this platform, not an official meteorological warning.</p>
               </div>
-            </section>
+            ) : (
+              <Skeleton className="h-40" />
+            )}
+          </Panel>
+        </div>
 
-            <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3">Advisories</h2>
-              {advisories.length === 0 ? (
-                <EmptyState message="No pending advisories" />
-              ) : (
-                <div className="space-y-2">
-                  {advisories.map((a) => (
-                    <div key={a.id} className="bg-brand-surface border border-brand-border rounded p-3 flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant={a.status === 'accepted' ? 'healthy' : a.status === 'rejected' ? 'critical' : 'warning'} size="sm">{a.status}</Badge>
-                          <span className="font-mono text-[10px] text-white/40 uppercase">{a.kind}</span>
-                        </div>
-                        <p className="text-xs font-sans text-white/80">{a.message}</p>
-                      </div>
-                      {a.status === 'pending' && (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button onClick={() => handleAdvisory(a.id, 'accept')} disabled={advisoryBusy === a.id} className="p-1.5 rounded border border-emerald/30 text-emerald hover:bg-emerald/10 transition-colors disabled:opacity-40">
-                            <Check size={13} />
-                          </button>
-                          <button onClick={() => handleAdvisory(a.id, 'reject')} disabled={advisoryBusy === a.id} className="p-1.5 rounded border border-crimson/30 text-crimson hover:bg-crimson/10 transition-colors disabled:opacity-40">
-                            <XIcon size={13} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          </>
-        )}
+        <div className="grid xl:grid-cols-2 gap-5 mt-5">
+          <Panel eyebrow="Next 7 days" title="Temperature">
+            <div style={{ height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chart.length ? pts : pts} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
+                  <CartesianGrid stroke="#DDD5C2" strokeDasharray="3 5" vertical={false} />
+                  <ReferenceLine x={now} stroke="#1C1F33" strokeDasharray="2 3" />
+                  <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} minTickGap={50} />
+                  <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} width={36} unit="°" />
+                  <Tooltip contentStyle={{ background: '#FFFEFB', border: '1px solid #DDD5C2', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v) => [`${Number(v).toFixed(1)} °C`, 'Temp']} />
+                  <Area dataKey="temp" stroke="#3A3AB8" strokeWidth={2} fill="#3A3AB8" fillOpacity={0.1} isAnimationActive={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel eyebrow="On-site sensing" title="Science instruments" right={<Pill tone="warn">station telemetry · simulated feed</Pill>}>
+            {assets.loading && !assets.data ? (
+              <Skeleton className="h-40" />
+            ) : (
+              <ul className="divide-y divide-brand-border/70">
+                {aws.map((a) => (
+                  <li key={a.id} className="flex items-center gap-3 py-2.5">
+                    <span className={`w-2 h-2 rounded-full ${a.status === 'ok' ? 'bg-emerald' : a.status === 'degraded' ? 'bg-amber' : 'bg-white/30'}`} />
+                    <span className="text-[13px] text-white flex-1 truncate">{a.name}</span>
+                    <span className="font-mono text-[11px] text-white/45">{a.last_seen ? ago(a.last_seen) : 'never'}</span>
+                    <span className="font-mono text-[11px] text-white/70 num w-16 text-right">{a.primary_value !== null ? fmtNum(a.primary_value, 1) : '—'}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        </div>
       </div>
     </div>
   )

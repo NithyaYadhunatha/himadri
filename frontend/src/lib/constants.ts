@@ -163,7 +163,7 @@ export const NAV_GROUPS = [
   {
     label: 'PREDICTIVE & RISK',
     items: [
-      { label: 'Forecast', href: ROUTES.PREDICTIVE },
+      { label: 'Failure Forecast', href: ROUTES.PREDICTIVE },
       { label: 'Risk Heatmap', href: ROUTES.RISK },
       { label: 'Diagnosis', href: ROUTES.DIAGNOSIS },
     ],
