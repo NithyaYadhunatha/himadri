@@ -90,6 +90,7 @@ export const ROUTES = {
   TRUST: '/trust',
   ML_LAB: '/ml',
   ARCHITECTURE: '/architecture',
+  REPORT: '/report',
   TWIN: '/twin',
   TWIN_3D: '/twin/3d',
   TWIN_FLOORPLAN: '/twin/floorplan',
@@ -135,6 +136,7 @@ export const NAV_GROUPS = [
       { label: 'Trust Center', href: ROUTES.TRUST },
       { label: 'ML Lab', href: ROUTES.ML_LAB },
       { label: 'Architecture', href: ROUTES.ARCHITECTURE },
+      { label: 'Station Report', href: ROUTES.REPORT },
     ],
   },
   {
@@ -176,7 +178,6 @@ export const ADMIN_GROUP = {
     { label: 'Team', href: ROUTES.ADMIN_TEAM },
     { label: 'Devices', href: ROUTES.ADMIN_DEVICES },
     { label: 'Notifications', href: ROUTES.ADMIN_NOTIFICATIONS },
-    { label: 'Audit Log', href: ROUTES.AUDIT },
   ],
 } as const
 

@@ -166,3 +166,31 @@ body {
   outline: 1px solid rgba(58,58,184, 0.5);
   outline-offset: 2px;
 }
+
+/* ── Legacy page headings ─────────────────────────────────────────
+ * Older pages still render their title as a tiny uppercase mono h1.
+ * Lift them into the display face so every page shares one voice. */
+main h1.font-mono {
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: -0.015em;
+  font-size: 32px;
+  font-weight: 450;
+  line-height: 1.08;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+main h1.font-mono > svg { width: 22px; height: 22px; opacity: 0.55; }
+main h1.font-mono + p,
+main h1.font-mono + div > p:first-child { font-size: 13.5px; line-height: 1.55; opacity: 0.7; max-width: 46rem; }
+main h2.font-mono.uppercase { letter-spacing: 0.12em; }
+
+/* ── Print ───────────────────────────────────────────────────────── */
+@media print {
+  html, body { background: #fff !important; height: auto !important; }
+  body { background-image: none !important; }
+  main { overflow: visible !important; }
+  * { box-shadow: none !important; }
+  @page { margin: 14mm; }
+}

@@ -53,10 +53,10 @@ function Cell({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-2.5 px-4 py-2 border-r border-brand-border/70 last:border-r-0 hover:bg-brand-surface-2 transition-colors min-w-0"
+      className="group flex items-center gap-2.5 px-4 py-2 border-r border-brand-border/70 last:border-r-0 hover:bg-brand-surface-2 transition-colors shrink-0 whitespace-nowrap"
     >
       <LiveDot tone={tone} size={7} pulse={!!pulse} />
-      <div className="leading-tight min-w-0">
+      <div className="leading-tight">
         <p className="font-mono text-[8.5px] uppercase tracking-[0.16em] text-white/40">{label}</p>
         <p className="font-mono text-[11.5px] font-semibold text-white num truncate">
           {value}
@@ -91,7 +91,7 @@ export function StatusBar() {
   const alertTone: Tone = !s ? 'mute' : s.critical_alerts > 0 ? 'crit' : s.open_alerts > 0 ? 'warn' : 'ok'
 
   return (
-    <div className="bg-brand-surface border-b border-brand-border flex items-stretch overflow-x-auto">
+    <div className="print:hidden bg-brand-surface border-b border-brand-border flex items-stretch overflow-x-auto">
       <div className="flex items-center gap-2 px-4 border-r border-brand-border/70 shrink-0 bg-white text-brand-surface">
         <span className="font-mono text-[9px] uppercase tracking-[0.2em] opacity-60">Station</span>
         <span className="font-display text-[15px] leading-none">{STATION_LABELS[station]}</span>

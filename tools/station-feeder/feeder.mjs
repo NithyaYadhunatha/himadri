@@ -21,6 +21,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import http from 'node:http'
 
 const args = process.argv.slice(2)
 const flag = (n) => args.includes(`--${n}`)
@@ -67,6 +68,44 @@ const diurnal = () => Math.sin(((hourOfDay() - 9) / 24) * 2 * Math.PI) // peaks 
 const state = new Map() // key -> number
 const poweredOff = new Set() // asset ids the operator has stopped from HQ
 const setpoints = new Map() // asset id -> last commanded setpoint
+
+// ── tiny control server for the in-app "Demo Director" ─────────────────────
+// GET /state -> { incident, cycle, assets }   POST /incident {name}  ("" clears)
+const control = { cycle: 0, assets: 0 }
+const INCIDENTS = ['freezer_warming', 'generator_fault', 'fuel_leak', 'coolant_overheat']
+function startControlServer() {
+  const port = Number(opt('control-port', 7070))
+  const server = http.createServer((req, res) => {
+    const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS' }
+    if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end() }
+    if (req.method === 'GET' && req.url?.startsWith('/state')) {
+      res.writeHead(200, { ...cors, 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ incident: incidentName(), incidents: INCIDENTS, ...control }))
+    }
+    if (req.method === 'POST' && req.url?.startsWith('/incident')) {
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        try {
+          const name = (JSON.parse(body || '{}').name ?? '').toString()
+          if (name && !INCIDENTS.includes(name)) throw new Error('unknown incident')
+          fs.writeFileSync(INCIDENT_FILE, name)
+          log('incident set from control server:', name || '(cleared)')
+          res.writeHead(200, { ...cors, 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: true, incident: name }))
+        } catch (e) {
+          res.writeHead(400, { ...cors, 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: false, error: String(e.message ?? e) }))
+        }
+      })
+      return
+    }
+    res.writeHead(404, cors)
+    res.end()
+  })
+  server.on('error', (e) => log('control server not started:', e.code ?? e.message))
+  server.listen(port, '127.0.0.1', () => log('control server on http://127.0.0.1:' + port))
+}
 
 function incidentName() {
   try {
@@ -129,7 +168,7 @@ function genValue(assetId, label, unit, base) {
     if (isFuel) {
       // litres per hour — ship/ice-shelf caches are stores, not day tanks
       let burn = /cache/.test(assetId) ? 0 : 7 + rnd() * 2
-      if (inc === 'fuel_leak' && /maitri-storage-fuel-tank-01/.test(assetId)) burn = 900
+      if (inc === 'fuel_leak' && /maitri-storage-fuel-tank-01/.test(assetId)) burn = 180000
       cur = Math.max(0, cur - burn * (CYCLE_S / 3600))
     } else {
       cur += 0.8 * (CYCLE_S / 60) + rnd() * 0.5
@@ -288,6 +327,8 @@ async function backfill(fleet) {
 async function main() {
   log(`HIMADRI station feeder → ${ORIGIN}  (cycle ${CYCLE_S}s${ONCE ? ', once' : ''})`)
   const fleet = await loadFleet()
+  control.assets = fleet.length
+  startControlServer()
   if (flag('backfill')) await backfill(fleet)
   else await seedFromLatest(fleet)
 
@@ -307,6 +348,7 @@ async function main() {
       await sleep(pace)
     }
     const inc = incidentName()
+    control.cycle = cycle
     log(`cycle ${cycle}: ${ok} ok / ${fail} failed${inc ? `  [incident: ${inc}]` : ''}`)
     if (ONCE) break
     const wait = Math.max(0, CYCLE_S * 1000 - (Date.now() - started))

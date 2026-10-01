@@ -95,7 +95,7 @@ export function Navbar() {
   const activeItem = findActiveItem(pathname, activeGroup.items)
 
   return (
-    <div className="flex flex-col w-full z-30 shrink-0 shadow-[0_4px_20px_rgba(28,31,51,0.10)] relative">
+    <div className="print:hidden flex flex-col w-full z-30 shrink-0 shadow-[0_4px_20px_rgba(28,31,51,0.10)] relative">
       {/* ─── Top Navbar ────────────────────────────────────────────── */}
       <header className="h-14 bg-brand-surface border-b border-brand-border grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-5 relative overflow-hidden">
         {/* Faint dot-grid texture — the header's original design language,

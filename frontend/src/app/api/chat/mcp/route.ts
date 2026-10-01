@@ -43,6 +43,8 @@ import { z } from 'zod'
 import { getCurrentMembership } from '@/lib/auth/rbac'
 import { callLLM } from '@/lib/llm/provider'
 import { listMcpTools, callMcpTool } from '@/lib/mcp/client'
+import { offlineReply } from '@/lib/server/copilot'
+import type { StationId } from '@/lib/constants'
 
 export const runtime = 'nodejs'
 
@@ -244,8 +246,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'message is required' }, { status: 400 })
   }
 
+  // No model configured: answer deterministically from live station data.
   if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) {
-    return NextResponse.json({ error: 'No LLM provider configured' }, { status: 500 })
+    const station: StationId = /bharati/i.test(message) ? 'bharati' : 'maitri'
+    return NextResponse.json({ reply: await offlineReply(message, station) })
   }
 
   const history = body.history ?? []
@@ -267,7 +271,10 @@ export async function POST(req: Request) {
     const reply = await replyFromContextOnly(message, history, fleetContext)
     return NextResponse.json({ reply })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'LLM request failed'
-    return NextResponse.json({ error: msg }, { status: 502 })
+    // Provider out of credits / unreachable: degrade to the deterministic
+    // live-data copilot rather than failing the operator.
+    console.error('[chat/mcp] LLM unavailable, using offline copilot:', err instanceof Error ? err.message : String(err))
+    const station: StationId = /bharati/i.test(message) ? 'bharati' : 'maitri'
+    return NextResponse.json({ reply: await offlineReply(message, station) })
   }
 }

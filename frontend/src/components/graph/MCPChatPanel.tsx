@@ -165,23 +165,23 @@ export function MCPChatPanel({ nodes = [] }: Props) {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-cyan flex items-center justify-center shadow-lg hover:bg-cyan/80 transition-colors"
-          aria-label="Open AI Chat"
+          className="print:hidden fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-white pl-4 pr-5 py-3 shadow-[0_8px_30px_-8px_rgba(28,31,51,0.55)] hover:-translate-y-0.5 transition-transform"
+          aria-label="Ask Himadri"
         >
-          <MessageSquare size={20} className="text-brand-bg" />
+          <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-marigold opacity-70 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-marigold" /></span>
+          <MessageSquare size={15} className="text-brand-surface" />
+          <span className="font-mono text-[11px] uppercase tracking-wider text-brand-surface">Ask Himadri</span>
         </button>
       )}
 
       {/* Expanded panel */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[380px] h-[500px] bg-brand-surface border border-brand-border rounded-lg shadow-2xl overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] max-w-[calc(100vw-2rem)] h-[540px] bg-brand-surface border border-brand-border rounded-2xl shadow-[0_24px_60px_-20px_rgba(28,31,51,0.45)] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-brand-border shrink-0 bg-brand-bg">
             <div className="flex items-center gap-2">
               <Bot size={14} className="text-cyan" />
-              <span className="font-mono text-xs font-bold text-white uppercase tracking-widest">
-                HIMADRI Agent
-              </span>
+              <span className="font-display text-[16px] text-white">Ask Himadri</span>
               {nodes.length > 0 && (
                 <span className="font-mono text-[9px] text-white/30">· {nodes.length} assets</span>
               )}
@@ -199,11 +199,14 @@ export function MCPChatPanel({ nodes = [] }: Props) {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
             {messages.length === 0 && !thinking && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <Bot size={28} className="text-white/20 mb-3" />
-                <p className="font-mono text-[11px] text-white/40 leading-relaxed">
-                  Ask me anything about Maitri or Bharati — asset health, dependencies,
-                  risk, logistics, or scenarios.
-                </p>
+                <Bot size={28} className="text-cyan/40 mb-3" />
+                <p className="font-display text-[18px] text-white leading-snug">Ask the station anything.</p>
+                <p className="font-mono text-[10.5px] text-white/45 leading-relaxed mt-1.5 mb-4">Answers come from live station data, with the source named.</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["How long will our fuel last?", "Any open alerts?", "Is the convoy ready to leave?", "Is the audit chain intact?", "How is the uplink?", "Weather outlook?"].map((q) => (
+                    <button key={q} onClick={() => setInput(q)} className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 font-mono text-[10.5px] text-white/70 hover:border-cyan hover:text-cyan transition">{q}</button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -247,7 +250,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about your infrastructure..."
+              placeholder="Ask about fuel, alerts, convoy, link…"
               rows={2}
               className="flex-1 resize-none bg-brand-surface border border-brand-border rounded px-3 py-2 text-[12px] font-sans text-white placeholder:text-white/30 focus:outline-none focus:border-cyan/50 transition-colors"
             />
