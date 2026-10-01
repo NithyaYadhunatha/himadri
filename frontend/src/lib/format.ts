@@ -27,7 +27,7 @@ export function clamp(n: number, lo: number, hi: number): number {
 
 /** Backend timestamps are UTC; some come with a trailing Z, some are naive. */
 export function toMs(iso: string): number {
-  return new Date(/Z$|[+-]dd:dd$/.test(iso) ? iso : iso + "Z").getTime()
+  return new Date(/Z$|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + "Z").getTime()
 }
 
 /** Naive-UTC ISO string (no Z) — the backend compares against naive DB columns and 500s on tz-aware input. */

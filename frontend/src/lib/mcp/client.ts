@@ -37,7 +37,7 @@ export interface McpTool {
 let clientPromise: Promise<Client> | null = null
 
 async function connect(): Promise<Client> {
-  const client = new Client({ name: 'inframind-web', version: '1.0.0' })
+  const client = new Client({ name: 'himadri-web', version: '1.0.0' })
   const transport = new StreamableHTTPClientTransport(new URL(`${API_ORIGIN}/mcp`), {
     requestInit: { headers: { Authorization: `Bearer ${API_TOKEN}` } },
   })

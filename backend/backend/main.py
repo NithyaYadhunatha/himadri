@@ -54,7 +54,7 @@ from backend.routers import (
     sync,
     websocket,
 )
-from backend.services import alert_engine, command_engine, digitaltwin_bridge, email_service, mqtt_ingest
+from backend.services import alert_engine, command_engine, digitaltwin_bridge, email_service, link_monitor, mqtt_ingest
 from backend.websocket.manager import ws_manager
 
 # Curated set of operation_ids exposed as MCP tools for the natural-language
@@ -214,6 +214,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("himadri.mqtt_disabled")
 
     detection_task = asyncio.create_task(_offline_detection_loop())
+    link_task = asyncio.create_task(link_monitor.run_forever()) if settings.LINK_CHECK_SECONDS > 0 else None
     logger.info("himadri.background_tasks_started")
 
     logger.info("himadri.startup_complete", host="0.0.0.0", port=8000)
@@ -226,6 +227,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await detection_task
     except asyncio.CancelledError:
         pass
+    if link_task is not None:
+        link_task.cancel()
+        try:
+            await link_task
+        except asyncio.CancelledError:
+            pass
 
     if settings.MQTT_ENABLED:
         await mqtt_ingest.stop()

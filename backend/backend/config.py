@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     NODE_ID: str = "himadri-local"
     LINK_STATE: str = "unknown"
     HQ_SYNC_URL: str = ""
+    # Seconds between uplink probes (services/link_monitor.py). Set to 0 to disable.
+    LINK_CHECK_SECONDS: int = 15
     SYNC_BYTES_BUDGET: int = 5_000_000
 
     # MCP server (exposes a curated set of read/report/simulation/analytics

@@ -42,6 +42,15 @@ class CommandExpired(Exception):
     pass
 
 
+def _same_person(a: str | None, b: str | None) -> bool:
+    """Identity comparison for the two-person rule. Case, surrounding whitespace
+    and repeated inner whitespace must not let one person pose as two."""
+    def norm(s: str | None) -> str:
+        return " ".join((s or "").casefold().split())
+
+    return norm(a) != "" and norm(a) == norm(b)
+
+
 async def create_command(
     db: AsyncSession,
     *,
@@ -91,7 +100,7 @@ async def approve_command(db: AsyncSession, command: Command, approver: str, app
         command.state = "expired"
         await db.flush()
         raise CommandExpired(f"Command {command.id} expired at {command.expires_at}")
-    if approver == command.issued_by:
+    if _same_person(approver, command.issued_by):
         raise SameUserApproval("A second, different authorised user must approve this command")
 
     command.approved_by = approver

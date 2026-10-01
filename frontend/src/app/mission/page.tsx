@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { useStationStore } from '@/store/useStationStore'
 import { STATIONS, STATION_LABELS, ROUTES, type StationId } from '@/lib/constants'
-import { useBackend } from '@/lib/hooks/usePoll'
+import { useBackend, usePoll } from '@/lib/hooks/usePoll'
 import { useFuelEndurance } from '@/lib/hooks/useFuel'
 import { Kpi, Panel, PageHead, Pill, Meter, LiveDot, Skeleton, type Tone } from '@/components/ui/kit'
 import { ago, fmtBytes, fmtNum } from '@/lib/format'
@@ -151,6 +151,9 @@ export default function MissionControlPage() {
   const audit = useBackend<AuditRow[]>('audit?limit=60', 20000)
   const commands = useBackend<Command[]>(`commands?station=${station}`, 15000)
   const sync = useBackend<SyncStatus>('sync/status', 12000)
+  const forecast = usePoll<{ points: { t: number; gust: number; wind: number }[] }>(`/api/environment/forecast?station=${station}`, 900000)
+  const convoys = useBackend<{ id: string; route_ref: string | null; state: string; medical_officer: string | null; assignments: { vehicle_asset_id: string | null }[] }[]>(`convoys?station=${station}`, 30000)
+  const vehicles = useBackend<{ id: string; subtype: string; status: string }[]>(`vehicles?station=${station}`, 30000)
   const chain = useBackend<AuditVerify>('audit/verify', 30000)
   const accuracy = useBackend<Accuracy>('model-accuracy/accuracy', 60000)
   const series = useBackend<unknown[]>('series', 120000)
@@ -169,6 +172,13 @@ export default function MissionControlPage() {
   )
   const pending = (commands.data ?? []).filter((c) => !['applied', 'failed', 'expired'].includes(c.state))
 
+  const next72 = (forecast.data?.points ?? []).filter((p) => p.t >= Date.now() && p.t <= Date.now() + 72 * 3600000)
+  const peakGust = next72.length ? Math.max(...next72.map((p) => p.gust)) : null
+  const wxBand = peakGust === null ? null : peakGust < 40 ? { l: 'Calm', t: 'ok' as Tone } : peakGust < 70 ? { l: 'Watch', t: 'warn' as Tone } : peakGust < 100 ? { l: 'Warning', t: 'crit' as Tone } : { l: 'Severe', t: 'crit' as Tone }
+  const convoy = convoys.data?.[0]
+  const ambulanceIds = new Set((vehicles.data ?? []).filter((v) => v.subtype === 'ambulance').map((v) => v.id))
+  const convoyHasAmbulance = !!convoy && convoy.assignments.some((a) => a.vehicle_asset_id && ambulanceIds.has(a.vehicle_asset_id))
+  const convoyGo = !!convoy && !!convoy.medical_officer && convoyHasAmbulance
   const coverage = s ? Math.round((s.ok_assets / Math.max(1, s.total_assets)) * 100) : null
 
   return (
@@ -241,6 +251,31 @@ export default function MissionControlPage() {
             hint={chain.data ? (chain.data.valid ? 'SHA-256 chain intact' : 'CHAIN BROKEN') : 'verifying…'}
           />
         </div>
+
+        {/* Cross-domain situation board — weather × logistics × fuel × power in one sentence */}
+        <Panel className="mt-5" eyebrow="Cross-domain correlation" title="Situation board" right={<Pill tone="primary">weather × convoy × fuel × power</Pill>}>
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {[
+              { k: "Weather · next 72 h", v: peakGust !== null ? `${peakGust.toFixed(0)} km/h` : "—", s: wxBand ? wxBand.l : "loading", tone: (wxBand?.t ?? "mute") as Tone, href: ROUTES.ENVIRONMENT, d: "peak gust forecast at the station" },
+              { k: "Resupply convoy", v: convoy ? (convoyGo ? "GO" : "NO-GO") : "none", s: convoy ? (convoyGo ? "crew & escort complete" : !convoy.medical_officer ? "no medical officer" : "ambulance not assigned") : "no convoy planned", tone: (convoy ? (convoyGo ? "ok" : "crit") : "mute") as Tone, href: ROUTES.LOGISTICS, d: "medical officer + ambulance escort" },
+              { k: "Fuel margin", v: margin !== null ? `${margin >= 0 ? "+" : ""}${fmtNum(margin)} d` : "—", s: margin === null ? "reading tanks" : margin >= 30 ? "comfortable" : margin >= 0 ? "thin" : "shortfall", tone: (margin === null ? "mute" : margin >= 30 ? "ok" : margin >= 0 ? "warn" : "crit") as Tone, href: ROUTES.ENERGY, d: `endurance vs ${isolation} d isolation` },
+              { k: "Power", v: energy.data?.generation_kw != null ? `${fmtNum(energy.data.generation_kw, 0)} kW` : "—", s: s && s.critical_alerts === 0 ? "all generators reporting" : "attention", tone: (s && s.critical_alerts === 0 ? "ok" : "warn") as Tone, href: ROUTES.ENERGY, d: "current generation" },
+            ].map((c) => (
+              <Link key={c.k} href={c.href} className="group rounded-xl border border-brand-border bg-brand-surface-2/60 p-4 hover:border-cyan transition">
+                <p className="eyebrow">{c.k}</p>
+                <p className={`font-display text-[34px] leading-none mt-1.5 num ${c.tone === "ok" ? "text-emerald" : c.tone === "warn" ? "text-amber" : c.tone === "crit" ? "text-crimson" : "text-white"}`}>{c.v}</p>
+                <p className="font-mono text-[11px] text-white mt-2">{c.s}</p>
+                <p className="font-mono text-[10px] text-white/45">{c.d}</p>
+              </Link>
+            ))}
+          </div>
+          <p className="mt-4 text-[13.5px] text-white/75 leading-relaxed rounded-xl bg-brand-surface-2/70 border border-brand-border px-4 py-3">
+            <b className="text-white">Briefing:</b>{" "}
+            {convoy ? (convoyGo ? "The resupply convoy is crewed and escorted. " : `The resupply convoy is NO-GO — ${!convoy.medical_officer ? "no medical officer is assigned" : "the ambulance escort is not assigned"}. `) : ""}
+            {wxBand ? (wxBand.t === "ok" ? "Weather is calm for the next 72 hours. " : `Gusts to ${peakGust?.toFixed(0)} km/h are forecast within 72 hours (${wxBand.l.toLowerCase()}) — hold outdoor work and convoy movement. `) : ""}
+            {margin !== null ? (margin >= 0 ? `Fuel covers the isolation window with ${fmtNum(margin)} days to spare.` : `Fuel falls ${fmtNum(-margin)} days short of the isolation window.`) : ""}
+          </p>
+        </Panel>
 
         <div className="grid xl:grid-cols-[1.35fr_1fr] gap-5 mt-5">
           {/* LEFT COLUMN */}

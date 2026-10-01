@@ -14,10 +14,15 @@
 import { NextResponse } from 'next/server'
 import { backendFetch, forwardToBackend, requireMembership } from '@/lib/apiProxy'
 import { isStationRequestAllowed } from '@/lib/graph/departmentScope'
+import { DEV_BYPASS_AUTH } from '@/lib/auth/devBypass'
+import { hasPermission } from '@/lib/auth/permissions'
 
 type Params = { params: Promise<{ id: string }> }
 
-interface BackendCommandMin { station_id: string }
+interface BackendCommandMin { station_id: string; issued_by: string }
+
+const norm = (s: string) => s.trim().split(/\s+/).join(' ').toLowerCase()
+const same = (a: string, b: string) => norm(a) === norm(b)
 
 export async function POST(req: Request, { params }: Params) {
   const access = await requireMembership()
@@ -39,5 +44,25 @@ export async function POST(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Command not found' }, { status: 404 })
   }
 
+  // Outside local dev there is exactly one trustworthy identity: the signed-in
+  // session. The approver name/role in the request body are ignored, so one
+  // person cannot approve their own command by typing another name, and only
+  // roles allowed to co-approve life-safety actions may do so.
+  if (!DEV_BYPASS_AUTH) {
+    const m = access.membership
+    if (!hasPermission(m.role, 'approveLifeSafetyCommand')) {
+      return NextResponse.json({ error: 'Your role may not approve life-safety commands' }, { status: 403 })
+    }
+    const approver = m.name || m.email
+    if (same(approver, command.issued_by) || same(m.email, command.issued_by)) {
+      return NextResponse.json({ error: 'A second, different authorised user must approve this command' }, { status: 400 })
+    }
+    const res = await backendFetch(`/commands/${encodeURIComponent(id)}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ approver, approver_role: m.role }),
+    })
+    const text = await res.text()
+    return new NextResponse(text, { status: res.status, headers: { 'Content-Type': 'application/json' } })
+  }
   return forwardToBackend(req, `/commands/${encodeURIComponent(id)}/approve`, { method: 'POST' })
 }

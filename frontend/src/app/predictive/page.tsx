@@ -685,7 +685,7 @@ function DriftSection({ drift, onRetrain }: {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="font-mono text-3xl font-bold" style={{ color: driftColor, textShadow: `0 0 20px ${driftColor}55` }}>
-              {drift.driftScore}
+              {drift.driftScore ?? '—'}
             </p>
             <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Drift Score</p>
           </div>
