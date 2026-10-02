@@ -22,12 +22,29 @@ export type { ActiveMembership } from '@/lib/auth/rbacTypes'
 const CLERK_METADATA_AUTH_FALLBACK = process.env.CLERK_METADATA_AUTH_FALLBACK === 'true'
 
 async function getClerkMetadataMembership(clerkUserId: string): Promise<ActiveMembership | null> {
-  const clerkUser = await currentUser()
-  if (!clerkUser) return null
+  let email = ''
+  let name = clerkUserId
+  let publicMetadata: Record<string, unknown> | undefined
 
-  const email = clerkUser.primaryEmailAddress?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress ?? ''
-  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email || clerkUserId
-  const state = resolveInitialMembershipState(email, clerkUser.publicMetadata)
+  try {
+    const clerkUser = await currentUser()
+    if (!clerkUser) return null
+
+    email = clerkUser.primaryEmailAddress?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress ?? ''
+    name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email || clerkUserId
+    publicMetadata = clerkUser.publicMetadata
+  } catch (error) {
+    // auth() has already verified the signed Clerk session before this helper
+    // runs. If Clerk's Backend API is unavailable, keep the authenticated user
+    // in the app's read-only default role rather than crashing the Server
+    // Component render. Never infer an admin/invited role without metadata.
+    console.error(
+      '[auth] Clerk user lookup failed; using read-only membership fallback:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+  }
+
+  const state = resolveInitialMembershipState(email, publicMetadata)
 
   if (state.status !== 'ACTIVE' || !state.role || !state.department) return null
 
