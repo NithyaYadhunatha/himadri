@@ -24,7 +24,7 @@ import '@xyflow/react/dist/style.css'
 import { LayoutGrid, Lock } from 'lucide-react'
 import { GraphNode, type GraphNodeRenderData } from './GraphNode'
 import { layoutWithDagre, layoutCircular } from '@/lib/graph/layout'
-import { canUseZoneBands, computeZoneBandedLayout, type ZoneLayoutBox } from '@/lib/graph/zoneLayout'
+import { canUseZoneBands, computeCategoryLayout, computeZoneBandedLayout, type ZoneLayoutBox } from '@/lib/graph/zoneLayout'
 import { computeBlastRadius, computeDependencyChain } from '@/lib/graph/blastRadius'
 import type { GraphNode as GraphNodeData, GraphEdge, ZoneMeta } from '@/types/graph'
 import { HEALTH_COLORS } from '@/lib/constants'
@@ -44,10 +44,16 @@ function runLayout(
   preset: LayoutPreset,
   zones: ZoneMeta[] | undefined,
 ): { nodes: Node[]; boxes: ZoneLayoutBox[] } {
-  if (preset === 'TB' && canUseZoneBands(graphNodesData, zones)) {
+  const zoned = graphNodesData.filter((n) => !!n.zoneId).length
+  if (preset === 'TB' && canUseZoneBands(graphNodesData, zones) && zoned >= graphNodesData.length * 0.5) {
     return computeZoneBandedLayout(built, graphNodesData, zones)
   }
   if (preset === 'circular') return { nodes: layoutCircular(built), boxes: [] }
+  // No zone data and a sparse dependency graph: dagre would stack every asset
+  // into one rank, so cluster by category instead.
+  if (preset === 'TB' && graphNodesData.length > 12 && edges.length < graphNodesData.length / 2) {
+    return computeCategoryLayout(built, graphNodesData)
+  }
   return { nodes: layoutWithDagre(built, toStructuralEdges(edges), { direction: preset === 'LR' ? 'LR' : 'TB' }), boxes: [] }
 }
 
@@ -70,16 +76,16 @@ function ZoneBandOverlay({ boxes }: { boxes: ZoneLayoutBox[] }) {
             top: box.y,
             width: box.width,
             height: box.height,
-            border: box.kind === 'band' ? '2px dashed #1868A055' : '1.5px dashed #6E8AA077',
+            border: box.kind === 'band' ? '2px dashed #1D1C9355' : '1.5px dashed #62607977',
             borderRadius: box.kind === 'band' ? 10 : 6,
-            background: box.kind === 'band' ? 'rgba(24,104,160,0.05)' : 'rgba(110,138,160,0.05)',
+            background: box.kind === 'band' ? 'rgba(29,28,147,0.05)' : 'rgba(110,138,160,0.05)',
           }}
         >
           <div
             className={`absolute -top-1 left-2.5 -translate-y-full font-mono uppercase tracking-wider flex items-center gap-1 rounded px-1.5 py-0.5 ${
               box.kind === 'band'
-                ? 'text-[11px] text-[#1868A0] font-bold bg-[#F7FBFDee] border border-[#1868A033]'
-                : 'text-[9px] text-[#16283A99] bg-[#F7FBFDcc]'
+                ? 'text-[11px] text-[#1D1C93] font-bold bg-[#FFFFFFee] border border-[#1D1C9333]'
+                : 'text-[9px] text-[#08033099] bg-[#FFFFFFcc]'
             }`}
           >
             {box.restricted && <Lock size={box.kind === 'band' ? 9 : 8} />}
@@ -172,8 +178,8 @@ function toFlowEdge(
   const color = isDependencyEdge
     ? '#00D4FF'
     : isImpactEdge
-      ? '#B8720F'
-      : score >= 80 ? '#1F9E6D' : score >= 50 ? '#B8720F' : '#B23A2E'
+      ? '#D4820A'
+      : score >= 80 ? '#0F8A6A' : score >= 50 ? '#D4820A' : '#C23B3B'
   const isPathHighlighted = isDependencyEdge || isImpactEdge
 
   return {
@@ -182,8 +188,8 @@ function toFlowEdge(
     target: e.target,
     type: 'smoothstep',
     label: showLabel ? e.type : undefined,
-    labelStyle: showLabel ? { fill: '#16283A66', fontSize: 9, fontFamily: 'var(--font-mono)' } : undefined,
-    labelBgStyle: showLabel ? { fill: '#F7FBFD', fillOpacity: 0.9 } : undefined,
+    labelStyle: showLabel ? { fill: '#08033066', fontSize: 9, fontFamily: 'var(--font-mono)' } : undefined,
+    labelBgStyle: showLabel ? { fill: '#FFFFFF', fillOpacity: 0.9 } : undefined,
     style: {
       stroke: color,
       strokeWidth: isSelected || isPathHighlighted ? 2.75 : 2,
@@ -256,7 +262,7 @@ function ImpactLegend({ dependencyCount, impactCount }: { dependencyCount: numbe
           <span className="font-mono text-[9px] text-white/60">Depends on ({dependencyCount})</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#B8720F' }} />
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#D4820A' }} />
           <span className="font-mono text-[9px] text-white/60">Impacted if it fails ({impactCount})</span>
         </div>
       </div>
@@ -522,11 +528,11 @@ function FlowCanvasInner({
         nodesConnectable={!readOnly}
         elementsSelectable
         proOptions={{ hideAttribution: true }}
-        style={{ background: '#E7F1F8' }}
+        style={{ background: '#BBB8CD' }}
       >
         {/* Keep the actual crossing-line grid (dots read as a different,
             less "graph paper" texture) but faded well below the original
-            solid #B9D6E6 — that saturation was visually loud enough to
+            solid #8E8EB0 — that saturation was visually loud enough to
             compete with the nodes themselves instead of sitting behind
             them. Alpha, not a duller hex, so it stays proportionally light
             at any zoom level. */}
@@ -534,7 +540,7 @@ function FlowCanvasInner({
           variant={BackgroundVariant.Lines}
           gap={40}
           size={1}
-          color="#B9D6E655"
+          color="#8E8EB055"
         />
         <ViewportPortal>
           <ZoneBandOverlay boxes={zoneBoxes} />
@@ -548,9 +554,9 @@ function FlowCanvasInner({
           nodeColor={(node) => {
             const data = node.data as unknown as GraphNodeData
             if (colorMode === 'health') {
-              return HEALTH_COLORS[data?.health] ?? '#6E8AA0'
+              return HEALTH_COLORS[data?.health] ?? '#626079'
             }
-            return HEALTH_COLORS[data?.health] ?? '#6E8AA0'
+            return HEALTH_COLORS[data?.health] ?? '#626079'
           }}
           maskColor="rgba(217, 233, 242,0.8)"
         />

@@ -1,78 +1,79 @@
 @import "tailwindcss";
 
-/* ── Tailwind v4: Custom theme tokens ─────────────────────────── */
+/* ── Tailwind v4: design tokens ───────────────────────────────── */
 /*
- * Antarctic ice-blue theme (HIMADRI). Token NAMES are kept as-is (brand-*,
- * cyan, amber, crimson, emerald, white) so this is a value-only repaint —
- * every component already styled through these tokens (the vast majority of
- * the app) picks up the new palette automatically, with zero JSX changes.
- * `cyan` is kept as the name for the primary interactive accent — it is
- * genuinely a cool blue again here (glacier blue), unlike the previous
- * cream/forest-green repaint where the name had drifted from the color.
+ * HIMADRI x tweakcn "nyxpop" (light): lavender field, near-black navy ink, deep
+ * indigo accent, big radii, indigo-tinted shadows, Bebas Neue display type and
+ * Fira Code labels. Token NAMES are unchanged so every component repaints.
+ * Source: https://tweakcn.com/r/themes/cmp4sli94000004l4c91070io
  */
 @theme {
-  /* Brand colors — cool ice/glacier surface hierarchy */
-  --color-brand-bg: #E7F1F8;        /* page background — pale ice blue */
-  --color-brand-surface: #F7FBFD;   /* card surface — near-white, lightest, "raised" (snow) */
-  --color-brand-surface-2: #EDF5FA; /* secondary panel */
-  --color-brand-surface-3: #D9E9F2; /* tertiary / hover / elevated */
-  --color-brand-border: #B9D6E6;    /* soft glacier-blue border */
+  --color-brand-bg: #BBB8CD;        /* paper */
+  --color-brand-surface: #FFFFFF;   /* raised card */
+  --color-brand-surface-2: #D5D2E2; /* inset panel */
+  --color-brand-surface-3: #C8C5D8; /* hover / elevated */
+  --color-brand-border: #8E8EB0;    /* hairline */
 
-  /* Core text color — `white`/`text-white` etc. render as deep slate-navy
-     ink on the ice surfaces above, so every existing text-white/NN opacity
-     utility keeps working as "muted ink" with no rewrite needed. */
-  --color-white: #16283A;
+  /* ink: 'white' renders as deep ink; text-white/NN stays muted ink */
+  --color-white: #080330;
 
-  /* Accent palette */
-  --color-cyan: #1868A0;         /* primary accent — glacier/polar blue */
-  --color-cyan-dim: #1868A033;
-  --color-cyan-glow: #1868A066;
-  --color-amber: #B8720F;        /* warning — kept warm on purpose for contrast against the cool blue field */
-  --color-amber-dim: #B8720F33;
-  --color-crimson: #B23A2E;      /* critical — brick red, unchanged: alarms stay warm regardless of theme */
-  --color-crimson-dim: #B23A2E33;
-  --color-emerald: #1F9E6D;      /* status: healthy — cool sea-green so it reads distinct from the primary blue */
-  --color-emerald-dim: #1F9E6D33;
-  --color-violet-brand: #6E7FCE; /* rare secondary accent (chart pills), cooled to sit with the ice palette */
+  --color-cyan: #1D1C93;            /* primary / accent — deep indigo */
+  --color-cyan-dim: #1D1C9333;
+  --color-cyan-glow: #1D1C9366;
+  --color-amber: #D4820A;           /* warning */
+  --color-amber-dim: #D4820A33;
+  --color-crimson: #C23B3B;         /* critical */
+  --color-crimson-dim: #C23B3B33;
+  --color-emerald: #0F8A6A;         /* healthy */
+  --color-emerald-dim: #0F8A6A33;
+  --color-violet-brand: #A04FB8;    /* secondary data accent */
+  --color-marigold: #F2A71B;        /* brand highlight */
+  --color-marigold-dim: #F2A71B2E;
 
-  /* Fonts */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', Menlo, Monaco, monospace;
+  /* body stays Inter for dense dashboards; set to var(--font-bebas) for the theme's literal Bebas-everywhere look */
+  --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-mono: var(--font-fira), 'Fira Code', Menlo, Monaco, monospace;
+  --font-display: var(--font-bebas), 'Bebas Neue', Impact, sans-serif;
 
-  /* Border radius — softened from the old sharp 4px "terminal" look to a
-     warmer, more beautified feel that matches the cream/beige palette. */
-  --radius: 8px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 14px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-cyan-glow: 0 0 20px #1868A033;
-  --shadow-amber-glow: 0 0 20px #B8720F33;
-  --shadow-crimson-glow: 0 0 20px #B23A2E33;
-  --shadow-emerald-glow: 0 0 20px #1F9E6D33;
+  /* soft, paper-like elevation instead of neon glow */
+  --shadow-cyan-glow: 0 1px 2px #1D1C9322, 0 6px 18px -6px #1D1C9338;
+  --shadow-amber-glow: 0 1px 2px #D4820A22, 0 6px 18px -6px #D4820A38;
+  --shadow-crimson-glow: 0 1px 2px #C23B3B22, 0 6px 18px -6px #C23B3B38;
+  --shadow-emerald-glow: 0 1px 2px #0F8A6A22, 0 6px 18px -6px #0F8A6A38;
+  --shadow-panel: 0px 4px 15px 0px rgba(13,5,73,0.30), 0px 1px 2px -1px rgba(13,5,73,0.30);
 
-  /* Animations */
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-shimmer: shimmer 2s infinite;
-  --animate-fade-in: fadeIn 0.2s ease-out;
+  --animate-fade-in: fadeIn 0.25s ease-out;
   --animate-slide-in-right: slideInRight 0.3s ease-out;
   --animate-glow-pulse: glowPulse 2s ease-in-out infinite;
+  --animate-flow: flow 1.2s linear infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both;
 }
 
 /* ── Base ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
+  color-scheme: light;
   height: 100%;
-  background-color: #E7F1F8;
-  color: #16283A;
+  background-color: #BBB8CD;
+  color: #080330;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans);
+}
+
+body {
+  letter-spacing: 0.01em;
 }
 
 /* ── Keyframes ────────────────────────────────────────────────── */
@@ -91,6 +92,9 @@ html, body {
   100% { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes flow { to { stroke-dashoffset: -16; } }
+@keyframes rise { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+
 @keyframes glowPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -99,9 +103,15 @@ html, body {
 /* ── Utility classes ──────────────────────────────────────────── */
 .font-sans { font-family: var(--font-sans); }
 .font-mono { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); letter-spacing: 0.05em; font-weight: 400; }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
+.eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(8,3,48,0.5); }
+.panel { background: var(--color-brand-surface); border: 1.5px solid #0D0549; border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
+.stagger > * { animation: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both; }
+.stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.1s}.stagger > *:nth-child(4){animation-delay:.15s}.stagger > *:nth-child(5){animation-delay:.2s}.stagger > *:nth-child(6){animation-delay:.25s}.stagger > *:nth-child(n+7){animation-delay:.3s}
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #EDF5FA 25%, #D9E9F2 50%, #EDF5FA 75%);
+  background: linear-gradient(90deg, #D5D2E2 25%, #C8C5D8 50%, #D5D2E2 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -113,43 +123,71 @@ html, body {
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #E7F1F8; }
-::-webkit-scrollbar-thumb { background: #B9D6E6; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #93BFD8; }
+::-webkit-scrollbar-track { background: #BBB8CD; }
+::-webkit-scrollbar-thumb { background: #8E8EB0; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #7B7BA0; }
 
 /* ── React Flow overrides ─────────────────────────────────────── */
 .react-flow__attribution { display: none; }
 .react-flow__controls button {
-  background: #F7FBFD !important;
-  border-color: #B9D6E6 !important;
-  color: rgba(22,40,58,0.6) !important;
+  background: #FFFFFF !important;
+  border-color: #8E8EB0 !important;
+  color: rgba(8,3,48,0.6) !important;
 }
 .react-flow__controls button:hover {
-  background: #EDF5FA !important;
-  color: #16283A !important;
+  background: #D5D2E2 !important;
+  color: #080330 !important;
 }
-.react-flow__minimap { border-color: #B9D6E6 !important; }
+.react-flow__minimap { border-color: #8E8EB0 !important; }
 .react-flow__handle { opacity: 0 !important; }
 
 /* ── Recharts overrides ───────────────────────────────────────── */
 .recharts-tooltip-wrapper { outline: none; }
 .recharts-default-tooltip {
-  background: #F7FBFD !important;
-  border: 1px solid #B9D6E6 !important;
+  background: #FFFFFF !important;
+  border: 1px solid #8E8EB0 !important;
   border-radius: 8px !important;
-  color: #16283A !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  color: #080330 !important;
+  font-family: 'Fira Code', monospace !important;
   font-size: 11px !important;
 }
 
 /* ── Selection ────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(24, 104, 160, 0.2);
-  color: #16283A;
+  background: rgba(29,28,147, 0.2);
+  color: #080330;
 }
 
 /* ── Focus ring ───────────────────────────────────────────────── */
 :focus-visible {
-  outline: 1px solid rgba(24, 104, 160, 0.5);
+  outline: 1px solid rgba(29,28,147, 0.5);
   outline-offset: 2px;
+}
+
+/* ── Legacy page headings ─────────────────────────────────────────
+ * Older pages still render their title as a tiny uppercase mono h1.
+ * Lift them into the display face so every page shares one voice. */
+main h1.font-mono {
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: -0.015em;
+  font-size: 32px;
+  font-weight: 450;
+  line-height: 1.08;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+main h1.font-mono > svg { width: 22px; height: 22px; opacity: 0.55; }
+main h1.font-mono + p,
+main h1.font-mono + div > p:first-child { font-size: 13.5px; line-height: 1.55; opacity: 0.7; max-width: 46rem; }
+main h2.font-mono.uppercase { letter-spacing: 0.12em; }
+
+/* ── Print ───────────────────────────────────────────────────────── */
+@media print {
+  html, body { background: #fff !important; height: auto !important; }
+  body { background-image: none !important; }
+  main { overflow: visible !important; }
+  * { box-shadow: none !important; }
+  @page { margin: 14mm; }
 }

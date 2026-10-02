@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter, Fira_Code, Bebas_Neue } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
@@ -11,14 +11,21 @@ const inter = Inter({
   display: 'swap',
 })
 
-const jetbrainsMono = JetBrains_Mono({
+const bebas = Bebas_Neue({
   subsets: ['latin'],
-  variable: '--font-jetbrains',
+  weight: '400',
+  variable: '--font-bebas',
+  display: 'swap',
+})
+
+const fira = Fira_Code({
+  subsets: ['latin'],
+  variable: '--font-fira',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'HIMADRI — Antarctic Station Digital Twin',
+  title: 'HIMADRI — Station Command & Digital Twin',
   description:
     'HIMADRI is a digital twin and remote-management platform for Maitri and Bharati, India’s two Antarctic research stations, built for Smart India Hackathon 2026 (PS 26060, ISRO/NCPOR).',
   keywords: ['digital twin', 'Antarctica', 'Maitri', 'Bharati', 'NCPOR', 'ISRO', 'HIMADRI'],
@@ -30,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const body = (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fira.variable} ${bebas.variable}`}>
       <body className="font-sans bg-brand-bg text-white antialiased">
         <DashboardLayout>{children}</DashboardLayout>
       </body>
@@ -49,16 +56,16 @@ export default function RootLayout({
         // Clerk's default (light) base theme fits the app's ice-blue light
         // theme; `variables`/`elements` below re-skin it to match exactly.
         variables: {
-          colorPrimary: '#1868A0',
-          colorBackground: '#D9E9F2',
-          colorInput: '#E7F1F8',
-          colorInputForeground: '#16283A',
-          colorForeground: '#16283A',
-          colorMutedForeground: 'rgba(22,40,58,0.5)',
-          colorNeutral: '#16283A',
-          colorDanger: '#B23A2E',
-          colorSuccess: '#1F9E6D',
-          colorWarning: '#B8720F',
+          colorPrimary: '#1D1C93',
+          colorBackground: '#C8C5D8',
+          colorInput: '#BBB8CD',
+          colorInputForeground: '#080330',
+          colorForeground: '#080330',
+          colorMutedForeground: 'rgba(8,3,48,0.5)',
+          colorNeutral: '#080330',
+          colorDanger: '#C23B3B',
+          colorSuccess: '#0F8A6A',
+          colorWarning: '#D4820A',
           borderRadius: '8px',
           fontFamily: 'Inter, system-ui, sans-serif',
         },

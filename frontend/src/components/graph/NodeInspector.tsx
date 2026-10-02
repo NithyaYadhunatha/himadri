@@ -158,7 +158,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
     }
   }
 
-  const healthColor = node ? HEALTH_COLORS[node.health] : '#6E8AA0'
+  const healthColor = node ? HEALTH_COLORS[node.health] : '#626079'
   const dependencyNodes = node ? node.dependencies.map((id) => allNodes.find((candidate) => candidate.id === id)).filter((candidate): candidate is GraphNode => Boolean(candidate)) : []
   const dependentNodes = node ? node.dependents.map((id) => allNodes.find((candidate) => candidate.id === id)).filter((candidate): candidate is GraphNode => Boolean(candidate)) : []
 

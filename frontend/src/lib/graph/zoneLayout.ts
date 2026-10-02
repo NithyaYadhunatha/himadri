@@ -259,3 +259,66 @@ export function computeZoneBandedLayout(
 
   return { nodes, boxes: result.boxes }
 }
+
+// ─── Category-cluster layout ────────────────────────────────────────────────
+//
+// Used when assets carry no zone ids and the dependency graph is sparse, where
+// dagre would stack everything into one long rank. Groups assets by category
+// into labelled clusters packed left-to-right, wrapping into rows.
+
+const CAT_ORDER = ['power', 'heating', 'water', 'storage', 'waste', 'vehicle', 'instrument', 'medical', 'comms', 'structure', 'custom']
+const CAT_LABEL: Record<string, string> = {
+  power: 'POWER',
+  heating: 'HEATING',
+  water: 'WATER',
+  storage: 'STORAGE & FUEL',
+  waste: 'WASTE',
+  vehicle: 'VEHICLES',
+  instrument: 'SCIENCE INSTRUMENTS',
+  medical: 'MEDICAL',
+  comms: 'COMMUNICATIONS',
+  structure: 'STRUCTURE',
+  custom: 'OTHER',
+}
+
+export function computeCategoryLayout(
+  built: Node[],
+  graphNodesData: GraphNodeData[],
+): { nodes: Node[]; boxes: ZoneLayoutBox[] } {
+  const groups = new Map<string, GraphNodeData[]>()
+  for (const n of graphNodesData) {
+    const key = CAT_ORDER.includes(n.type as string) ? (n.type as string) : 'custom'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(n)
+  }
+  const ordered = [...groups.entries()].sort((a, b) => CAT_ORDER.indexOf(a[0]) - CAT_ORDER.indexOf(b[0]))
+
+  const MAX_ROW_W = 1500
+  const positions = new Map<string, { x: number; y: number }>()
+  const boxes: ZoneLayoutBox[] = []
+  let x = 0
+  let y = 0
+  let rowH = 0
+  for (const [cat, list] of ordered) {
+    const cols = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(list.length))))
+    const grid = clusterGridSize(list.length)
+    const g = { ...grid, cols, width: cols * NODE_W + (cols - 1) * NODE_GAP, height: Math.ceil(list.length / cols) * NODE_H + (Math.ceil(list.length / cols) - 1) * NODE_GAP }
+    const boxW = g.width + CLUSTER_PAD * 2
+    const boxH = g.height + CLUSTER_PAD * 2 + CLUSTER_LABEL_H
+    if (x > 0 && x + boxW > MAX_ROW_W) {
+      x = 0
+      y += rowH + CLUSTER_GAP
+      rowH = 0
+    }
+    boxes.push({ id: `cat-${cat}`, label: `${CAT_LABEL[cat] ?? cat.toUpperCase()} · ${list.length}`, x, y, width: boxW, height: boxH, kind: 'cluster' })
+    const packed = packCluster(list.map((n) => n.id), x + CLUSTER_PAD, y + CLUSTER_PAD + CLUSTER_LABEL_H, cols)
+    for (const [id, p] of packed) positions.set(id, p)
+    x += boxW + CLUSTER_GAP
+    rowH = Math.max(rowH, boxH)
+  }
+
+  return {
+    nodes: built.map((n) => ({ ...n, position: positions.get(n.id) ?? n.position ?? { x: 0, y: 0 } })),
+    boxes,
+  }
+}

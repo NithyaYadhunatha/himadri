@@ -1,154 +1,140 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { AlertTriangle, Gauge, X } from 'lucide-react'
-import { ErrorState, InlineLoader, EmptyState } from '@/components/ui/Loader'
-import { riskService, type RiskCell } from '@/services/risk.service'
+// Risk heatmap — a real matrix: one row per subsystem, one column per risk
+// factor, each cell shaded by its score. Click any cell for the evidence the
+// backend attached to it. The right-hand column is the weighted total.
+import { useMemo, useState } from 'react'
 import { useStationStore } from '@/store/useStationStore'
+import { STATION_LABELS } from '@/lib/constants'
+import { useBackend } from '@/lib/hooks/usePoll'
+import { Panel, PageHead, Pill, Skeleton, TONE_HEX, type Tone } from '@/components/ui/kit'
+import { ago } from '@/lib/format'
 
-function scoreColor(score: number): string {
-  if (score >= 70) return '#B23A2E'
-  if (score >= 40) return '#B8720F'
-  return '#1F9E6D'
+interface Factor {
+  name: string
+  label: string
+  score: number
+  weight: number
+  evidence: string
+}
+interface Row {
+  id: string
+  subsystem: string
+  score: number
+  factors: Factor[]
+  computed_at: string
 }
 
-// Heat-scaled alpha: the tile's fill saturation rises with score (a real
-// heatmap reads by intensity, not just hue) — a 12 at 8% opacity and a 90 at
-// ~42% opacity look meaningfully different at a glance, not just "green vs
-// red text on the same pale card."
-function heatAlphaHex(score: number): string {
-  const alpha = Math.round(18 + (Math.min(100, Math.max(0, score)) / 100) * 44)
-  return alpha.toString(16).padStart(2, '0')
-}
-
-function RiskCellTile({ cell, onClick }: { cell: RiskCell; onClick: () => void }) {
-  const color = scoreColor(cell.score)
-  const fillAlpha = heatAlphaHex(cell.score)
-  return (
-    <button
-      onClick={onClick}
-      className="group relative flex flex-col items-start gap-2.5 rounded-lg border p-4 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg"
-      style={{ borderColor: `${color}55`, background: `linear-gradient(160deg, ${color}${fillAlpha} 0%, ${color}0c 100%)` }}
-    >
-      {/* Heat bar — a literal intensity strip along the top, reinforcing the
-          "heatmap" reading beyond just the tinted background. */}
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: color, opacity: cell.score / 100 }} />
-      <div className="flex items-center justify-between w-full">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-white/60">{cell.label}</span>
-        <Gauge size={13} style={{ color }} />
-      </div>
-      <span className="font-mono text-4xl font-bold leading-none" style={{ color }}>{Math.round(cell.score)}</span>
-      <div className="w-full h-1.5 rounded-full bg-brand-bg/60 overflow-hidden">
-        <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, cell.score)}%`, background: color }} />
-      </div>
-      <span className="font-mono text-[9px] text-white/30 uppercase tracking-wider">
-        {cell.factors.length} factor{cell.factors.length === 1 ? '' : 's'} · click to explain
-      </span>
-    </button>
-  )
+const tone = (n: number): Tone => (n >= 66 ? 'crit' : n >= 40 ? 'warn' : 'ok')
+const cellBg = (n: number) => {
+  const c = n >= 66 ? '194,59,59' : n >= 40 ? '212,130,10' : '15,138,106'
+  return `rgba(${c},${(0.08 + (Math.min(100, n) / 100) * 0.5).toFixed(2)})`
 }
 
 export default function RiskHeatmapPage() {
   const station = useStationStore((s) => s.station)
-  const [cells, setCells] = useState<RiskCell[]>([])
-  const [generatedAt, setGeneratedAt] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [selected, setSelected] = useState<RiskCell | null>(null)
+  const risk = useBackend<Row[]>(`analytics/risk?station=${station}`, 30000)
+  const [sel, setSel] = useState<{ row: Row; factor: Factor } | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const heatmap = await riskService.getHeatmap(station)
-      setCells(heatmap.cells)
-      setGeneratedAt(heatmap.generated_at)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load risk heatmap')
-    } finally {
-      setLoading(false)
-    }
-  }, [station])
-
-  useEffect(() => { load() }, [load])
+  const rows = useMemo(() => [...(risk.data ?? [])].sort((a, b) => b.score - a.score), [risk.data])
+  const cols = useMemo(() => {
+    const m = new Map<string, { label: string; weight: number }>()
+    for (const r of rows) for (const f of r.factors) if (!m.has(f.name)) m.set(f.name, { label: f.label, weight: f.weight })
+    return [...m.entries()]
+  }, [rows])
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
-              Antarctic Risk Heatmap — {station.toUpperCase()}
-            </h1>
-            <p className="text-white/40 text-xs mt-1 font-sans">
-              Every cell explains itself — click one to see its contributing factors, weights, and evidence.
-            </p>
-          </div>
-          {generatedAt && (
-            <span className="font-mono text-[10px] text-white/30 shrink-0">
-              Generated {new Date(generatedAt).toLocaleString()}
-            </span>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-[1300px] mx-auto px-6 py-7">
+        <PageHead
+          eyebrow={`Risk heatmap · ${STATION_LABELS[station]}`}
+          title="Where the station is exposed — and why."
+          sub="Every subsystem is scored from weighted factors. Nothing here is a black box: click a cell to read the evidence behind it."
+          right={rows[0] && <Pill tone="mute">computed {ago(rows[0].computed_at)}</Pill>}
+        />
+
+        <Panel pad={false}>
+          {risk.loading && !risk.data ? (
+            <div className="p-5"><Skeleton className="h-72" /></div>
+          ) : rows.length === 0 ? (
+            <p className="p-6 text-sm text-white/55">No risk cells computed for this station yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-separate border-spacing-[3px] p-3 min-w-[900px]">
+                <thead>
+                  <tr>
+                    <th className="text-left px-3 pb-2 eyebrow w-36">Subsystem</th>
+                    {cols.map(([k, c]) => (
+                      <th key={k} className="px-2 pb-2 text-left align-bottom">
+                        <p className="eyebrow leading-snug">{c.label}</p>
+                        <p className="font-mono text-[9.5px] text-white/35">weight {(c.weight * 100).toFixed(0)}%</p>
+                      </th>
+                    ))}
+                    <th className="px-3 pb-2 eyebrow text-right w-28">Weighted score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.id}>
+                      <td className="px-3 py-2 font-mono text-[12px] uppercase tracking-wider text-white">{r.subsystem}</td>
+                      {cols.map(([k]) => {
+                        const f = r.factors.find((x) => x.name === k)
+                        const active = sel?.row.id === r.id && sel.factor.name === k
+                        return (
+                          <td key={k} className="p-0">
+                            {f ? (
+                              <button
+                                onClick={() => setSel({ row: r, factor: f })}
+                                className={`w-full h-14 rounded-lg font-display text-[22px] num text-white transition hover:scale-[1.04] ${active ? 'ring-2 ring-white' : ''}`}
+                                style={{ background: cellBg(f.score) }}
+                              >
+                                {f.score.toFixed(0)}
+                              </button>
+                            ) : (
+                              <div className="h-14 rounded-lg bg-brand-surface-2" />
+                            )}
+                          </td>
+                        )
+                      })}
+                      <td className="px-3 text-right">
+                        <span className="font-display text-[30px] num" style={{ color: TONE_HEX[tone(r.score)] }}>{r.score.toFixed(0)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
+        </Panel>
+
+        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-5 mt-5">
+          <Panel eyebrow="Evidence" title={sel ? `${sel.row.subsystem} · ${sel.factor.label}` : 'Select a cell'}>
+            {sel ? (
+              <div>
+                <div className="flex items-baseline gap-3">
+                  <span className="font-display text-5xl num" style={{ color: TONE_HEX[tone(sel.factor.score)] }}>{sel.factor.score.toFixed(0)}</span>
+                  <span className="font-mono text-[11px] text-white/50">× weight {(sel.factor.weight * 100).toFixed(0)}% = <b className="text-white">{(sel.factor.score * sel.factor.weight).toFixed(1)}</b> points of {sel.row.score.toFixed(0)}</span>
+                </div>
+                <p className="text-[14px] text-white/80 leading-relaxed mt-4 rounded-xl bg-brand-surface-2/70 border border-brand-border p-4">{sel.factor.evidence}</p>
+              </div>
+            ) : (
+              <p className="text-[13px] text-white/55 leading-relaxed">Each cell is one factor of one subsystem&rsquo;s risk. The text the backend recorded for that cell appears here — the data it looked at, not a conclusion.</p>
+            )}
+          </Panel>
+          <Panel eyebrow="Reading the map" title="Scale">
+            <div className="flex items-center gap-1 h-10 rounded-lg overflow-hidden">
+              {[5, 20, 35, 50, 65, 80, 95].map((n) => (
+                <div key={n} className="flex-1 h-full flex items-center justify-center font-mono text-[10px] text-white/70" style={{ background: cellBg(n) }}>{n}</div>
+              ))}
+            </div>
+            <ul className="mt-4 space-y-2 text-[13px] text-white/70">
+              <li><b className="text-emerald">0–39</b> managed — monitor</li>
+              <li><b className="text-amber">40–65</b> elevated — plan mitigation</li>
+              <li><b className="text-crimson">66+</b> high — act before the next isolation window</li>
+            </ul>
+          </Panel>
         </div>
-
-        {loading && <div className="flex justify-center py-16"><InlineLoader text="Computing risk heatmap…" /></div>}
-        {error && <div className="py-16"><ErrorState message={error} onRetry={load} /></div>}
-        {!loading && !error && cells.length === 0 && (
-          <EmptyState message="No risk data available" hint="The backend may not have computed a heatmap for this station yet." />
-        )}
-
-        {!loading && !error && cells.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {cells.map((cell) => (
-              <RiskCellTile key={cell.subsystem} cell={cell} onClick={() => setSelected(cell)} />
-            ))}
-          </div>
-        )}
       </div>
-
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setSelected(null)}>
-          <div
-            className="w-full max-w-lg bg-brand-surface border border-brand-border rounded shadow-2xl max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-brand-border sticky top-0 bg-brand-surface">
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={15} style={{ color: scoreColor(selected.score) }} />
-                <h2 className="font-mono text-sm font-semibold text-white uppercase tracking-wider">{selected.label}</h2>
-              </div>
-              <button onClick={() => setSelected(null)} className="text-white/40 hover:text-white transition-colors">
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] text-white/40 uppercase">Overall Score</span>
-                <span className="font-mono text-lg font-bold" style={{ color: scoreColor(selected.score) }}>
-                  {Math.round(selected.score)}
-                </span>
-              </div>
-              {selected.factors.length === 0 ? (
-                <p className="text-xs font-mono text-white/30 italic">No factor breakdown provided by the backend for this cell.</p>
-              ) : (
-                selected.factors.map((f) => (
-                  <div key={f.name} className="bg-brand-bg border border-brand-border rounded p-3 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-sans font-medium text-white">{f.label}</span>
-                      <span className="font-mono text-xs" style={{ color: scoreColor(f.score) }}>{Math.round(f.score)}</span>
-                    </div>
-                    <div className="h-1 bg-brand-border rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, f.score)}%`, backgroundColor: scoreColor(f.score) }} />
-                    </div>
-                    <p className="text-[10px] font-mono text-white/40">Weight {(f.weight * 100).toFixed(0)}%</p>
-                    <p className="text-[11px] font-sans text-white/60 leading-relaxed">{f.evidence}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

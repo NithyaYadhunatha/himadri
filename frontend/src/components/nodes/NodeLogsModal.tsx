@@ -11,10 +11,10 @@ import { CenteredModal } from '@/components/ui/CenteredModal'
 import { mockLogsFor, type LogLevel } from '@/lib/graph/mockLogs'
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  INFO: '#6E8AA0',
-  WARNING: '#B8720F',
-  ERROR: '#B23A2E',
-  CRITICAL: '#B23A2E',
+  INFO: '#626079',
+  WARNING: '#D4820A',
+  ERROR: '#C23B3B',
+  CRITICAL: '#C23B3B',
 }
 
 function formatTimestamp(iso: string): string {

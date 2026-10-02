@@ -298,6 +298,28 @@ function buildMockResult(input: RunScenarioInput, id: string): ScenarioResult {
   }
 }
 
+// The deployed backend nests the headline numbers under `outputs` (and the
+// cost as a breakdown object); the page reads them from the top level. Flatten
+// once here so both shapes work.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function norm(r: any): ScenarioResult {
+  const o = r?.outputs ?? null
+  const cost = typeof r?.cost_inr === "number" ? r.cost_inr : (o?.cost_inr?.total ?? null)
+  const now = new Date().toISOString()
+  return {
+    ...r,
+    fuel_endurance_days: r?.fuel_endurance_days ?? o?.fuel_endurance_days ?? null,
+    food_endurance_days: r?.food_endurance_days ?? o?.food_endurance_days ?? null,
+    survivability_verdict: r?.survivability_verdict ?? o?.survivability_verdict ?? null,
+    first_failure_at_day: r?.first_failure_at_day ?? o?.first_failure_at_day ?? null,
+    first_failure_cause: r?.first_failure_cause ?? o?.first_failure_cause ?? null,
+    carbon_kg_co2e: r?.carbon_kg_co2e ?? o?.carbon_kg_co2e ?? null,
+    cost_inr: cost,
+    created_at: r?.created_at ?? now,
+    completed_at: r?.completed_at ?? r?.created_at ?? now,
+  } as ScenarioResult
+}
+
 if (USE_MOCK) seedMockRuns()
 
 export const scenarioService = {
@@ -327,7 +349,7 @@ export const scenarioService = {
       const body = await res.json().catch(() => ({}))
       throw new Error(body.error ?? `Scenario run failed (${res.status})`)
     }
-    return res.json()
+    return norm(await res.json())
   },
 
   list: async (station?: string): Promise<ScenarioResult[]> => {
@@ -337,7 +359,7 @@ export const scenarioService = {
     const qs = station ? `?station=${encodeURIComponent(station)}` : ''
     const res = await fetch(`/api/scenarios${qs}`)
     if (!res.ok) throw new Error(`Failed to load scenarios (${res.status})`)
-    return res.json()
+    return ((await res.json()) as unknown[]).map(norm)
   },
 
   get: async (id: string): Promise<ScenarioResult> => {
@@ -348,7 +370,7 @@ export const scenarioService = {
     }
     const res = await fetch(`/api/scenarios/${encodeURIComponent(id)}`)
     if (!res.ok) throw new Error(`Failed to load scenario (${res.status})`)
-    return res.json()
+    return norm(await res.json())
   },
 
   compare: async (ids: string[]): Promise<ScenarioResult[]> => {
@@ -359,6 +381,6 @@ export const scenarioService = {
     }
     const res = await fetch(`/api/scenarios/compare?ids=${ids.map(encodeURIComponent).join(',')}`)
     if (!res.ok) throw new Error(`Failed to compare scenarios (${res.status})`)
-    return res.json()
+    return ((await res.json()) as unknown[]).map(norm)
   },
 }

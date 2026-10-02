@@ -65,6 +65,40 @@ python agent.py
 ### Hardware gateway (optional)
 See [`PolarTwinDualBoard/server/README.md`](PolarTwinDualBoard/server/README.md), [`docs/wiring.md`](PolarTwinDualBoard/docs/wiring.md) and [`docs/architecture.md`](PolarTwinDualBoard/docs/architecture.md).
 
+## Running the demo
+
+The deployed backend is the demo target. Its stations only look alive while something is reporting, so run the **station feeder** — a stand-in for the station device agents that posts physically plausible heartbeats for all 63 assets through the real ingest pipeline (rules → risk → graph → WebSocket):
+
+```bash
+node tools/station-feeder/feeder.mjs --interval 30        # steady state
+node tools/station-feeder/feeder.mjs --fast               # demo cadence (8 s)
+node tools/station-feeder/feeder.mjs --backfill           # first run: also write 24 h of history for key series
+node tools/station-feeder/feeder.mjs --resupply 15000     # a ship call: +15 000 L in every day tank
+```
+
+While it runs, write an incident name into `tools/station-feeder/incident.txt` to trigger a real alert, and empty the file to clear it: `freezer_warming`, `generator_fault`, `fuel_leak`, `coolant_overheat`. The feeder also acts on remote commands (stop / start / setpoint) and reports them applied, so the full *queued → co-approved → sent → acked → applied* loop is demonstrable.
+
+> Without a feeder (or real devices) assets are marked offline after the backend’s offline timeout and every one raises a *data continuity lost* alert. That is the system working as designed.
+
+### Frontend pages
+
+| Page | What it shows |
+|------|---------------|
+| `/mission` | Mission control: live KPIs, cross-domain situation board (weather × convoy × fuel × power), risk, alerts, engine-room counters |
+| `/resilience` | Real sync-node status plus an interactive store-and-forward link simulator (cut the link, watch the priority lanes) |
+| `/trust` | Audit-chain verdict (re-verify on demand), ledger explorer, provenance breakdown, two-person command pipeline |
+| `/ml` | Model registry honesty (incl. “not validated yet”), forecasts with intervals, explainable risk factors |
+| `/architecture` | The real pipeline with live counters per stage + the Arduino/Pi hardware loop |
+| `/environment` | Live Open-Meteo conditions, 7-day storm watch, derived operational advice |
+| `/energy`, `/logistics` | Fuel endurance fitted from live tank sensors; convoy go/no-go gate enforced by the backend |
+| `/remote-control` | Supervised commands; life-safety assets require a different second approver |
+
+Design system: “Paper & Ink” — warm paper surfaces, ink text, ultramarine accent, marigold highlight, Fraunces display type; tokens in `frontend/src/app/globals.css`, building blocks in `frontend/src/components/ui/kit.tsx`.
+
+### Dev server note
+
+Turbopack (`next dev`) can crash on Windows under bursts of requests; `npm run dev -- --webpack` is stable.
+
 ## Repository Structure
 
 ```text
@@ -77,6 +111,7 @@ himadri/
 │   ├── src/               app routes, components, services, store
 │   └── public/            static assets and Unity WebGL build
 ├── PolarTwinDualBoard/    Arduino firmware, Pi gateway, wiring docs
+├── tools/station-feeder/  Station simulator for the deployed backend (heartbeats, incidents, command loop)
 └── postman/               API collections
 ```
 

@@ -9,6 +9,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Fuel, AlertTriangle, Truck, Lock, Thermometer, Zap, Droplets, Users, Bell, Gauge, X } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
+import { Kpi, PageHead } from '@/components/ui/kit'
+import { useFuelEndurance } from '@/lib/hooks/useFuel'
+import { STATION_LABELS } from '@/lib/constants'
 import { InlineLoader, ErrorState } from '@/components/ui/Loader'
 import { NodeInspector } from '@/components/graph/NodeInspector'
 import { graphService } from '@/services/graph.service'
@@ -17,7 +20,7 @@ import { alertsService } from '@/services/alerts.service'
 import { riskService } from '@/services/risk.service'
 import { useStationStore } from '@/store/useStationStore'
 import { HEALTH_COLORS } from '@/lib/constants'
-import { canUseFloorPlan, computeFloorPlanSections, type FloorPlanRoom } from '@/lib/graph/floorPlan'
+import { canUseFloorPlan, computeFloorPlanSections, computeSystemSections, type FloorPlanRoom } from '@/lib/graph/floorPlan'
 import type { GraphNode } from '@/types/graph'
 import type { BackendAlertDetail } from '@/lib/backendAdapters'
 
@@ -32,7 +35,7 @@ const OVERLAY_MODES: Array<{ id: OverlayMode; label: string; icon: React.Compone
   { id: 'risk', label: 'Risk', icon: Gauge },
 ]
 
-const NEUTRAL = '#6E8AA0'
+const NEUTRAL = '#626079'
 
 function avgHealthColor(assets: GraphNode[]): { color: string; value: string } {
   if (assets.length === 0) return { color: NEUTRAL, value: 'n/a' }
@@ -43,6 +46,7 @@ function avgHealthColor(assets: GraphNode[]): { color: string; value: string } {
 
 export default function FloorPlanPage() {
   const station = useStationStore((s) => s.station)
+  const fuel = useFuelEndurance(station)
   const [nodes, setNodes] = useState<GraphNode[]>([])
   const [zones, setZones] = useState<Parameters<typeof computeFloorPlanSections>[1]>([])
   const [openAlerts, setOpenAlerts] = useState<BackendAlertDetail[]>([])
@@ -53,7 +57,7 @@ export default function FloorPlanPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [sectionKey, setSectionKey] = useState<string | null>(null)
-  const [overlay, setOverlay] = useState<OverlayMode>('power')
+  const [overlay, setOverlay] = useState<OverlayMode>('alerts')
   const [selectedRoom, setSelectedRoom] = useState<FloorPlanRoom | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<GraphNode | null>(null)
 
@@ -71,7 +75,7 @@ export default function FloorPlanPage() {
       ])
       setNodes(graph.status === 'fulfilled' ? graph.value.nodes : [])
       setZones(zoneList.status === 'fulfilled' ? zoneList.value : [])
-      setFuelDays(endurance.status === 'fulfilled' ? endurance.value.fuel_days_remaining : null)
+      setFuelDays(endurance.status === 'fulfilled' ? (endurance.value.fuel_days_remaining ?? null) : null)
       setOpenAlerts(alerts.status === 'fulfilled' ? alerts.value : [])
       setActiveConvoys(convoys.status === 'fulfilled' ? convoys.value.filter((c) => c.status === 'underway').length : 0)
       setRiskBySubsystem(risk.status === 'fulfilled' ? new Map(risk.value.cells.map((c) => [c.subsystem, c.score])) : new Map())
@@ -83,7 +87,11 @@ export default function FloorPlanPage() {
 
   useEffect(() => { load() }, [load])
 
-  const sections = useMemo(() => (canUseFloorPlan(nodes, zones) ? computeFloorPlanSections(nodes, zones) : []), [nodes, zones])
+  const sections = useMemo(() => {
+    const zonedShare = nodes.length ? nodes.filter((n) => !!n.zoneId).length / nodes.length : 0
+    if (canUseFloorPlan(nodes, zones) && zonedShare >= 0.5) return computeFloorPlanSections(nodes, zones)
+    return computeSystemSections(nodes)
+  }, [nodes, zones])
   const activeSection = sections.find((s) => s.key === sectionKey) ?? sections[0] ?? null
 
   useEffect(() => {
@@ -141,36 +149,23 @@ export default function FloorPlanPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-7rem)] overflow-y-auto bg-brand-bg p-6">
+    <div className="h-full overflow-y-auto bg-brand-bg p-6">
       <div className="max-w-6xl mx-auto space-y-5">
-        <div>
-          <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
-            Floor Plan — {station.toUpperCase()}
-          </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">
-            Every room as a box, colored by the selected overlay. Click a room to see what&rsquo;s inside it.
-          </p>
-        </div>
+        <PageHead
+          eyebrow={`Floor plan · ${STATION_LABELS[station]}`}
+          title="Every room, coloured by what you care about."
+          sub="Pick an overlay — power, thermal, alerts, risk — and read the station at a glance. Click a room to see the assets inside it."
+        />
 
         {loading && <div className="flex justify-center py-16"><InlineLoader text="Loading floor plan…" /></div>}
         {error && !loading && <ErrorState message={error} onRetry={load} />}
 
         {!loading && !error && (
           <>
-            {/* Stat strip */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1868A040', background: 'linear-gradient(155deg, #1868A014 0%, #1868A004 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Fuel size={10} /> Fuel Endurance</p>
-                <p className="font-mono text-xl font-bold text-white mt-1">{fuelDays ?? '—'} <span className="text-[10px] text-white/40">days</span></p>
-              </div>
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#B23A2E40', background: 'linear-gradient(155deg, #B23A2E14 0%, #B23A2E04 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><AlertTriangle size={10} /> Open Alerts</p>
-                <p className="font-mono text-xl font-bold text-white mt-1">{openAlerts.length}</p>
-              </div>
-              <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1F9E6D40', background: 'linear-gradient(155deg, #1F9E6D14 0%, #1F9E6D04 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Truck size={10} /> Active Convoys</p>
-                <p className="font-mono text-xl font-bold text-white mt-1">{activeConvoys}</p>
-              </div>
+            <div className="grid grid-cols-3 gap-4">
+              <Kpi label="Fuel endurance" value={fuel.days !== null ? Math.round(fuel.days) : fuelDays} unit="days" tone="primary" icon={<Fuel size={15} />} hint="derived from tank sensors" />
+              <Kpi label="Open alerts" value={openAlerts.length} tone={openAlerts.length ? "warn" : "ok"} icon={<AlertTriangle size={15} />} hint="station-wide" />
+              <Kpi label="Active convoys" value={activeConvoys} tone="ink" icon={<Truck size={15} />} hint="underway right now" />
             </div>
 
             {/* Station-area picker */}

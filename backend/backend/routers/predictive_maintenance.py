@@ -4,7 +4,6 @@ All routes are served under prefix /model-accuracy to match the existing fronten
 """
 from __future__ import annotations
 
-import random
 from datetime import datetime, timezone
 
 # pyrefly: ignore [missing-import]
@@ -182,19 +181,21 @@ async def get_drift(simId: str | None = None):
         {
             "feature": fi["feature"],
             "importance": round(fi["importance"] * 100, 1),
-            "drift": round(random.uniform(1.0, 8.0), 1),
+            # Input-distribution drift is not measured yet (needs a training-time
+            # reference snapshot). Report that honestly instead of a made-up number.
+            "drift": None,
         }
         for fi in model.metrics_json.get("feature_importance", [])
     ]
 
-    drift_score = round(sum(f["drift"] for f in feat_imp) / max(len(feat_imp), 1), 1)
+    drift_score = None
     return {
         "driftScore": drift_score,
-        "driftStatus": "warning" if drift_score > 10 else "healthy",
+        "driftStatus": "unmeasured",
         "lastRetrainedAt": model.trained_at.isoformat() if model.trained_at else datetime.now(timezone.utc).isoformat(),
-        "retrainingRecommended": drift_score > 10,
+        "retrainingRecommended": False,
         "featureImportance": feat_imp,
-        "driftAlert": None,
+        "driftAlert": "Drift is not measured yet — only feature importance is reported.",
     }
 
 

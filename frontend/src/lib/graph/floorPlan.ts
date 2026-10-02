@@ -111,3 +111,38 @@ export function computeFloorPlanSections(nodes: GraphNodeData[], zones: ZoneMeta
   }
   return sections
 }
+
+const SYSTEM_LABELS: Record<string, string> = {
+  power: 'Power plant',
+  heating: 'Heating & heat-trace',
+  water: 'Water',
+  storage: 'Fuel & cold storage',
+  waste: 'Waste & sewage',
+  vehicle: 'Vehicle yard',
+  instrument: 'Science instruments',
+  medical: 'Medical bay',
+  comms: 'Communications',
+  structure: 'Structure',
+}
+
+/** Fallback when assets carry no zone ids: one section whose "rooms" are the
+ * station's functional systems, so the floor plan is still a useful map. */
+export function computeSystemSections(nodes: GraphNodeData[]): FloorPlanSection[] {
+  const byType = new Map<string, GraphNodeData[]>()
+  for (const n of nodes) {
+    const key = String(n.type)
+    if (!byType.has(key)) byType.set(key, [])
+    byType.get(key)!.push(n)
+  }
+  const rooms: FloorPlanRoom[] = [...byType.entries()]
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([type, assets]) => ({
+      zoneId: `system-${type}`,
+      name: SYSTEM_LABELS[type] ?? type,
+      kind: 'system',
+      restricted: type === 'medical',
+      floor: null,
+      assets,
+    }))
+  return rooms.length ? [{ key: 'systems', label: 'By system', rooms }] : []
+}

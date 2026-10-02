@@ -123,6 +123,12 @@ async def list_series(
     return [s for a in assets for s in _series_for(a) if critical is None or s["critical"] == critical]
 
 
+def _naive_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value
+    return value.astimezone(timezone.utc).replace(tzinfo=None)
+
+
 @router.get("/series/{key}/readings", operation_id="get_series_readings")
 async def get_series_readings(
     key: str, date_from: datetime | None = Query(default=None, alias="from"),
@@ -132,10 +138,12 @@ async def get_series_readings(
 ) -> list[dict]:
     asset, series, name = await _find_series(db, key)
     query = select(Reading).where(Reading.asset_id == asset.id, Reading.values.has_key(name))  # noqa: W601
+    # collected_at is a naive-UTC column; a tz-aware bound (e.g. a trailing Z)
+    # would raise on comparison, so normalise to naive UTC first.
     if date_from:
-        query = query.where(Reading.collected_at >= date_from)
+        query = query.where(Reading.collected_at >= _naive_utc(date_from))
     if date_to:
-        query = query.where(Reading.collected_at <= date_to)
+        query = query.where(Reading.collected_at <= _naive_utc(date_to))
     readings = (await db.execute(query.order_by(Reading.collected_at.desc()).limit(2000))).scalars().all()
     rows = [{"series_key": key, "ts": r.collected_at, "value": r.values[name],
              "unit": (r.units or {}).get(name) or series["unit"], "source": r.source}

@@ -208,6 +208,8 @@ if (USE_MOCK && typeof window !== 'undefined') {
   }, 15_000)
 }
 
+const assetCache = new Map<string, { at: number; promise: Promise<RemoteAsset[]> }>()
+
 export const commandsService = {
   /** The controllable-asset roster for `station`, each with its current
    * (possibly command-mutated) live value. */
@@ -238,12 +240,23 @@ export const commandsService = {
           }),
       )
     }
-    const list = await json<BackendAssetListItemMin[]>(await fetch('/api/nodes'))
-    const scoped = list.filter((a) => a.station_id === station)
-    const details = await Promise.all(
-      scoped.map((a) => fetch(`/api/nodes/${encodeURIComponent(a.id)}`).then((r) => (r.ok ? (r.json() as Promise<BackendAssetDetailMin>) : null))),
-    )
-    return details.filter((d): d is BackendAssetDetailMin => !!d && d.controllable).map(toRemoteAsset)
+    // One detail fetch per asset is expensive, and the page polls — cache per
+    // station for 20 s and share an in-flight request so polling stays cheap.
+    const hit = assetCache.get(station)
+    if (hit && Date.now() - hit.at < 20_000) return hit.promise
+    const promise = (async () => {
+      const list = await json<BackendAssetListItemMin[]>(await fetch('/api/nodes'))
+      const scoped = list.filter((a) => a.station_id === station)
+      const details: (BackendAssetDetailMin | null)[] = []
+      for (let i = 0; i < scoped.length; i += 8) {
+        const chunk = scoped.slice(i, i + 8)
+        details.push(...(await Promise.all(chunk.map((a) => fetch(`/api/nodes/${encodeURIComponent(a.id)}`).then((r) => (r.ok ? (r.json() as Promise<BackendAssetDetailMin>) : null))))))
+      }
+      return details.filter((d): d is BackendAssetDetailMin => !!d && d.controllable).map(toRemoteAsset)
+    })()
+    assetCache.set(station, { at: Date.now(), promise })
+    promise.catch(() => assetCache.delete(station))
+    return promise
   },
 
   list: async (station: string, state?: CommandState): Promise<CommandRecord[]> => {

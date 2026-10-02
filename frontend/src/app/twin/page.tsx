@@ -125,6 +125,20 @@ export default function StationTwinPage() {
     return () => clearInterval(id)
   }, [load])
 
+  // Deep link: /twin?asset=<id> (from Alerts / Mission Control "Locate") selects that asset
+  const deepLinked = useRef(false)
+  useEffect(() => {
+    if (deepLinked.current || nodes.length === 0) return
+    const id = new URLSearchParams(window.location.search).get('asset')
+    if (!id) return
+    const hit = nodes.find((n) => n.id === id)
+    if (hit) {
+      deepLinked.current = true
+      setSelectedNode(hit)
+      setInspectorOpen(true)
+    }
+  }, [nodes])
+
   const handleFullscreen = useCallback(() => {
     if (!graphContainerRef.current) return
     if (!document.fullscreenElement) {
@@ -228,7 +242,7 @@ export default function StationTwinPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-7rem)] flex flex-col overflow-hidden bg-brand-bg">
+      <div className="h-full flex flex-col overflow-hidden bg-brand-bg">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-brand-border shrink-0 bg-brand-bg">
           <div className="flex items-center gap-2">
             <Activity size={16} className="text-cyan" />

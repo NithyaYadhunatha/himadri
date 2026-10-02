@@ -20,8 +20,8 @@ export const MOCK_MEMBERSHIP: ActiveMembership = {
   userId: 'dev-bypass-user',
   clerkUserId: 'dev-bypass-user',
   email: 'dev@himadri.local',
-  name: 'Dev Tester',
-  department: 'MAITRI',
-  role: 'STATION_LEADER',
+  name: 'Dev Tester (HQ)',
+  department: 'HQ_NCPOR',
+  role: 'HQ_OPERATOR',
   status: 'ACTIVE',
 }
