@@ -67,7 +67,7 @@ export function DemoDirector() {
 
   if (!open) return null
   return (
-    <div className="print:hidden fixed left-6 bottom-6 z-50 w-[360px] rounded-2xl border border-brand-border bg-brand-surface shadow-[0_24px_60px_-20px_rgba(28,31,51,0.45)] overflow-hidden">
+    <div className="print:hidden fixed left-6 bottom-6 z-50 w-[360px] rounded-2xl border border-brand-border bg-brand-surface shadow-[0_24px_60px_-20px_rgba(8,3,48,0.45)] overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 bg-white text-brand-surface">
         <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider">
           <Clapperboard size={14} className="text-marigold" /> Demo director

@@ -54,7 +54,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
   // score — the score reflects synthetic load, not genuine infrastructure state.
   const statusColor = nodeData.isSimulating
     ? HEALTH_COLORS.simulating
-    : (HEALTH_COLORS[nodeData.health] ?? '#8A8576')
+    : (HEALTH_COLORS[nodeData.health] ?? '#626079')
   const healthColor = statusColor;
   // In 'health' mode the badge border/glow tracks health; in 'type' mode (default) it tracks node type.
   const badgeColor = nodeData.colorMode === 'health' ? healthColor : typeColor
@@ -121,22 +121,22 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
           filter: nodeData.isSimulationTarget
             ? `drop-shadow(0 0 10px #F97316) brightness(1.15)`
             : selected
-              ? `drop-shadow(0 0 8px #3A3AB8) brightness(1.15)`
+              ? `drop-shadow(0 0 8px #1D1C93) brightness(1.15)`
               : nodeData.isDependency
                 ? `drop-shadow(0 0 8px #00D4FF) brightness(1.15)`
                 : nodeData.isImpacted
                   ? `drop-shadow(0 0 8px #D4820A) brightness(1.15)`
                   : hovered
-                    ? `drop-shadow(0 0 4px #3A3AB8aa) brightness(1.1)`
+                    ? `drop-shadow(0 0 4px #1D1C93aa) brightness(1.1)`
                     : 'none',
         }}
       >
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            backgroundColor: '#FFFEFB',
+            backgroundColor: '#FFFFFF',
             border: `2px solid ${badgeColor}`,
-            boxShadow: `inset 0 0 0 3px ${badgeColor}33, 0 1px 3px rgba(28,31,51,0.25)`,
+            boxShadow: `inset 0 0 0 3px ${badgeColor}33, 0 1px 3px rgba(8,3,48,0.25)`,
           }}
         />
         <TypeIcon
@@ -169,7 +169,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
         <div
           className="font-mono text-center leading-tight truncate"
           style={{
-            color: selected ? '#1C1F33' : '#3A5468',
+            color: selected ? '#080330' : '#3A5468',
             fontSize: '11px',
             fontFamily: 'var(--font-mono)',
             maxWidth: `${Math.max(100, sizePx * 1.5)}px`,
@@ -197,7 +197,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
           className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 z-30 pointer-events-none
             bg-brand-surface border border-brand-border rounded px-2 py-1 shadow-lg whitespace-nowrap"
         >
-          <p className="font-mono text-[9px] text-[#3A3AB8]">
+          <p className="font-mono text-[9px] text-[#1D1C93]">
             Health {nodeData.healthScore}
           </p>
         </div>

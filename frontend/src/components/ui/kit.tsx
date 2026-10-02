@@ -10,12 +10,12 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 export type Tone = 'ink' | 'primary' | 'ok' | 'warn' | 'crit' | 'mute'
 
 export const TONE_HEX: Record<Tone, string> = {
-  ink: '#1C1F33',
-  primary: '#3A3AB8',
+  ink: '#080330',
+  primary: '#1D1C93',
   ok: '#0F8A6A',
   warn: '#D4820A',
   crit: '#C23B3B',
-  mute: '#8A8576',
+  mute: '#626079',
 }
 
 const TONE_TEXT: Record<Tone, string> = {

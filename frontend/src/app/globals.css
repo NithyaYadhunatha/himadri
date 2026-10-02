@@ -2,25 +2,24 @@
 
 /* ── Tailwind v4: design tokens ───────────────────────────────── */
 /*
- * HIMADRI 'Paper & Ink' — a light, editorial mission-control palette:
- * warm paper surfaces, deep ink text, ultramarine as the single interactive
- * accent and marigold as the brand highlight. Deliberately NOT the usual
- * icy-blue polar theme. Token NAMES (brand-*, cyan, amber, crimson, emerald,
- * white=ink) are unchanged so every component repaints from here.
+ * HIMADRI x tweakcn "nyxpop" (light): lavender field, near-black navy ink, deep
+ * indigo accent, big radii, indigo-tinted shadows, Bebas Neue display type and
+ * Fira Code labels. Token NAMES are unchanged so every component repaints.
+ * Source: https://tweakcn.com/r/themes/cmp4sli94000004l4c91070io
  */
 @theme {
-  --color-brand-bg: #F3EFE6;        /* paper */
-  --color-brand-surface: #FFFEFB;   /* raised card */
-  --color-brand-surface-2: #F7F3EA; /* inset panel */
-  --color-brand-surface-3: #ECE6D8; /* hover / elevated */
-  --color-brand-border: #DDD5C2;    /* hairline */
+  --color-brand-bg: #BBB8CD;        /* paper */
+  --color-brand-surface: #FFFFFF;   /* raised card */
+  --color-brand-surface-2: #D5D2E2; /* inset panel */
+  --color-brand-surface-3: #C8C5D8; /* hover / elevated */
+  --color-brand-border: #8E8EB0;    /* hairline */
 
   /* ink: 'white' renders as deep ink; text-white/NN stays muted ink */
-  --color-white: #1C1F33;
+  --color-white: #080330;
 
-  --color-cyan: #3A3AB8;            /* primary — ultramarine */
-  --color-cyan-dim: #3A3AB833;
-  --color-cyan-glow: #3A3AB866;
+  --color-cyan: #1D1C93;            /* primary / accent — deep indigo */
+  --color-cyan-dim: #1D1C9333;
+  --color-cyan-glow: #1D1C9366;
   --color-amber: #D4820A;           /* warning */
   --color-amber-dim: #D4820A33;
   --color-crimson: #C23B3B;         /* critical */
@@ -31,24 +30,25 @@
   --color-marigold: #F2A71B;        /* brand highlight */
   --color-marigold-dim: #F2A71B2E;
 
+  /* body stays Inter for dense dashboards; set to var(--font-bebas) for the theme's literal Bebas-everywhere look */
   --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), 'JetBrains Mono', Menlo, Monaco, monospace;
-  --font-display: var(--font-fraunces), 'Fraunces', Georgia, serif;
+  --font-mono: var(--font-fira), 'Fira Code', Menlo, Monaco, monospace;
+  --font-display: var(--font-bebas), 'Bebas Neue', Impact, sans-serif;
 
-  --radius: 10px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-2xl: 22px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
   --radius-full: 9999px;
 
   /* soft, paper-like elevation instead of neon glow */
-  --shadow-cyan-glow: 0 1px 2px #3A3AB822, 0 6px 18px -6px #3A3AB838;
+  --shadow-cyan-glow: 0 1px 2px #1D1C9322, 0 6px 18px -6px #1D1C9338;
   --shadow-amber-glow: 0 1px 2px #D4820A22, 0 6px 18px -6px #D4820A38;
   --shadow-crimson-glow: 0 1px 2px #C23B3B22, 0 6px 18px -6px #C23B3B38;
   --shadow-emerald-glow: 0 1px 2px #0F8A6A22, 0 6px 18px -6px #0F8A6A38;
-  --shadow-panel: 0 1px 0 #FFFFFF inset, 0 1px 2px rgba(28,31,51,0.05), 0 8px 24px -12px rgba(28,31,51,0.14);
+  --shadow-panel: 0px 4px 15px 0px rgba(13,5,73,0.30), 0px 1px 2px -1px rgba(13,5,73,0.30);
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-shimmer: shimmer 2s infinite;
@@ -65,18 +65,15 @@
 html, body {
   color-scheme: light;
   height: 100%;
-  background-color: #F3EFE6;
-  color: #1C1F33;
+  background-color: #BBB8CD;
+  color: #080330;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: var(--font-sans);
 }
 
 body {
-  background-image:
-    radial-gradient(1200px 500px at 85% -10%, rgba(242,167,27,0.10), transparent 60%),
-    radial-gradient(900px 500px at -10% 0%, rgba(58,58,184,0.07), transparent 55%);
-  background-attachment: fixed;
+  letter-spacing: 0.01em;
 }
 
 /* ── Keyframes ────────────────────────────────────────────────── */
@@ -106,15 +103,15 @@ body {
 /* ── Utility classes ──────────────────────────────────────────── */
 .font-sans { font-family: var(--font-sans); }
 .font-mono { font-family: var(--font-mono); }
-.font-display { font-family: var(--font-display); font-optical-sizing: auto; }
+.font-display { font-family: var(--font-display); letter-spacing: 0.05em; font-weight: 400; }
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
-.eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28,31,51,0.5); }
-.panel { background: var(--color-brand-surface); border: 1px solid var(--color-brand-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
+.eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(8,3,48,0.5); }
+.panel { background: var(--color-brand-surface); border: 1.5px solid #0D0549; border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
 .stagger > * { animation: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both; }
 .stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.1s}.stagger > *:nth-child(4){animation-delay:.15s}.stagger > *:nth-child(5){animation-delay:.2s}.stagger > *:nth-child(6){animation-delay:.25s}.stagger > *:nth-child(n+7){animation-delay:.3s}
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #F7F3EA 25%, #ECE6D8 50%, #F7F3EA 75%);
+  background: linear-gradient(90deg, #D5D2E2 25%, #C8C5D8 50%, #D5D2E2 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -126,44 +123,44 @@ body {
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #F3EFE6; }
-::-webkit-scrollbar-thumb { background: #DDD5C2; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #C7BDA5; }
+::-webkit-scrollbar-track { background: #BBB8CD; }
+::-webkit-scrollbar-thumb { background: #8E8EB0; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #7B7BA0; }
 
 /* ── React Flow overrides ─────────────────────────────────────── */
 .react-flow__attribution { display: none; }
 .react-flow__controls button {
-  background: #FFFEFB !important;
-  border-color: #DDD5C2 !important;
-  color: rgba(28,31,51,0.6) !important;
+  background: #FFFFFF !important;
+  border-color: #8E8EB0 !important;
+  color: rgba(8,3,48,0.6) !important;
 }
 .react-flow__controls button:hover {
-  background: #F7F3EA !important;
-  color: #1C1F33 !important;
+  background: #D5D2E2 !important;
+  color: #080330 !important;
 }
-.react-flow__minimap { border-color: #DDD5C2 !important; }
+.react-flow__minimap { border-color: #8E8EB0 !important; }
 .react-flow__handle { opacity: 0 !important; }
 
 /* ── Recharts overrides ───────────────────────────────────────── */
 .recharts-tooltip-wrapper { outline: none; }
 .recharts-default-tooltip {
-  background: #FFFEFB !important;
-  border: 1px solid #DDD5C2 !important;
+  background: #FFFFFF !important;
+  border: 1px solid #8E8EB0 !important;
   border-radius: 8px !important;
-  color: #1C1F33 !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  color: #080330 !important;
+  font-family: 'Fira Code', monospace !important;
   font-size: 11px !important;
 }
 
 /* ── Selection ────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(58,58,184, 0.2);
-  color: #1C1F33;
+  background: rgba(29,28,147, 0.2);
+  color: #080330;
 }
 
 /* ── Focus ring ───────────────────────────────────────────────── */
 :focus-visible {
-  outline: 1px solid rgba(58,58,184, 0.5);
+  outline: 1px solid rgba(29,28,147, 0.5);
   outline-offset: 2px;
 }
 

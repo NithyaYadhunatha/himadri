@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Fraunces } from 'next/font/google'
+import { Inter, Fira_Code, Bebas_Neue } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
@@ -11,16 +11,16 @@ const inter = Inter({
   display: 'swap',
 })
 
-const fraunces = Fraunces({
+const bebas = Bebas_Neue({
   subsets: ['latin'],
-  variable: '--font-fraunces',
+  weight: '400',
+  variable: '--font-bebas',
   display: 'swap',
-  axes: ['opsz'],
 })
 
-const jetbrainsMono = JetBrains_Mono({
+const fira = Fira_Code({
   subsets: ['latin'],
-  variable: '--font-jetbrains',
+  variable: '--font-fira',
   display: 'swap',
 })
 
@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const body = (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fira.variable} ${bebas.variable}`}>
       <body className="font-sans bg-brand-bg text-white antialiased">
         <DashboardLayout>{children}</DashboardLayout>
       </body>
@@ -56,13 +56,13 @@ export default function RootLayout({
         // Clerk's default (light) base theme fits the app's ice-blue light
         // theme; `variables`/`elements` below re-skin it to match exactly.
         variables: {
-          colorPrimary: '#3A3AB8',
-          colorBackground: '#ECE6D8',
-          colorInput: '#F3EFE6',
-          colorInputForeground: '#1C1F33',
-          colorForeground: '#1C1F33',
-          colorMutedForeground: 'rgba(28,31,51,0.5)',
-          colorNeutral: '#1C1F33',
+          colorPrimary: '#1D1C93',
+          colorBackground: '#C8C5D8',
+          colorInput: '#BBB8CD',
+          colorInputForeground: '#080330',
+          colorForeground: '#080330',
+          colorMutedForeground: 'rgba(8,3,48,0.5)',
+          colorNeutral: '#080330',
           colorDanger: '#C23B3B',
           colorSuccess: '#0F8A6A',
           colorWarning: '#D4820A',

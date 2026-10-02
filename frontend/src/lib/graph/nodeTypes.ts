@@ -56,7 +56,7 @@ export interface NodeTypeConfig {
 export const nodeTypeConfig: Record<NodeType, NodeTypeConfig> = {
   power: {
     icon: Battery,
-    color: '#3A3AB8',
+    color: '#1D1C93',
     label: 'Power',
     actions: [
       {

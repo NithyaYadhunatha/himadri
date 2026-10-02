@@ -41,29 +41,29 @@ export function PolarMap({ className = '' }: { className?: string }) {
     <svg viewBox="0 0 520 520" className={className} role="img" aria-label="Polar map: Maitri and Bharati stations linked to NCPOR, Goa">
       <defs>
         <radialGradient id="pm-ice" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFFEFB" />
-          <stop offset="100%" stopColor="#F3EFE6" />
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="100%" stopColor="#BBB8CD" />
         </radialGradient>
         <filter id="pm-soft" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#1C1F33" floodOpacity="0.12" />
+          <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#080330" floodOpacity="0.12" />
         </filter>
       </defs>
 
-      <circle cx={CX} cy={CY} r={R + 14} fill="url(#pm-ice)" filter="url(#pm-soft)" stroke="#DDD5C2" />
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#DDD5C2" />
+      <circle cx={CX} cy={CY} r={R + 14} fill="url(#pm-ice)" filter="url(#pm-soft)" stroke="#8E8EB0" />
+      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#8E8EB0" />
 
       {/* graticule */}
       {lats.map((lat) => (
-        <circle key={lat} cx={CX} cy={CY} r={((lat + 90) / (90 + LAT_MAX)) * R} fill="none" stroke="#DDD5C2" strokeWidth="1" strokeDasharray={lat === 0 ? '0' : '2 5'} />
+        <circle key={lat} cx={CX} cy={CY} r={((lat + 90) / (90 + LAT_MAX)) * R} fill="none" stroke="#8E8EB0" strokeWidth="1" strokeDasharray={lat === 0 ? '0' : '2 5'} />
       ))}
       {lons.map((lon) => {
         const [x, y] = project(LAT_MAX, lon)
-        return <line key={lon} x1={CX} y1={CY} x2={x} y2={y} stroke="#DDD5C2" strokeWidth="1" strokeDasharray="2 6" />
+        return <line key={lon} x1={CX} y1={CY} x2={x} y2={y} stroke="#8E8EB0" strokeWidth="1" strokeDasharray="2 6" />
       })}
 
       {/* continent (Antarctic Circle, softly filled) */}
-      <circle cx={CX} cy={CY} r={acRadius} fill="#ECE6D8" stroke="#C7BDA5" strokeWidth="1.2" />
-      <text x={CX} y={CY + 4} textAnchor="middle" fill="#8A8576" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em' }}>
+      <circle cx={CX} cy={CY} r={acRadius} fill="#C8C5D8" stroke="#7B7BA0" strokeWidth="1.2" />
+      <text x={CX} y={CY + 4} textAnchor="middle" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em' }}>
         ANTARCTICA
       </text>
 
@@ -71,7 +71,7 @@ export function PolarMap({ className = '' }: { className?: string }) {
       {STATIONS.map((s, i) => {
         const p = project(s.lat, s.lon)
         return (
-          <path key={s.id} d={arc(hq, p, -30 + i * 55)} fill="none" stroke="#3A3AB8" strokeWidth="1.6" strokeDasharray="5 6" className="animate-[flow_1.4s_linear_infinite]" opacity="0.85" />
+          <path key={s.id} d={arc(hq, p, -30 + i * 55)} fill="none" stroke="#1D1C93" strokeWidth="1.6" strokeDasharray="5 6" className="animate-[flow_1.4s_linear_infinite]" opacity="0.85" />
         )
       })}
 
@@ -83,8 +83,8 @@ export function PolarMap({ className = '' }: { className?: string }) {
             <circle cx={x} cy={y} r="14" fill="#F2A71B" opacity="0.18">
               <animate attributeName="r" values="8;18;8" dur="3s" repeatCount="indefinite" />
             </circle>
-            <circle cx={x} cy={y} r="5.5" fill="#1C1F33" stroke="#FFFEFB" strokeWidth="2" />
-            <text x={x + s.dx} y={y + s.dy} textAnchor={s.anchor} fill="#1C1F33" style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>
+            <circle cx={x} cy={y} r="5.5" fill="#080330" stroke="#FFFFFF" strokeWidth="2" />
+            <text x={x + s.dx} y={y + s.dy} textAnchor={s.anchor} fill="#080330" style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>
               {s.name}
             </text>
           </g>
@@ -93,18 +93,18 @@ export function PolarMap({ className = '' }: { className?: string }) {
 
       {/* HQ */}
       <g>
-        <circle cx={hq[0]} cy={hq[1]} r="7" fill="#3A3AB8" stroke="#FFFEFB" strokeWidth="2" />
-        <text x={hq[0] - 4} y={hq[1] - 30} textAnchor="end" fill="#3A3AB8" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em' }}>
+        <circle cx={hq[0]} cy={hq[1]} r="7" fill="#1D1C93" stroke="#FFFFFF" strokeWidth="2" />
+        <text x={hq[0] - 4} y={hq[1] - 30} textAnchor="end" fill="#1D1C93" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em' }}>
           {HQ.name.toUpperCase()}
         </text>
-        <text x={hq[0] - 4} y={hq[1] - 18} textAnchor="end" fill="#8A8576" style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5 }}>
+        <text x={hq[0] - 4} y={hq[1] - 18} textAnchor="end" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5 }}>
           15.5°N · ~11,000 km →
         </text>
       </g>
 
       {/* ring labels */}
       {[{ lat: -70, t: '70°S' }, { lat: -60, t: '60°S' }, { lat: -50, t: '50°S' }, { lat: -40, t: '40°S' }].map((l) => (
-        <text key={l.t} x={CX + 4} y={CY - ((l.lat + 90) / (90 + LAT_MAX)) * R - 3} fill="#B7B09B" style={{ fontFamily: 'var(--font-mono)', fontSize: 8 }}>
+        <text key={l.t} x={CX + 4} y={CY - ((l.lat + 90) / (90 + LAT_MAX)) * R - 3} fill="#84839D" style={{ fontFamily: 'var(--font-mono)', fontSize: 8 }}>
           {l.t}
         </text>
       ))}

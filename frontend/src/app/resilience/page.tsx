@@ -122,29 +122,29 @@ function Diagram({ link, queued }: { link: Link; queued: number }) {
     <svg viewBox="0 0 760 190" className="w-full h-auto" role="img" aria-label="Station to HQ link diagram">
       {/* nodes */}
       <g>
-        <rect x="14" y="52" width="190" height="86" rx="16" fill="#FFFEFB" stroke="#DDD5C2" />
-        <text x="109" y="86" textAnchor="middle" className="fill-[#1C1F33]" style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>
+        <rect x="14" y="52" width="190" height="86" rx="16" fill="#FFFFFF" stroke="#8E8EB0" />
+        <text x="109" y="86" textAnchor="middle" className="fill-[#080330]" style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>
           Station edge
         </text>
-        <text x="109" y="108" textAnchor="middle" fill="#8A8576" style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.12em' }}>
+        <text x="109" y="108" textAnchor="middle" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.12em' }}>
           MAITRI · BHARATI
         </text>
-        <text x="109" y="124" textAnchor="middle" fill="#8A8576" style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5 }}>
+        <text x="109" y="124" textAnchor="middle" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5 }}>
           ingest · alerts · twin · audit
         </text>
       </g>
       <g>
-        <circle cx="380" cy="42" r="22" fill="#F7F3EA" stroke="#DDD5C2" />
-        <text x="380" y="47" textAnchor="middle" fill="#3A3AB8" style={{ fontSize: 17 }}>
+        <circle cx="380" cy="42" r="22" fill="#D5D2E2" stroke="#8E8EB0" />
+        <text x="380" y="47" textAnchor="middle" fill="#1D1C93" style={{ fontSize: 17 }}>
           ✦
         </text>
-        <text x="380" y="82" textAnchor="middle" fill="#8A8576" style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.12em' }}>
+        <text x="380" y="82" textAnchor="middle" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.12em' }}>
           SATELLITE
         </text>
       </g>
       <g>
-        <rect x="556" y="52" width="190" height="86" rx="16" fill="#1C1F33" />
-        <text x="651" y="86" textAnchor="middle" fill="#FFFEFB" style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>
+        <rect x="556" y="52" width="190" height="86" rx="16" fill="#080330" />
+        <text x="651" y="86" textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>
           HQ · NCPOR Goa
         </text>
         <text x="651" y="108" textAnchor="middle" fill="#F2A71B" style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.12em' }}>

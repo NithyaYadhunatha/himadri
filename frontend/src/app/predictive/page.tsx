@@ -40,7 +40,7 @@ function DarkTooltip({ active, payload, label }: {
     }} className="text-xs font-mono">
       {label && <p className="text-white/50 mb-1">{label}</p>}
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color ?? '#3A3AB8' }}>
+        <p key={i} style={{ color: p.color ?? '#1D1C93' }}>
           {p.name ? `${p.name}: ` : ''}{typeof p.value === 'number' ? p.value.toFixed(1) : p.value}
           {p.name === 'Accuracy' || (!p.name && !label?.includes('Imp')) ? '%' : ''}
         </p>
@@ -50,13 +50,13 @@ function DarkTooltip({ active, payload, label }: {
 }
 
 // ─── Stat Pill ────────────────────────────────────────────────────────────────
-function StatPill({ label, value, unit, color = '#3A3AB8', icon }: {
+function StatPill({ label, value, unit, color = '#1D1C93', icon }: {
   label: string; value: string | number; unit?: string; color?: string; icon?: React.ReactNode
 }) {
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-0.5"
          style={{
-           background: 'linear-gradient(135deg, rgba(28,31,51,0.04) 0%, rgba(28,31,51,0.01) 100%)',
+           background: 'linear-gradient(135deg, rgba(8,3,48,0.04) 0%, rgba(8,3,48,0.01) 100%)',
            border: `1px solid ${color}25`,
            padding: '16px',
            backdropFilter: 'blur(10px)',
@@ -94,12 +94,12 @@ function SectionCard({ children, className = '', glow = false }: {
     <div
       className={`group relative rounded-2xl p-6 transition-all duration-500 hover:border-white/10 ${className}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(28,31,51,0.03) 0%, rgba(247, 251, 253,0.5) 100%)',
-        border: '1px solid rgba(28,31,51,0.05)',
+        background: 'linear-gradient(135deg, rgba(8,3,48,0.03) 0%, rgba(247, 251, 253,0.5) 100%)',
+        border: '1px solid rgba(8,3,48,0.05)',
         backdropFilter: 'blur(20px)',
         boxShadow: glow 
-          ? '0 8px 32px rgba(15,138,106,0.08), inset 0 1px 0 rgba(28,31,51,0.05)' 
-          : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(28,31,51,0.05)',
+          ? '0 8px 32px rgba(15,138,106,0.08), inset 0 1px 0 rgba(8,3,48,0.05)' 
+          : '0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(8,3,48,0.05)',
       }}
     >
       <div className="absolute top-0 left-1/4 right-1/4 h-[1px] opacity-30 transition-opacity duration-500 group-hover:opacity-100"
@@ -120,7 +120,7 @@ function SectionHeader({ icon, title, subtitle, badge }: {
              style={{
                background: 'linear-gradient(135deg, rgba(15,138,106,0.1) 0%, rgba(15,138,106,0.02) 100%)',
                border: '1px solid rgba(15,138,106,0.2)',
-               color: '#3A3AB8',
+               color: '#1D1C93',
                boxShadow: 'inset 0 0 12px rgba(15,138,106,0.05)'
              }}>
           {icon}
@@ -172,7 +172,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
         
         {/* Left Side: Precision & Recall */}
         <div className="space-y-3">
-          <StatPill label="Precision" value={metrics.classification?.precision.toFixed(1) ?? 0} unit="%" color="#3A3AB8" icon={<Target size={11} />} />
+          <StatPill label="Precision" value={metrics.classification?.precision.toFixed(1) ?? 0} unit="%" color="#1D1C93" icon={<Target size={11} />} />
           <StatPill label="Recall" value={metrics.classification?.recall.toFixed(1) ?? 0} unit="%" color="#0F8A6A" icon={<Activity size={11} />} />
         </div>
 
@@ -198,7 +198,7 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
           </div>
 
           <div className="flex items-center gap-4 mt-4 px-4 py-2 rounded-full z-10 backdrop-blur-md" 
-               style={{ background: 'rgba(217, 233, 242,0.6)', border: '1px solid rgba(28,31,51,0.08)' }}>
+               style={{ background: 'rgba(217, 233, 242,0.6)', border: '1px solid rgba(8,3,48,0.08)' }}>
             <div className="flex items-center gap-1.5">
               <span className="font-mono text-[10px] text-white/40 uppercase tracking-wider">Current:</span>
               <span className="font-mono text-sm font-bold" style={{ color }}>{accuracy.toFixed(1)}%</span>
@@ -246,14 +246,14 @@ function AccuracySection({ metrics }: { metrics: AccuracyMetrics }) {
               </defs>
               <XAxis
                 dataKey="day"
-                tick={{ fill: '#1C1F3366', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#08033066', fontSize: 9, fontFamily: 'Fira Code' }}
                 axisLine={false}
                 tickLine={false}
                 interval={0}
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fill: '#1C1F3366', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#08033066', fontSize: 9, fontFamily: 'Fira Code' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${v}%`}
@@ -412,7 +412,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
         ) : (
           <div className="space-y-2">
             {/* Header */}
-            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr_2fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(28,31,51,0.03)' }}>
+            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr_2fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(8,3,48,0.03)' }}>
               {['System', 'Risk', 'Failure Prob', 'Predicted Lifetime(Days)', 'Confidence', 'Risk Factors'].map(h => (
                 <span key={h} className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
               ))}
@@ -436,7 +436,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
                   <span className="font-mono text-sm font-bold" style={{ color: riskColor(sys.risk_level) }}>
                     {(sys.failure_probability * 100).toFixed(1)}%
                   </span>
-                  <div className="h-1 rounded-full" style={{ background: 'rgba(28,31,51,0.08)', width: '80%' }}>
+                  <div className="h-1 rounded-full" style={{ background: 'rgba(8,3,48,0.08)', width: '80%' }}>
                     <div className="h-full rounded-full" style={{
                       width: `${Math.min(sys.failure_probability * 100, 100)}%`,
                       background: `linear-gradient(90deg, ${riskColor(sys.risk_level)}, ${riskColor(sys.risk_level)}88)`,
@@ -489,7 +489,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
           <p className="text-white/30 font-mono text-xs py-3">No stable systems found.</p>
         ) : (
           <div className="space-y-2">
-            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(28,31,51,0.03)' }}>
+            <div className="grid grid-cols-[1.8fr_0.8fr_1fr_1.4fr_0.8fr] gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(8,3,48,0.03)' }}>
               {['System', 'Health', 'Failure Prob', 'Predicted Lifetime(Days)', 'Confidence'].map(h => (
                 <span key={h} className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
               ))}
@@ -566,7 +566,7 @@ function PredictionsTable({
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
             className="p-1.5 rounded-lg text-white/40 hover:text-white disabled:opacity-30 transition-colors"
-            style={{ background: 'rgba(28,31,51,0.05)', border: '1px solid rgba(28,31,51,0.08)' }}
+            style={{ background: 'rgba(8,3,48,0.05)', border: '1px solid rgba(8,3,48,0.08)' }}
           >
             <ChevronLeft size={13} />
           </button>
@@ -574,7 +574,7 @@ function PredictionsTable({
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
             className="p-1.5 rounded-lg text-white/40 hover:text-white disabled:opacity-30 transition-colors"
-            style={{ background: 'rgba(28,31,51,0.05)', border: '1px solid rgba(28,31,51,0.08)' }}
+            style={{ background: 'rgba(8,3,48,0.05)', border: '1px solid rgba(8,3,48,0.08)' }}
           >
             <ChevronRight size={13} />
           </button>
@@ -582,7 +582,7 @@ function PredictionsTable({
       </div>
 
       {/* Header */}
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg mb-1 px-4 py-2" style={{ background: 'rgba(28,31,51,0.03)' }}>
+      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg mb-1 px-4 py-2" style={{ background: 'rgba(8,3,48,0.03)' }}>
         {['Scenario', 'Predicted', 'Actual', 'Deviation', 'Outcome'].map((h) => (
           <div key={h}>
             <span className="font-mono text-[9px] text-white/30 uppercase tracking-widest">{h}</span>
@@ -604,7 +604,7 @@ function PredictionsTable({
               <div
                 key={pred.id}
                 className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 rounded-lg px-4 py-3 items-center transition-all hover:scale-[1.002]"
-                style={{ background: 'rgba(28,31,51,0.02)', border: '1px solid rgba(28,31,51,0.04)' }}
+                style={{ background: 'rgba(8,3,48,0.02)', border: '1px solid rgba(8,3,48,0.04)' }}
               >
                 <div>
                   <p className="text-xs font-sans text-white font-medium leading-tight line-clamp-1">{pred.scenario}</p>
@@ -704,7 +704,7 @@ function DriftSection({ drift, onRetrain }: {
           border: '1px solid rgba(212,130,10,0.25)',
         }}>
           <AlertTriangle size={14} style={{ color: '#D4820A', marginTop: 1, flexShrink: 0 }} />
-          <p className="text-xs font-sans" style={{ color: 'rgba(28,31,51,0.75)' }}>{drift.driftAlert}</p>
+          <p className="text-xs font-sans" style={{ color: 'rgba(8,3,48,0.75)' }}>{drift.driftAlert}</p>
         </div>
       )}
 
@@ -726,7 +726,7 @@ function DriftSection({ drift, onRetrain }: {
               <XAxis
                 type="number"
                 domain={[0, 40]}
-                tick={{ fill: '#1C1F3344', fontSize: 9, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#08033044', fontSize: 9, fontFamily: 'Fira Code' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${v}%`}
@@ -735,12 +735,12 @@ function DriftSection({ drift, onRetrain }: {
                 type="category"
                 dataKey="name"
                 width={130}
-                tick={{ fill: '#1C1F33AA', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+                tick={{ fill: '#080330AA', fontSize: 10, fontFamily: 'Fira Code' }}
                 axisLine={false}
                 tickLine={false}
               />
               <Tooltip content={<DarkTooltip />} />
-              <Bar dataKey="importance" name="Importance" fill="#3A3AB8" fillOpacity={0.75} radius={[0, 3, 3, 0]} barSize={8} />
+              <Bar dataKey="importance" name="Importance" fill="#1D1C93" fillOpacity={0.75} radius={[0, 3, 3, 0]} barSize={8} />
               <Bar dataKey="drift" name="Drift" fill="#C23B3B" fillOpacity={0.65} radius={[0, 3, 3, 0]} barSize={8} />
             </BarChart>
           </ResponsiveContainer>
@@ -748,8 +748,8 @@ function DriftSection({ drift, onRetrain }: {
 
         <div className="w-52 space-y-3">
           <div className="rounded-xl p-4 space-y-3" style={{
-            background: 'rgba(28,31,51,0.03)',
-            border: '1px solid rgba(28,31,51,0.07)',
+            background: 'rgba(8,3,48,0.03)',
+            border: '1px solid rgba(8,3,48,0.07)',
           }}>
             <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">Retraining Status</p>
             <div className="flex items-center gap-2">
@@ -790,14 +790,14 @@ function KPIStrip({ metrics, forecast }: { metrics: AccuracyMetrics; forecast: F
     { label: 'High Risk Systems', value: String(highRiskCount), color: highRiskCount > 0 ? '#C23B3B' : '#0F8A6A', icon: <AlertTriangle size={16} /> },
     { label: 'Stable Systems', value: String(stableCount), color: '#0F8A6A', icon: <Shield size={16} /> },
     { label: 'F1 Score', value: `${metrics.classification?.f1.toFixed(1) ?? 0}%`, color: '#A78BFA', icon: <Zap size={16} /> },
-    { label: 'Model Version', value: metrics.model_version, color: '#3A3AB8', icon: <Cpu size={16} /> },
+    { label: 'Model Version', value: metrics.model_version, color: '#1D1C93', icon: <Cpu size={16} /> },
   ]
 
   return (
     <div className="grid grid-cols-5 gap-4">
       {kpis.map((k) => (
         <div key={k.label} className="group relative rounded-2xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1" style={{
-          background: 'linear-gradient(135deg, rgba(28,31,51,0.03) 0%, rgba(28,31,51,0.01) 100%)',
+          background: 'linear-gradient(135deg, rgba(8,3,48,0.03) 0%, rgba(8,3,48,0.01) 100%)',
           border: `1px solid ${k.color}25`,
           boxShadow: `0 8px 24px -4px ${k.color}10`,
           backdropFilter: 'blur(12px)',
@@ -889,7 +889,7 @@ export default function PredictiveMaintenancePage() {
             </div>
             <h1 className="font-mono font-bold tracking-tight mb-2" style={{
               fontSize: 28,
-              background: 'linear-gradient(to right, #1C1F33, #3A3AB8)',
+              background: 'linear-gradient(to right, #080330, #1D1C93)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textShadow: '0 0 40px rgba(15,138,106, 0.2)'

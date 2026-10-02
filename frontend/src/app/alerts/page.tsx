@@ -17,7 +17,7 @@ import { ago } from '@/lib/format'
 type Sev = BackendAlertDetail['severity']
 const SEV_ORDER: Record<Sev, number> = { emergency: 0, critical: 1, warning: 2, info: 3 }
 const SEV_TONE: Record<Sev, Tone> = { emergency: 'crit', critical: 'crit', warning: 'warn', info: 'primary' }
-const SEV_BAR: Record<Sev, string> = { emergency: '#C23B3B', critical: '#C23B3B', warning: '#D4820A', info: '#3A3AB8' }
+const SEV_BAR: Record<Sev, string> = { emergency: '#C23B3B', critical: '#C23B3B', warning: '#D4820A', info: '#1D1C93' }
 const STATES: BackendAlertDetail['state'][] = ['open', 'acked', 'resolved']
 
 interface Blast {

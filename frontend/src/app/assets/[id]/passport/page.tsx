@@ -77,7 +77,7 @@ export default function AssetPassportPage() {
             printable entry mechanism, so it's a small corner trigger here,
             not a permanently-rendered code (see /assets/qr-sheet for the
             printable version this is meant to travel with). */}
-        <div className="relative overflow-hidden rounded-xl border border-brand-border p-5" style={{ background: 'linear-gradient(135deg, #1C1F3308 0%, #3A3AB80a 100%)' }}>
+        <div className="relative overflow-hidden rounded-xl border border-brand-border p-5" style={{ background: 'linear-gradient(135deg, #08033008 0%, #1D1C930a 100%)' }}>
           <button
             onClick={() => setQrOpen(true)}
             title="Show this passport's QR code"
@@ -138,8 +138,8 @@ export default function AssetPassportPage() {
           </div>
         </section>
 
-        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#3A3AB8' }}>
-          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#3A3AB8' }}>
+        <section className="bg-brand-surface border border-brand-border rounded-lg p-4 border-l-4" style={{ borderLeftColor: '#1D1C93' }}>
+          <p className="font-mono text-[10px] uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: '#1D1C93' }}>
             <Clock size={12} /> 30-Day Telemetry History
           </p>
           {passport.telemetry_history.length === 0 ? (

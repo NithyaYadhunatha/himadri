@@ -11,7 +11,7 @@ interface SparklineProps {
   className?: string
 }
 
-export function Sparkline({ data, color = '#3A3AB8', height = 32, className = '' }: SparklineProps) {
+export function Sparkline({ data, color = '#1D1C93', height = 32, className = '' }: SparklineProps) {
   const chartData = data.map((d) => ({ v: d.value }))
 
   return (

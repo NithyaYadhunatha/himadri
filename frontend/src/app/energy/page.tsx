@@ -41,7 +41,7 @@ interface Rule {
 
 const CO2_KG_PER_LITRE_DIESEL = 2.68 // IPCC default emission factor for diesel/gasoil combustion
 
-const COLORS = ['#3A3AB8', '#0F8A6A', '#D4820A', '#A04FB8', '#C23B3B']
+const COLORS = ['#1D1C93', '#0F8A6A', '#D4820A', '#A04FB8', '#C23B3B']
 
 function PowerChart({ station, keys }: { station: string; keys: SeriesRow[] }) {
   const [rows, setRows] = useState<Record<string, number | string>[] | null>(null)
@@ -77,10 +77,10 @@ function PowerChart({ station, keys }: { station: string; keys: SeriesRow[] }) {
     <div style={{ height: 260 }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke="#DDD5C2" strokeDasharray="3 5" vertical={false} />
-          <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} minTickGap={36} />
-          <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} width={40} unit=" kW" />
-          <Tooltip contentStyle={{ background: '#FFFEFB', border: '1px solid #DDD5C2', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
+          <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+          <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={36} />
+          <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} width={40} unit=" kW" />
+          <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
           {keys.map((k, i) => (
             <Area key={k.asset_id} dataKey={k.asset_id} name={k.asset_id.replace(`${station}-power-`, '')} type="monotone" stackId="p" stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.18} strokeWidth={1.8} isAnimationActive={false} connectNulls />
           ))}
@@ -147,7 +147,7 @@ export default function EnergyPage() {
                 <span className="eyebrow">Extra load</span>
                 <span className="font-display text-3xl text-white num">+{load}%</span>
               </div>
-              <input type="range" min={0} max={80} step={5} value={load} onChange={(e) => setLoad(Number(e.target.value))} className="w-full mt-2 accent-[#3A3AB8]" />
+              <input type="range" min={0} max={80} step={5} value={load} onChange={(e) => setLoad(Number(e.target.value))} className="w-full mt-2 accent-[#1D1C93]" />
             </div>
             <div className="mt-5 rounded-xl border border-brand-border bg-brand-surface-2/60 p-4">
               <p className="eyebrow">Fuel endurance</p>

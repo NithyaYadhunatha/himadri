@@ -173,7 +173,7 @@ export function createGenericAssetPanel(curatedData: Record<string, GenericAsset
                   <div key={i} className="bg-brand-bg border border-brand-border rounded p-2 flex items-start gap-2">
                     <span
                       className="font-mono text-[9px] uppercase tracking-wide shrink-0 w-16"
-                      style={{ color: e.severity === 'CRITICAL' ? '#C23B3B' : e.severity === 'WARNING' ? '#D4820A' : '#8A8576' }}
+                      style={{ color: e.severity === 'CRITICAL' ? '#C23B3B' : e.severity === 'WARNING' ? '#D4820A' : '#626079' }}
                     >
                       {e.severity}
                     </span>

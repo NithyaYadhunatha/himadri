@@ -35,7 +35,7 @@ const OVERLAY_MODES: Array<{ id: OverlayMode; label: string; icon: React.Compone
   { id: 'risk', label: 'Risk', icon: Gauge },
 ]
 
-const NEUTRAL = '#8A8576'
+const NEUTRAL = '#626079'
 
 function avgHealthColor(assets: GraphNode[]): { color: string; value: string } {
   if (assets.length === 0) return { color: NEUTRAL, value: 'n/a' }

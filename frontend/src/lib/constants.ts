@@ -62,12 +62,12 @@ export const HEALTH_COLORS = {
   degraded: '#D4820A',
   warning: '#D4820A',
   critical: '#C23B3B',
-  unreachable: '#8A8576',
+  unreachable: '#626079',
   // "cyan" is the design-token name for "Interactive / AI / Simulated" (a
   // glacier blue here) — used for assets whose readings are synthetic
   // (isSimulating === true / a device agent is injecting a fault) so they
   // don't read as healthy-green or degrade into the amber/crimson buckets.
-  simulating: '#3A3AB8',
+  simulating: '#1D1C93',
 } as const
 
 export const ASSET_CATEGORY_ABBREV: Record<string, string> = {

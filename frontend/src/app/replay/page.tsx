@@ -17,7 +17,7 @@ interface Bucket { ts: string; value: number }
 interface Alert { id: string; severity: string; message: string; first_seen: string; state: string; asset_id: string }
 
 const PICKS: { match: RegExp; name: string; unit: string; color: string }[] = [
-  { match: /power-generator-01\.power_kw$/, name: 'Generator 1', unit: 'kW', color: '#3A3AB8' },
+  { match: /power-generator-01\.power_kw$/, name: 'Generator 1', unit: 'kW', color: '#1D1C93' },
   { match: /fuel-tank-01\.level_l$/, name: 'Fuel Tank 01', unit: 'L', color: '#0F8A6A' },
   { match: /instrument-aws-01\.temp_c$/, name: 'Air temperature', unit: '°C', color: '#D4820A' },
   { match: /storage-freezer-01\.temp_c$/, name: 'Freezer 1', unit: '°C', color: '#A04FB8' },
@@ -126,14 +126,14 @@ export default function ReplayPage() {
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
-                    <CartesianGrid stroke="#DDD5C2" strokeDasharray="3 5" vertical={false} />
-                    <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(v) => new Date(v).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} minTickGap={40} />
+                    <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+                    <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(v) => new Date(v).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={40} />
                     <YAxis hide domain={[0, 1]} />
-                    <Tooltip contentStyle={{ background: '#FFFEFB', border: '1px solid #DDD5C2', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(v) => new Date(Number(v)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
+                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(v) => new Date(Number(v)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
                     {picked.map((p) => (
                       <Line key={p.key} dataKey={`${p.key}__n`} name={p.name} stroke={p.color} strokeWidth={2} dot={false} yAxisId={0} isAnimationActive={false} connectNulls />
                     ))}
-                    {t !== null && <ReferenceLine x={t} stroke="#1C1F33" strokeWidth={2} />}
+                    {t !== null && <ReferenceLine x={t} stroke="#080330" strokeWidth={2} />}
                     {marks.map((a) => (
                       <ReferenceDot key={a.id} x={a.t} y={0.02} r={5} fill={a.severity === 'critical' || a.severity === 'emergency' ? '#C23B3B' : '#D4820A'} stroke="#fff" ifOverflow="extendDomain" />
                     ))}
@@ -145,7 +145,7 @@ export default function ReplayPage() {
                   {playing ? <Pause size={13} /> : <Play size={13} />} {playing ? 'Pause' : 'Play'}
                 </button>
                 <button onClick={() => { setPlaying(false); setIdx(0) }} className="p-2 text-white/50 hover:text-white" aria-label="Restart"><RotateCcw size={15} /></button>
-                <input type="range" min={0} max={data.length - 1} value={idx} onChange={(e) => { setPlaying(false); setIdx(Number(e.target.value)) }} className="flex-1 accent-[#3A3AB8]" />
+                <input type="range" min={0} max={data.length - 1} value={idx} onChange={(e) => { setPlaying(false); setIdx(Number(e.target.value)) }} className="flex-1 accent-[#1D1C93]" />
                 <span className="font-mono text-[11px] text-white/55 num w-16 text-right">{idx + 1}/{data.length}</span>
               </div>
             </>

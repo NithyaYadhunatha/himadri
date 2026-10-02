@@ -16,10 +16,10 @@ interface Node {
 
 const COLOR: Record<string, string> = {
   ok: '#0F8A6A',
-  simulating: '#3A3AB8',
+  simulating: '#1D1C93',
   degraded: '#D4820A',
   fault: '#C23B3B',
-  offline: '#B7B09B',
+  offline: '#84839D',
 }
 
 function sample(station: string): Node[] {

@@ -165,7 +165,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="print:hidden fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-white pl-4 pr-5 py-3 shadow-[0_8px_30px_-8px_rgba(28,31,51,0.55)] hover:-translate-y-0.5 transition-transform"
+          className="print:hidden fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-white pl-4 pr-5 py-3 shadow-[0_8px_30px_-8px_rgba(8,3,48,0.55)] hover:-translate-y-0.5 transition-transform"
           aria-label="Ask Himadri"
         >
           <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-marigold opacity-70 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-marigold" /></span>
@@ -176,7 +176,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
 
       {/* Expanded panel */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] max-w-[calc(100vw-2rem)] h-[540px] bg-brand-surface border border-brand-border rounded-2xl shadow-[0_24px_60px_-20px_rgba(28,31,51,0.45)] overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[400px] max-w-[calc(100vw-2rem)] h-[540px] bg-brand-surface border border-brand-border rounded-2xl shadow-[0_24px_60px_-20px_rgba(8,3,48,0.45)] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-brand-border shrink-0 bg-brand-bg">
             <div className="flex items-center gap-2">

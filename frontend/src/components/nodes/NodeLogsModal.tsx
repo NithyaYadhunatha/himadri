@@ -11,7 +11,7 @@ import { CenteredModal } from '@/components/ui/CenteredModal'
 import { mockLogsFor, type LogLevel } from '@/lib/graph/mockLogs'
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  INFO: '#8A8576',
+  INFO: '#626079',
   WARNING: '#D4820A',
   ERROR: '#C23B3B',
   CRITICAL: '#C23B3B',

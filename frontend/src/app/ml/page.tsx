@@ -125,18 +125,18 @@ function ForecastChart({ metric, unit, horizon }: { metric: string; unit: string
       <div style={{ height: 270 }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="#DDD5C2" strokeDasharray="3 5" vertical={false} />
-            <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} minTickGap={40} />
-            <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#8A8576' }} axisLine={false} tickLine={false} width={52} domain={['auto', 'auto']} tickFormatter={(v) => fmtNum(v)} />
+            <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+            <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={40} />
+            <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} width={52} domain={['auto', 'auto']} tickFormatter={(v) => fmtNum(v)} />
             <Tooltip
-              contentStyle={{ background: '#FFFEFB', border: '1px solid #DDD5C2', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }}
+              contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }}
               labelFormatter={(t) => new Date(Number(t)).toLocaleString('en-GB')}
               formatter={(v, n) => [`${fmtNum(Number(v), 1)} ${unit}`, n === 'actual' ? 'Observed' : n === 'fc' ? 'Forecast' : n === 'srv' ? 'Backend OLS' : String(n)]}
             />
             <Area dataKey="lo" stackId="ci" stroke="none" fill="transparent" isAnimationActive={false} />
-            <Area dataKey="band" stackId="ci" stroke="none" fill="#3A3AB8" fillOpacity={0.12} isAnimationActive={false} name="95% interval" />
-            <Line dataKey="actual" stroke="#1C1F33" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
-            <Line dataKey="fc" stroke="#3A3AB8" strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} connectNulls />
+            <Area dataKey="band" stackId="ci" stroke="none" fill="#1D1C93" fillOpacity={0.12} isAnimationActive={false} name="95% interval" />
+            <Line dataKey="actual" stroke="#080330" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
+            <Line dataKey="fc" stroke="#1D1C93" strokeWidth={2} strokeDasharray="6 4" dot={false} isAnimationActive={false} connectNulls />
             {showServer && <Line dataKey="srv" stroke="#D4820A" strokeWidth={1.6} strokeDasharray="2 4" dot={false} isAnimationActive={false} connectNulls />}
           </ComposedChart>
         </ResponsiveContainer>
