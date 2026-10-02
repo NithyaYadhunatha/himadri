@@ -96,6 +96,42 @@
         console.info("Maitri live telemetry:", deployedWebSocketUrl);
       })();
 
+
+      // ── PolarTwin web <-> 3D bridge ───────────────────────────────────────
+      // Parent page (Next.js /twin/3d) posts { source:'polartwin-web', command }.
+      // Commands are forwarded to the Unity GameObject "WebBridge" (see
+      // docs/unity/). If the Unity build does not contain it, nothing happens
+      // and no capabilities are announced, so the dashboard reports the 3D
+      // bridge as unavailable instead of pretending it worked.
+      // Unity -> web events go out via window.polartwinEmit (called by WebBridge.jslib).
+      (function polartwinBridge() {
+        var pending = [];
+        window.polartwinUnity = null;
+        function send(cmd) {
+          if (!window.polartwinUnity) { pending.push(cmd); return; }
+          try { window.polartwinUnity.SendMessage("WebBridge", "OnWebCommand", JSON.stringify(cmd)); } catch (_) {}
+        }
+        window.addEventListener("message", function (ev) {
+          if (ev.source !== window.parent || ev.origin !== window.location.origin) return;
+          var d = ev.data;
+          if (!d || d.source !== "polartwin-web" || !d.command) return;
+          // Handled here, not in Unity: pointer lock belongs to this document.
+          if (d.command.type === "releasePointer") { if (document.exitPointerLock) document.exitPointerLock(); return; }
+          send(d.command);
+        });
+        // Forward only the keys the dashboard overlays use. Capture phase + no
+        // preventDefault: Unity still receives every key unchanged.
+        window.addEventListener("keydown", function (e) {
+          if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.key === "h" || e.key === "H" || e.key === "Escape")
+            try { window.parent.postMessage({ source: "polartwin-unity", event: { type: "key", key: e.key } }, window.location.origin); } catch (_) {}
+        }, true);
+        window.polartwinFlush = function () { var q = pending; pending = []; q.forEach(send); };
+        window.polartwinEmit = function (json) {
+          try { window.parent.postMessage({ source: "polartwin-unity", event: JSON.parse(json) }, window.location.origin); } catch (_) {}
+        };
+      })();
+
       // Shows a temporary message banner/ribbon for a few seconds, or
       // a permanent error message on top of the canvas if type=='error'.
       // If type=='warning', a yellow highlight color is used.
@@ -199,6 +235,9 @@
             loadingContainer.style.display = "none";
           }
         }).then((unityInstance) => {
+                window.polartwinUnity = unityInstance;
+                window.polartwinFlush();
+                window.polartwinEmit(JSON.stringify({ type: "sceneLoaded" }));
                 document.querySelector("#unity-fullscreen-button").onclick = () => {
                   unityInstance.SetFullscreen(1);
                 };
