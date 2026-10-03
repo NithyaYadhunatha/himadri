@@ -89,9 +89,9 @@ def _wire_command(body: Any, gateway_id: str) -> str:
     command = body.get("wireCommand")
     if command in {"BUZZER:ON", "BUZZER:OFF"}:
         return command
-    if isinstance(command, str) and command.startswith("SERVO:"):
-        angle_text = command.removeprefix("SERVO:")
-        if angle_text.isdigit() and 0 <= int(angle_text) <= 180:
+    if isinstance(command, str):
+        prefix, _, angle_text = command.partition(":")
+        if prefix in {"SERVO", "WRIST"} and angle_text.isdigit() and 0 <= int(angle_text) <= 180:
             return command
     raise ValueError("unsupported hardware command")
 
@@ -134,6 +134,14 @@ def merge_pi_readings(
         and 0 <= servo_angle <= 180
         else None
     )
+    wrist_angle = snapshot.get("wrist_angle")
+    system["wrist_angle"] = (
+        wrist_angle
+        if isinstance(wrist_angle, int)
+        and not isinstance(wrist_angle, bool)
+        and 0 <= wrist_angle <= 180
+        else None
+    )
     merged["system"] = system
     return merged
 
@@ -156,6 +164,7 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
         if isinstance(system.get("buzzer_on"), bool)
         else None,
         _reading("servo-01", system.get("servo_angle"), "deg"),
+        _reading("servo-02", system.get("wrist_angle"), "deg"),
         _reading("sensor-ultrasonic-01", packet.get("distance_cm"), "cm"),
         _reading("sensor-ir-01", int(packet["ir_detected"]), "state")
         if isinstance(packet.get("ir_detected"), bool)
@@ -195,7 +204,7 @@ def main() -> None:
         print(
             f"Pi hardware: HC-SR04 BCM{hardware.trigger_pin}/{hardware.echo_pin}, "
             f"IR BCM{hardware.ir_pin}, "
-            f"servo BCM{hardware.servo_pin}"
+            f"arm servo BCM{hardware.servo_pin}, wrist servo BCM{hardware.wrist_pin}"
         )
 
     session = requests.Session()
@@ -225,10 +234,14 @@ def main() -> None:
                             break
                         response.raise_for_status()
                         command = _wire_command(response.json(), gateway_id)
-                        if command.startswith("SERVO:"):
+                        if command.startswith(("SERVO:", "WRIST:")):
                             if hardware is None:
                                 raise ValueError("Pi servo hardware is disabled")
-                            hardware.set_servo_angle(int(command.removeprefix("SERVO:")))
+                            target, _, angle_text = command.partition(":")
+                            if target == "SERVO":
+                                hardware.set_servo_angle(int(angle_text))
+                            else:
+                                hardware.set_wrist_angle(int(angle_text))
                         else:
                             arduino.write((command + "\n").encode("ascii"))
                             arduino.flush()

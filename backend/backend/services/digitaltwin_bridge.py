@@ -9,8 +9,9 @@ same Mosquitto broker (backend.config.settings.MQTT_BROKER_HOST/PORT).
 
 Device catalog below mirrors the 14 devices built in the
 Unity project's Assets/Editor/DigitalTwinSceneBuilder.cs (the Data(...) calls
-in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01`,
-which is a Pi-owned physical actuator exposed through the API.
+in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01` (robot
+arm) and `servo-02` (robot wrist), which are Pi-owned physical actuators
+exposed through the API.
 
 Nine devices have a real sensor/actuator on the PolarTwinDualBoard
 rig (see PolarTwin/himadri/PolarTwinDualBoard/docs/architecture.md). The rest
@@ -66,7 +67,8 @@ DEVICE_CATALOG: dict[str, dict[str, Any]] = {
     "status-led-01": dict(name="RGB Status LED", deviceType="status-led", roomId="room-01", unit="state", warning=1, critical=1, kind="derived", inverse=False),
     "sensor-ultrasonic-01": dict(name="HC-SR04 Distance Sensor", deviceType="distance", roomId="room-02", unit="cm", warning=120, critical=40, kind="numeric", inverse=True),
     "sensor-ir-01": dict(name="IR Presence Sensor", deviceType="ir", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
-    "servo-01": dict(name="Position Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
+    "servo-01": dict(name="Robotic Arm Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
+    "servo-02": dict(name="Robotic Wrist Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
     # Keep the legacy Unity device ID so existing WebGL builds continue to
     # receive updates; the physical channel is the Uno D10 Hall-effect module.
     "sensor-door-01": dict(name="Hall Effect Sensor", deviceType="hall-effect", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
@@ -121,6 +123,8 @@ _HARDWARE_GATEWAY_ID = "polar-twin-uno"
 _HARDWARE_COMMANDS: dict[str, tuple[str, str]] = {
     "buzzer-01": ("BUZZER:OFF", "BUZZER:ON"),
 }
+# Robotic-arm servos driven directly by Raspberry Pi PWM: device -> wire prefix.
+_SERVO_WIRE_PREFIX = {"servo-01": "SERVO", "servo-02": "WRIST"}
 
 
 def compute_numeric_status(value: float, warning: float, critical: float, inverse: bool) -> str:
@@ -159,7 +163,7 @@ async def _set_device(device_id: str, value: float, display_value: str = "", sta
     meta = DEVICE_CATALOG[device_id]
     if not display_value and device_id == "sensor-door-01":
         display_value = "MAGNET DETECTED" if value >= 0.5 else "FIELD CLEAR"
-    elif not display_value and device_id == "servo-01":
+    elif not display_value and device_id in _SERVO_WIRE_PREFIX:
         display_value = f"{int(value)}°"
     if status is None:
         if meta["kind"] == "numeric":
@@ -318,6 +322,57 @@ def list_room_devices(room_id: str) -> list[dict[str, Any]]:
     return [device for device in _state.values() if device["roomId"] == room_id]
 
 
+def _parse_servo_angle(command: str, value: Any) -> int | None:
+    if (
+        command != "SET_ANGLE"
+        or isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or int(value) != value
+        or not 0 <= int(value) <= 180
+    ):
+        return None
+    return int(value)
+
+
+def _queue_servo(device_id: str, angle: int) -> None:
+    """Queue a SERVO:n / WRIST:n wire command for the Pi gateway. A newer
+    command for the same servo replaces any still-queued one so a slider drag
+    does not build a backlog of stale positions."""
+    prefix = _SERVO_WIRE_PREFIX[device_id]
+    queue = _hardware_commands[_HARDWARE_GATEWAY_ID]
+    stale = [c for c in queue if c.get("deviceId") == device_id]
+    for command in stale:
+        queue.remove(command)
+    queue.append({
+        "commandId": uuid.uuid4().hex,
+        "gatewayId": _HARDWARE_GATEWAY_ID,
+        "deviceId": device_id,
+        "wireCommand": f"{prefix}:{angle}",
+        "value": angle,
+        "queuedAt": _now_ms(),
+    })
+
+
+async def move_arm(arm: int | None, wrist: int | None) -> dict[str, int] | None:
+    """Queue arm and/or wrist moves atomically. Returns the accepted angles,
+    or None if nothing was requested or any angle is invalid."""
+    requested = {"servo-01": arm, "servo-02": wrist}
+    angles: dict[str, int] = {}
+    for device_id, raw in requested.items():
+        if raw is None:
+            continue
+        angle = _parse_servo_angle("SET_ANGLE", raw)
+        if angle is None:
+            return None
+        angles[device_id] = angle
+    if not angles:
+        return None
+    for device_id, angle in angles.items():
+        _queue_servo(device_id, angle)
+    return angles
+
+
 async def publish_command(device_id: str, command: str, value: Any) -> bool:
     """Publish an actuator command to the ESP8266 over MQTT, and for purely
     virtual devices (no hardware ack path) also optimistically update the
@@ -336,25 +391,11 @@ async def publish_command(device_id: str, command: str, value: Any) -> bool:
             "value": enabled,
             "queuedAt": _now_ms(),
         })
-    elif device_id == "servo-01":
-        if (
-            command != "SET_ANGLE"
-            or isinstance(value, bool)
-            or not isinstance(value, (int, float))
-            or not math.isfinite(value)
-            or int(value) != value
-            or not 0 <= int(value) <= 180
-        ):
+    elif device_id in _SERVO_WIRE_PREFIX:
+        angle = _parse_servo_angle(command, value)
+        if angle is None:
             return False
-        angle = int(value)
-        _hardware_commands[_HARDWARE_GATEWAY_ID].append({
-            "commandId": uuid.uuid4().hex,
-            "gatewayId": _HARDWARE_GATEWAY_ID,
-            "deviceId": device_id,
-            "wireCommand": f"SERVO:{angle}",
-            "value": angle,
-            "queuedAt": _now_ms(),
-        })
+        _queue_servo(device_id, angle)
 
     if _publisher_client is not None:
         try:
