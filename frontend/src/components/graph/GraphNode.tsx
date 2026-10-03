@@ -39,9 +39,9 @@ export interface GraphNodeRenderData extends GraphNodeData {
 }
 
 const DIFF_STYLE: Record<'added' | 'removed' | 'modified' | 'impacted', { ring: string; chip: string; chipLabel: string; chipClass: string }> = {
-  added: { ring: '#10B981', chip: '#10B981', chipLabel: '+ NEW', chipClass: 'bg-emerald text-brand-bg' },
+  added: { ring: '#1F9E6D', chip: '#1F9E6D', chipLabel: '+ NEW', chipClass: 'bg-emerald text-brand-bg' },
   removed: { ring: '#EF4444', chip: '#EF4444', chipLabel: '− REMOVED', chipClass: 'bg-crimson text-white' },
-  modified: { ring: '#06B6D4', chip: '#06B6D4', chipLabel: '⟳ MODIFIED', chipClass: 'bg-cyan text-brand-bg' },
+  modified: { ring: '#1868A0', chip: '#1868A0', chipLabel: '⟳ MODIFIED', chipClass: 'bg-cyan text-brand-bg' },
   impacted: { ring: '#F59E0B', chip: '#F59E0B', chipLabel: '⚠ IMPACT', chipClass: 'bg-amber text-brand-bg' },
 }
 
@@ -88,14 +88,14 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
     >
       {diffStyle && (
         <span
-          className={`absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 shrink-0 text-[7px] font-mono font-bold rounded px-1.5 py-[1px] whitespace-nowrap ${diffStyle.chipClass}`}
+          className={`absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 shrink-0 text-[10px] font-mono font-bold rounded px-1.5 py-[1px] whitespace-nowrap ${diffStyle.chipClass}`}
         >
           {diffStyle.chipLabel}
         </span>
       )}
       {nodeData.isSimulationTarget && !diffStyle && (
         <span
-          className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 shrink-0 text-[7px] font-mono font-bold rounded px-1.5 py-[1px] whitespace-nowrap"
+          className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 shrink-0 text-[10px] font-mono font-bold rounded px-1.5 py-[1px] whitespace-nowrap"
           style={{ backgroundColor: '#F97316', color: 'white' }}
         >
           ▶ SIM
@@ -123,7 +123,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
             : selected
               ? `drop-shadow(0 0 8px #1D1C93) brightness(1.15)`
               : nodeData.isDependency
-                ? `drop-shadow(0 0 8px #00D4FF) brightness(1.15)`
+                ? `drop-shadow(0 0 8px #1868A0) brightness(1.15)`
                 : nodeData.isImpacted
                   ? `drop-shadow(0 0 8px #D4820A) brightness(1.15)`
                   : hovered
@@ -157,7 +157,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
         {nodeData.incidents > 0 && (
           <div
             className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-crimson border border-brand-bg
-              flex items-center justify-center text-[9px] font-mono font-bold text-white z-10"
+              flex items-center justify-center text-[10px] font-mono font-bold text-white z-10"
           >
             {nodeData.incidents > 9 ? '9+' : nodeData.incidents}
           </div>
@@ -197,7 +197,7 @@ function GraphNodeComponent({ data, selected }: NodeProps) {
           className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 z-30 pointer-events-none
             bg-brand-surface border border-brand-border rounded px-2 py-1 shadow-lg whitespace-nowrap"
         >
-          <p className="font-mono text-[9px] text-[#1D1C93]">
+          <p className="font-mono text-[10px] text-[#1D1C93]">
             Health {nodeData.healthScore}
           </p>
         </div>

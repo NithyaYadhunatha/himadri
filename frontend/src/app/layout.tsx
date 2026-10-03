@@ -72,11 +72,11 @@ export default function RootLayout({
         elements: {
           card: 'bg-brand-surface-3 border border-brand-border shadow-none',
           headerTitle: 'font-mono text-white',
-          headerSubtitle: 'text-white/50',
+          headerSubtitle: 'text-white/70',
           socialButtonsBlockButton: 'border border-brand-border bg-brand-surface-2 hover:bg-brand-surface-3',
           dividerLine: 'bg-brand-border',
-          dividerText: 'text-white/30',
-          formFieldLabel: 'text-white/60',
+          dividerText: 'text-white/55',
+          formFieldLabel: 'text-white/75',
           formFieldInput: 'bg-brand-bg border border-brand-border focus:border-cyan',
           formButtonPrimary:
             'bg-cyan text-brand-bg font-semibold hover:bg-cyan/90 shadow-cyan-glow normal-case',

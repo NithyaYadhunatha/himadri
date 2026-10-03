@@ -24,7 +24,7 @@ const TONE_TEXT: Record<Tone, string> = {
   ok: 'text-emerald',
   warn: 'text-amber',
   crit: 'text-crimson',
-  mute: 'text-white/45',
+  mute: 'text-white/65',
 }
 
 const TONE_SOFT: Record<Tone, string> = {
@@ -33,7 +33,7 @@ const TONE_SOFT: Record<Tone, string> = {
   ok: 'bg-emerald/10 border-emerald/30 text-emerald',
   warn: 'bg-amber/12 border-amber/35 text-amber',
   crit: 'bg-crimson/10 border-crimson/30 text-crimson',
-  mute: 'bg-white/5 border-white/10 text-white/45',
+  mute: 'bg-white/5 border-white/10 text-white/65',
 }
 
 /* ── Panel ───────────────────────────────────────────────────── */
@@ -181,20 +181,20 @@ export function Kpi({
       <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r" style={{ background: TONE_HEX[tone] }} />
       <div className="flex items-center justify-between gap-2 pl-1">
         <p className="eyebrow truncate">{label}</p>
-        {icon ? <span className="text-white/35 shrink-0">{icon}</span> : badge}
+        {icon ? <span className="text-white/58 shrink-0">{icon}</span> : badge}
       </div>
       <div className="flex items-baseline gap-1.5 pl-1">
         <span className={`font-display text-[34px] leading-none tracking-tight ${TONE_TEXT[tone]}`}>
           <AnimatedNumber value={value} digits={digits} />
         </span>
-        {unit && <span className="font-mono text-[11px] text-white/45">{unit}</span>}
+        {unit && <span className="font-mono text-[11px] text-white/65">{unit}</span>}
       </div>
       {spark && (
         <div className="pl-1 -mb-1">
           <Spark values={spark} tone={tone === 'ink' ? 'primary' : tone} />
         </div>
       )}
-      {hint && <div className="pl-1 font-mono text-[10.5px] text-white/50 leading-snug">{hint}</div>}
+      {hint && <div className="pl-1 font-mono text-[10.5px] text-white/70 leading-snug">{hint}</div>}
     </div>
   )
 }
@@ -319,10 +319,10 @@ export function Tile({ label, value, hint, icon, tone = "primary" }: { label: st
       <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r" style={{ background: TONE_HEX[tone] }} />
       <div className="flex items-center justify-between pl-1">
         <p className="eyebrow">{label}</p>
-        {icon && <span className="text-white/35">{icon}</span>}
+        {icon && <span className="text-white/58">{icon}</span>}
       </div>
       <p className="pl-1 font-display text-[24px] leading-tight text-white truncate">{value}</p>
-      {hint && <p className="pl-1 font-mono text-[10.5px] text-white/50">{hint}</p>}
+      {hint && <p className="pl-1 font-mono text-[10.5px] text-white/70">{hint}</p>}
     </div>
   )
 }

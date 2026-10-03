@@ -25,7 +25,7 @@ const statusText: Record<HealthStatus, string> = {
   healthy: 'text-emerald',
   degraded: 'text-amber',
   critical: 'text-crimson',
-  unreachable: 'text-white/40',
+  unreachable: 'text-white/62',
 }
 
 export function StatCard({ label, value, unit, trend, status, description, className = '' }: StatCardProps) {
@@ -34,10 +34,10 @@ export function StatCard({ label, value, unit, trend, status, description, class
 
   return (
     <div className={`border rounded p-4 flex flex-col gap-1 ${borderStyle} ${className}`}>
-      <p className="font-mono text-[10px] uppercase tracking-widest text-white/50">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-white/70">{label}</p>
       <div className="flex items-end gap-1.5">
         <span className={`font-mono font-bold text-2xl leading-none ${valueColor}`}>{value}</span>
-        {unit && <span className="text-white/40 text-xs mb-0.5 font-mono">{unit}</span>}
+        {unit && <span className="text-white/62 text-xs mb-0.5 font-mono">{unit}</span>}
       </div>
       {(trend !== undefined || description) && (
         <div className="flex items-center gap-1 mt-0.5">
@@ -47,7 +47,7 @@ export function StatCard({ label, value, unit, trend, status, description, class
               {Math.abs(trend)}%
             </span>
           )}
-          {description && <span className="text-white/30 text-xs">{description}</span>}
+          {description && <span className="text-white/55 text-xs">{description}</span>}
         </div>
       )}
     </div>

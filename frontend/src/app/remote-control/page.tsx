@@ -28,6 +28,10 @@ import { commandsService } from '@/services/commands.service'
 import type { RemoteAsset, CommandAction, CommandRecord, CommandState } from '@/services/commands.service'
 import type { CommandActionKind } from '@/lib/mockData/mockCommands'
 import { useStationStore } from '@/store/useStationStore'
+import { SegTabs, LegendDot } from '@/components/ui/Panel'
+import { MetricChart, MiniSpark, PredictedEffects, ImpactLog } from '@/components/remote/PerformancePanel'
+import { usePerformanceSim } from '@/lib/performance/usePerformanceSim'
+import { metricsFor, isOn, type PredictedChange, type Sample } from '@/lib/performance/assetPerformance'
 import { getNodeTypeConfig, ASSET_CATEGORY_ORDER } from '@/lib/graph/nodeTypes'
 import { STATION_LABELS } from '@/lib/constants'
 import type { NodeType } from '@/types/graph'
@@ -64,12 +68,13 @@ function fmtValue(v: number | null, unit: string | null): string {
 // ─── Two-step confirmation dialog (FR-10) ──────────────────────────────────
 
 function CommandConfirmDialog({
-  asset, action, onClose, onIssued,
+  asset, action, onClose, onIssued, predict,
 }: {
   asset: RemoteAsset
   action: CommandAction
   onClose: () => void
   onIssued: () => void
+  predict: (asset: RemoteAsset, action: string, payload: Record<string, unknown>) => PredictedChange[]
 }) {
   const [step, setStep] = useState<1 | 2>(1)
   const [setpointValue, setSetpointValue] = useState<number>(asset.primaryValue ?? 0)
@@ -115,27 +120,27 @@ function CommandConfirmDialog({
 
         {/* Step indicator */}
         <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest">
-          <span className={step === 1 ? 'text-cyan' : 'text-white/30'}>1. Configure</span>
-          <ArrowRight size={10} className="text-white/20" />
-          <span className={step === 2 ? 'text-cyan' : 'text-white/30'}>2. Confirm &amp; Submit</span>
+          <span className={step === 1 ? 'text-cyan' : 'text-white/55'}>1. Configure</span>
+          <ArrowRight size={10} className="text-white/50" />
+          <span className={step === 2 ? 'text-cyan' : 'text-white/55'}>2. Confirm &amp; Submit</span>
         </div>
 
         {step === 1 && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="rounded border border-brand-border bg-brand-surface p-3">
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-1">Asset</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1">Asset</p>
                 <p className="text-white font-sans">{asset.name}</p>
               </div>
               <div className="rounded border border-brand-border bg-brand-surface p-3">
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest mb-1">Current Value</p>
-                <p className="text-white font-mono">{fmtValue(asset.primaryValue, asset.primaryUnit)} · <span className="text-white/50">{asset.status}</span></p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1">Current Value</p>
+                <p className="text-white font-mono">{fmtValue(asset.primaryValue, asset.primaryUnit)} · <span className="text-white/70">{asset.status}</span></p>
               </div>
             </div>
 
             {action === 'setpoint' && (
               <div className="space-y-2">
-                <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+                <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest">
                   Requested Setpoint ({asset.setpointUnit})
                 </label>
                 <input
@@ -148,14 +153,14 @@ function CommandConfirmDialog({
                   className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan/50"
                 />
                 {asset.setpointMin !== undefined && asset.setpointMax !== undefined && (
-                  <p className="text-[10px] text-white/30 font-sans">Allowed range: {asset.setpointMin}–{asset.setpointMax}{asset.setpointUnit}</p>
+                  <p className="text-[10px] text-white/55 font-sans">Allowed range: {asset.setpointMin}–{asset.setpointMax}{asset.setpointUnit}</p>
                 )}
               </div>
             )}
 
             {action === 'mode' && (
               <div className="space-y-2">
-                <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+                <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest">
                   Requested Operating Mode
                 </label>
                 <select
@@ -167,12 +172,12 @@ function CommandConfirmDialog({
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
-                <p className="text-[10px] text-white/30 font-sans">Current status: <span className="text-white/50">{asset.status}</span></p>
+                <p className="text-[10px] text-white/55 font-sans">Current status: <span className="text-white/70">{asset.status}</span></p>
               </div>
             )}
 
             {(action === 'start' || action === 'stop') && (
-              <p className="text-xs text-white/50 font-sans">
+              <p className="text-xs text-white/70 font-sans">
                 No additional parameters — this action carries an empty payload.
               </p>
             )}
@@ -188,11 +193,11 @@ function CommandConfirmDialog({
         {step === 2 && (
           <div className="space-y-4">
             <div className="rounded border border-brand-border bg-brand-surface p-3 space-y-2 text-xs">
-              <div className="flex justify-between"><span className="text-white/40 font-mono uppercase text-[9px]">Asset</span><span className="text-white font-sans">{asset.name}</span></div>
-              <div className="flex justify-between"><span className="text-white/40 font-mono uppercase text-[9px]">Action</span><span className="text-white font-mono">{meta.label}</span></div>
-              <div className="flex justify-between"><span className="text-white/40 font-mono uppercase text-[9px]">Current Value</span><span className="text-white font-mono">{fmtValue(asset.primaryValue, asset.primaryUnit)}</span></div>
+              <div className="flex justify-between"><span className="text-white/62 font-mono uppercase text-[10px]">Asset</span><span className="text-white font-sans">{asset.name}</span></div>
+              <div className="flex justify-between"><span className="text-white/62 font-mono uppercase text-[10px]">Action</span><span className="text-white font-mono">{meta.label}</span></div>
+              <div className="flex justify-between"><span className="text-white/62 font-mono uppercase text-[10px]">Current Value</span><span className="text-white font-mono">{fmtValue(asset.primaryValue, asset.primaryUnit)}</span></div>
               <div className="flex justify-between">
-                <span className="text-white/40 font-mono uppercase text-[9px]">Requested Value</span>
+                <span className="text-white/62 font-mono uppercase text-[10px]">Requested Value</span>
                 <span className="text-cyan font-mono">
                   {action === 'setpoint' ? `${setpointValue}${asset.setpointUnit ?? ''}` : action === 'mode' ? modeValue : action === 'start' ? 'running' : action === 'stop' ? 'stopped' : '—'}
                 </span>
@@ -200,8 +205,10 @@ function CommandConfirmDialog({
             </div>
 
             <div className="rounded border border-cyan/20 bg-cyan/5 p-3">
-              <p className="font-mono text-[9px] text-cyan/70 uppercase tracking-widest mb-1.5">Predicted Effect</p>
-              <p className="text-xs text-white/70 font-sans leading-relaxed">{effect}</p>
+              <p className="font-mono text-[11px] text-cyan uppercase tracking-widest mb-1.5">Predicted effect</p>
+              <p className="text-xs text-white/80 font-sans leading-relaxed">{effect}</p>
+              <p className="font-mono text-[11px] text-white/70 uppercase tracking-wider mt-3 mb-1.5">Performance once settled (now → after)</p>
+              <PredictedEffects rows={predict(asset, action, payload)} />
             </div>
 
             {error && <ErrorState message={error} />}
@@ -221,56 +228,33 @@ function CommandConfirmDialog({
 
 // ─── Asset card ─────────────────────────────────────────────────────────────
 
-function AssetCard({ asset, onAction }: { asset: RemoteAsset; onAction: (asset: RemoteAsset, action: CommandAction) => void }) {
+function AssetRow({ asset, selected, samples, onSelect }: { asset: RemoteAsset; selected: boolean; samples: Sample[]; onSelect: () => void }) {
   const config = getNodeTypeConfig(asset.category)
   const Icon = config.icon
-  const tone: Tone = asset.status === 'running' || asset.status === 'ok' ? 'ok' : asset.status === 'stopped' ? 'mute' : 'warn'
-
+  const def = metricsFor(asset.category)[0]
+  const on = isOn(asset)
+  const last = samples[samples.length - 1]?.[def.key]
   return (
-    <div className="panel p-4 flex flex-col gap-3 hover:-translate-y-0.5 transition-transform">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${config.color}16` }}>
-            <Icon size={17} style={{ color: config.color }} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[14px] text-white font-medium leading-tight truncate">{asset.name}</p>
-            <p className="font-mono text-[10px] text-white/40 mt-0.5 uppercase tracking-wider">{config.label}{asset.subtype ? ` · ${asset.subtype}` : ''}</p>
-          </div>
-        </div>
-        {asset.lifeSafety && (
-          <Pill tone="crit">
-            <ShieldAlert size={10} /> 2-person
-          </Pill>
-        )}
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full flex items-center gap-3 px-4 py-3 text-left border-l-[3px] transition-colors ${selected ? 'bg-cyan/10 border-cyan' : 'border-transparent hover:bg-brand-surface-2/70'}`}
+    >
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${config.color}16` }}>
+        <Icon size={16} style={{ color: config.color }} />
       </div>
-
-      <div className="flex items-end justify-between rounded-xl bg-brand-surface-2/70 border border-brand-border px-3.5 py-2.5">
-        <div>
-          <p className="eyebrow">Live value</p>
-          <p className="font-display text-[26px] leading-none text-white num mt-1">{fmtValue(asset.primaryValue, asset.primaryUnit)}</p>
-        </div>
-        <Pill tone={tone} dot>{asset.status || 'unknown'}</Pill>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13.5px] text-white font-medium leading-tight truncate">{asset.name}</p>
+        <p className="font-mono text-[10.5px] text-white/65 mt-0.5 flex items-center gap-1.5">
+          <span className={`inline-block w-1.5 h-1.5 rounded-full ${on ? 'bg-emerald' : 'bg-white/40'}`} />
+          {asset.status}{asset.lifeSafety ? ' · 2-person' : ''}
+        </p>
       </div>
-
-      <div className="flex gap-2">
-        {asset.actions.map((action) => {
-          const meta = ACTION_META[action]
-          const ActionIcon = meta.icon
-          const danger = action === 'stop'
-          return (
-            <button
-              key={action}
-              onClick={() => onAction(asset, action as CommandAction)}
-              className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 font-mono text-[10.5px] uppercase tracking-wider transition ${danger ? 'border-crimson/30 text-crimson hover:bg-crimson/10' : 'border-brand-border bg-brand-surface text-white/75 hover:border-cyan hover:text-cyan'}`}
-            >
-              <ActionIcon size={12} />
-              {meta.label}
-            </button>
-          )
-        })}
+      <div className="flex flex-col items-end shrink-0">
+        {samples.length > 3 && <MiniSpark samples={samples} def={def} color={on ? def.color : '#626079'} />}
+        <span className="font-mono text-[10.5px] text-white/75">{last !== undefined ? `${last.toFixed(def.decimals ?? 0)} ${def.unit}` : '—'}</span>
       </div>
-    </div>
+    </button>
   )
 }
 
@@ -339,9 +323,9 @@ function JournalCard({
         <div className="min-w-0">
           <p className="font-mono text-[12.5px] text-white">
             <b>{command.action.toUpperCase()}</b> · {assetName}
-            {Object.keys(command.payload).length > 0 && <span className="text-white/45"> {JSON.stringify(command.payload)}</span>}
+            {Object.keys(command.payload).length > 0 && <span className="text-white/65"> {JSON.stringify(command.payload)}</span>}
           </p>
-          <p className="font-mono text-[10.5px] text-white/45 mt-0.5">
+          <p className="font-mono text-[10.5px] text-white/65 mt-0.5">
             issued by <b className="text-white/75">{command.issued_by}</b> ({command.issued_role}) · {fmtTime(command.created_at)}
             {command.approved_by && <> · co-approved by <b className="text-emerald">{command.approved_by}</b></>}
           </p>
@@ -356,7 +340,7 @@ function JournalCard({
         {STAGES.map((s, i) => (
           <div key={s.id}>
             <div className={`h-1.5 rounded-full ${failed ? 'bg-crimson/30' : i <= idx ? 'bg-cyan' : 'bg-brand-surface-3'}`} />
-            <p className={`font-mono text-[9px] uppercase tracking-wider mt-1 ${i <= idx && !failed ? 'text-white/70' : 'text-white/30'}`}>{s.label}</p>
+            <p className={`font-mono text-[10px] uppercase tracking-wider mt-1 ${i <= idx && !failed ? 'text-white/70' : 'text-white/55'}`}>{s.label}</p>
           </div>
         ))}
       </div>
@@ -375,7 +359,7 @@ function JournalCard({
               value={approverName}
               onChange={(e) => setApproverName(e.target.value)}
               placeholder="Second approver's name…"
-              className={`w-52 rounded-lg border px-3 py-2 text-[12px] bg-brand-surface text-white placeholder:text-white/30 focus:outline-none ${sameUser ? 'border-crimson focus:border-crimson' : 'border-brand-border focus:border-cyan'}`}
+              className={`w-52 rounded-lg border px-3 py-2 text-[12px] bg-brand-surface text-white placeholder:text-white/55 focus:outline-none ${sameUser ? 'border-crimson focus:border-crimson' : 'border-brand-border focus:border-cyan'}`}
             />
             <button
               disabled={!canApprove || approving}
@@ -403,6 +387,8 @@ export default function RemoteControlPage() {
   const [error, setError] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<NodeType | ''>('')
   const [pending, setPending] = useState<{ asset: RemoteAsset; action: CommandAction } | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [windowSec, setWindowSec] = useState<'60' | '120'>('60')
 
   const isMounted = useRef(true)
   useEffect(() => {
@@ -436,6 +422,8 @@ export default function RemoteControlPage() {
     return () => clearInterval(id)
   }, [refresh])
 
+  const sim = usePerformanceSim(assets, commands)
+
   const handleApprove = async (id: string, approver: string) => {
     await commandsService.approve(id, approver, 'STATION_ENGINEER')
     await refresh(false)
@@ -446,6 +434,10 @@ export default function RemoteControlPage() {
   const assetNameById = new Map(assets.map((a) => [a.id, a.name]))
   const lifeSafetyCount = assets.filter((a) => a.lifeSafety).length
   const awaiting = commands.filter((c) => c.state === 'queued' && c.requires_second_approval && !c.approved_at).length
+  const selected = assets.find((a) => a.id === selectedId) ?? filteredAssets[0] ?? null
+  const defs = selected ? metricsFor(selected.category) : []
+  const samples = selected ? sim.history.get(selected.id) ?? [] : []
+  const markers = selected ? sim.impacts.filter((e) => e.assetId === selected.id).map((e) => e.t0) : []
   const inFlight = commands.filter((c) => ['queued', 'sent', 'acked'].includes(c.state)).length
 
   return (
@@ -472,31 +464,84 @@ export default function RemoteControlPage() {
         {error && <div className="mt-4"><ErrorState message={error} onRetry={() => refresh(true)} /></div>}
 
         <div className="flex items-center gap-2 flex-wrap mt-6">
-          <button onClick={() => setCategoryFilter('')} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === '' ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/60 hover:text-white'}`}>
+          <button onClick={() => setCategoryFilter('')} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === '' ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/75 hover:text-white'}`}>
             All
           </button>
           {categories.map((c) => (
-            <button key={c} onClick={() => setCategoryFilter(c)} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === c ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/60 hover:text-white'}`}>
+            <button key={c} onClick={() => setCategoryFilter(c)} className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${categoryFilter === c ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/75 hover:text-white'}`}>
               {getNodeTypeConfig(c).label}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-44" />)}
+          <div className="grid lg:grid-cols-[340px_1fr] gap-5 mt-5">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
           </div>
-        ) : filteredAssets.length === 0 ? (
+        ) : filteredAssets.length === 0 || !selected ? (
           <div className="mt-5"><EmptyState message="No controllable assets for this station" hint="Try clearing the category filter" /></div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-5">
-            {filteredAssets.map((asset) => (
-              <AssetCard key={asset.id} asset={asset} onAction={(a, action) => setPending({ asset: a, action })} />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-5 mt-5 items-start">
+            <Panel pad={false} eyebrow="Live · last 60 s" title="Assets">
+              <div className="divide-y divide-brand-border/70 max-h-[680px] overflow-y-auto">
+                {filteredAssets.map((a) => (
+                  <AssetRow key={a.id} asset={a} selected={a.id === selected.id} samples={sim.history.get(a.id) ?? []} onSelect={() => setSelectedId(a.id)} />
+                ))}
+              </div>
+            </Panel>
+
+            <div className="space-y-5 min-w-0">
+              <div className="panel p-5">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="eyebrow">{getNodeTypeConfig(selected.category).label}{selected.subtype ? ` · ${selected.subtype}` : ''}</p>
+                    <h2 className="font-display text-[28px] leading-tight text-white mt-1 flex items-center gap-3 flex-wrap">
+                      {selected.name}
+                      {selected.lifeSafety && <Pill tone="crit"><ShieldAlert size={10} /> 2-person</Pill>}
+                    </h2>
+                    <p className="font-mono text-[11px] text-white/65 mt-1.5 uppercase tracking-wider">
+                      status <b className={isOn(selected) ? 'text-emerald' : 'text-white'}>{selected.status}</b>
+                      {selected.primaryValue !== null && <> · setting <b className="text-white">{fmtValue(selected.primaryValue, selected.primaryUnit)}</b></>}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {selected.actions.map((action) => {
+                      const meta = ACTION_META[action]
+                      const ActionIcon = meta.icon
+                      const danger = action === 'stop'
+                      return (
+                        <button key={action} onClick={() => setPending({ asset: selected, action: action as CommandAction })}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider transition ${danger ? 'border-crimson/50 text-crimson hover:bg-crimson/10' : 'border-brand-border bg-brand-surface text-white/80 hover:border-cyan hover:text-white'}`}>
+                          <ActionIcon size={13} /> {meta.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <Panel eyebrow="Task-manager view" title="Performance"
+                right={<SegTabs size="sm" value={windowSec} onChange={setWindowSec} options={[{ value: '60', label: '60 s' }, { value: '120', label: '2 min' }]} />}>
+                <p className="text-[12.5px] text-white/65 mb-3 leading-relaxed">Simulated telemetry derived from the asset&apos;s commanded state and the rest of the station — not live sensor data.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {defs.map((d) => <MetricChart key={d.key + selected.id} def={d} samples={samples} windowSec={Number(windowSec)} markers={markers} />)}
+                </div>
+                <div className="mt-3 flex items-center gap-4 flex-wrap">
+                  <LegendDot color="#080330" label="command applied" dashed />
+                  <span className="text-[11.5px] text-white/75">Refreshes every second. Stop or start something and watch this asset — and its neighbours — respond.</span>
+                </div>
+              </Panel>
+
+              <Panel eyebrow="Cause and effect" title="How actions affected performance">
+                <p className="text-[12.5px] text-white/65 mb-3 leading-relaxed">Averages before the command vs ~30 s after it was applied — {selected.name} first, then anything else on the station that moved.</p>
+                <ImpactLog impacts={sim.impacts} assetId={selected.id} now={Date.now()} />
+              </Panel>
+            </div>
           </div>
         )}
 
-        <Panel className="mt-7" pad={false} eyebrow="Audited & tamper-evident" title="Command journal" right={<span className="font-mono text-[10.5px] text-white/45">{commands.length} command{commands.length === 1 ? '' : 's'} · live every {POLL_MS / 1000}s</span>}>
+        <Panel className="mt-7" pad={false} eyebrow="Audited & tamper-evident" title="Command journal" right={<span className="font-mono text-[10.5px] text-white/65">{commands.length} command{commands.length === 1 ? '' : 's'} · live every {POLL_MS / 1000}s</span>}>
           {commands.length === 0 ? (
             <div className="py-8"><EmptyState message="No commands issued yet" hint="Issue a command from an asset card above" /></div>
           ) : (
@@ -515,6 +560,7 @@ export default function RemoteControlPage() {
           action={pending.action}
           onClose={() => setPending(null)}
           onIssued={() => refresh(false)}
+          predict={sim.predict}
         />
       )}
     </div>

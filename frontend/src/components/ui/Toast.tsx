@@ -90,13 +90,13 @@ export function ToastStack({ toasts, onDismiss }: { toasts: ToastItem[]; onDismi
               )}
             </div>
             <div className="flex-1 min-w-0">
-              {t.title && <p className="font-mono text-[10px] uppercase tracking-widest text-white/50 mb-1">{t.title}</p>}
+              {t.title && <p className="font-mono text-[10px] uppercase tracking-widest text-white/70 mb-1">{t.title}</p>}
               <p className="text-xs font-sans text-white/80 leading-snug">{t.message}</p>
             </div>
             {!t.actions?.length && (
               <button
                 onClick={() => onDismiss(t.id)}
-                className="shrink-0 text-white/30 hover:text-white/70 transition-colors"
+                className="shrink-0 text-white/55 hover:text-white/70 transition-colors"
                 aria-label="Dismiss notification"
               >
                 <X size={13} />
@@ -111,7 +111,7 @@ export function ToastStack({ toasts, onDismiss }: { toasts: ToastItem[]; onDismi
                   onClick={action.onClick}
                   className={`font-mono text-[10px] uppercase tracking-widest px-3 py-1.5 rounded border transition-colors ${
                     action.variant === 'secondary'
-                      ? 'border-brand-border text-white/60 hover:text-white hover:border-white/40'
+                      ? 'border-brand-border text-white/75 hover:text-white hover:border-white/40'
                       : 'border-cyan/40 text-cyan hover:bg-cyan/10'
                   }`}
                 >

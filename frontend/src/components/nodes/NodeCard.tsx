@@ -108,9 +108,9 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
             {node.name}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            <span className="font-mono text-[10px] text-white/40 uppercase">{node.type}</span>
+            <span className="font-mono text-[10px] text-white/62 uppercase">{node.type}</span>
             {node.version && (
-              <span className="font-mono text-[10px] text-white/25 border border-brand-border rounded px-1">
+              <span className="font-mono text-[10px] text-white/50 border border-brand-border rounded px-1">
                 {node.version.length > 14 ? node.version.slice(0, 14) + '…' : node.version}
               </span>
             )}
@@ -133,10 +133,10 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
           {healthLabel[node.health]}
         </Badge>
         <span
-          className="font-mono text-[9px]"
+          className="font-mono text-[10px]"
           title="Type-weighted risk (health score × node-type criticality) — not the backend's raw risk_score"
         >
-          <span className="text-white/30">WEIGHTED RISK </span>
+          <span className="text-white/55">WEIGHTED RISK </span>
           <span style={{ color: weightedRiskColor(weightedRisk) }}>{weightedRisk.toFixed(0)}</span>
         </span>
       </div>
@@ -144,8 +144,8 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
       {/* Sparkline */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <span className="font-mono text-[9px] text-white/30 uppercase tracking-wider">24h trend</span>
-          <span className="font-mono text-[9px]" style={{ color: healthColor }}>
+          <span className="font-mono text-[10px] text-white/55 uppercase tracking-wider">24h trend</span>
+          <span className="font-mono text-[10px]" style={{ color: healthColor }}>
             {node.healthScore}
           </span>
         </div>
@@ -154,11 +154,11 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
 
       {/* Meta row */}
       <div className="flex items-center justify-between text-[10px] font-mono">
-        <div className="flex items-center gap-1 text-white/30">
+        <div className="flex items-center gap-1 text-white/55">
           <Clock size={9} />
           <span>{formatSync(node.lastSync)}</span>
         </div>
-        <div className="flex items-center gap-1 text-white/30">
+        <div className="flex items-center gap-1 text-white/55">
           <RefreshCw size={9} />
           <span>{formatUptime(node.uptime)}</span>
         </div>
@@ -170,13 +170,13 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
           {node.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="font-mono text-[9px] text-white/30 border border-brand-border rounded px-1.5 py-0.5"
+              className="font-mono text-[10px] text-white/55 border border-brand-border rounded px-1.5 py-0.5"
             >
               {tag}
             </span>
           ))}
           {node.tags.length > 3 && (
-            <span className="font-mono text-[9px] text-white/20">+{node.tags.length - 3}</span>
+            <span className="font-mono text-[10px] text-white/50">+{node.tags.length - 3}</span>
           )}
         </div>
       )}
@@ -196,7 +196,7 @@ export function NodeCard({ node, onSelect, onRemediate }: NodeCardProps) {
         <Link
           href={`/assets/${node.id}/passport`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 flex items-center justify-center w-8 h-8 rounded border border-brand-border text-white/40 hover:text-cyan hover:border-cyan/40 transition-colors"
+          className="shrink-0 flex items-center justify-center w-8 h-8 rounded border border-brand-border text-white/62 hover:text-cyan hover:border-cyan/40 transition-colors"
           title="Open QR passport"
         >
           <QrCode size={13} />

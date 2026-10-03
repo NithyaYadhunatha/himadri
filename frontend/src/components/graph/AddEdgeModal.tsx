@@ -77,7 +77,7 @@ export function AddEdgeModal({ open, onClose, nodes, existingEdges, onAdd }: Add
       <div className="p-5 space-y-4">
         {/* Source Node */}
         <div>
-          <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1.5">
+          <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-1.5">
             Source Node
           </label>
           <select
@@ -96,7 +96,7 @@ export function AddEdgeModal({ open, onClose, nodes, existingEdges, onAdd }: Add
 
         {/* Target Node */}
         <div>
-          <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1.5">
+          <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-1.5">
             Target Node
           </label>
           <select
@@ -132,7 +132,7 @@ export function AddEdgeModal({ open, onClose, nodes, existingEdges, onAdd }: Add
 
         {/* Relationship Type */}
         <div>
-          <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1.5">
+          <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-1.5">
             Relationship Type
           </label>
           {!useCustomType ? (
@@ -163,12 +163,12 @@ export function AddEdgeModal({ open, onClose, nodes, existingEdges, onAdd }: Add
                 value={customType}
                 onChange={(e) => setCustomType(e.target.value)}
                 placeholder="e.g. FAILOVER, BACKUP_TO…"
-                className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-cyan/50 placeholder:text-white/20"
+                className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-cyan/50 placeholder:text-white/50"
               />
               <button
                 type="button"
                 onClick={() => { setUseCustomType(false); setCustomType('') }}
-                className="text-[10px] font-mono text-white/40 hover:text-white/60 transition-colors"
+                className="text-[10px] font-mono text-white/62 hover:text-white/75 transition-colors"
               >
                 ← Use preset type
               </button>

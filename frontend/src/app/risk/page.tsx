@@ -67,7 +67,7 @@ export default function RiskHeatmapPage() {
                     {cols.map(([k, c]) => (
                       <th key={k} className="px-2 pb-2 text-left align-bottom">
                         <p className="eyebrow leading-snug">{c.label}</p>
-                        <p className="font-mono text-[9.5px] text-white/35">weight {(c.weight * 100).toFixed(0)}%</p>
+                        <p className="font-mono text-[10px] text-white/58">weight {(c.weight * 100).toFixed(0)}%</p>
                       </th>
                     ))}
                     <th className="px-3 pb-2 eyebrow text-right w-28">Weighted score</th>
@@ -113,7 +113,7 @@ export default function RiskHeatmapPage() {
               <div>
                 <div className="flex items-baseline gap-3">
                   <span className="font-display text-5xl num" style={{ color: TONE_HEX[tone(sel.factor.score)] }}>{sel.factor.score.toFixed(0)}</span>
-                  <span className="font-mono text-[11px] text-white/50">× weight {(sel.factor.weight * 100).toFixed(0)}% = <b className="text-white">{(sel.factor.score * sel.factor.weight).toFixed(1)}</b> points of {sel.row.score.toFixed(0)}</span>
+                  <span className="font-mono text-[11px] text-white/70">× weight {(sel.factor.weight * 100).toFixed(0)}% = <b className="text-white">{(sel.factor.score * sel.factor.weight).toFixed(1)}</b> points of {sel.row.score.toFixed(0)}</span>
                 </div>
                 <p className="text-[14px] text-white/80 leading-relaxed mt-4 rounded-xl bg-brand-surface-2/70 border border-brand-border p-4">{sel.factor.evidence}</p>
               </div>

@@ -1,9 +1,7 @@
 // GET  — proxies FastAPI's GET /inventory?station=&kind=, station-scoped
 //        like /api/advisories.
-// POST — proxies POST /inventory (no backend handler currently defined for
-//        this method — kept forwarding as before; still validates
-//        station_id in the body defensively so it's correct if/when the
-//        backend adds one).
+// POST — proxies POST /inventory (manual creation of a stock line; the
+//        station_id in the body is validated against the caller's membership).
 import { forwardToBackend, forwardToBackendWithStation, requireAllowedStation, requireMembership, resolveStationParam } from '@/lib/apiProxy'
 
 export async function GET(req: Request) {

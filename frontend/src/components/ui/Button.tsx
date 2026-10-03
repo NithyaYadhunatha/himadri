@@ -19,7 +19,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   secondary:
     'bg-brand-surface border border-brand-border text-white/80 hover:border-white/30 hover:text-white hover:bg-brand-surface-2 active:scale-95',
   ghost:
-    'bg-transparent text-white/60 hover:text-white hover:bg-white/5 active:scale-95',
+    'bg-transparent text-white/75 hover:text-white hover:bg-white/5 active:scale-95',
   danger:
     'bg-crimson/20 border border-crimson/40 text-crimson hover:bg-crimson/30 hover:border-crimson active:scale-95',
 }

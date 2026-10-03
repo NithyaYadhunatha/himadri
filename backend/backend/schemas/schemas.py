@@ -576,6 +576,20 @@ class InventoryCountRequest(BaseModel):
     checked_by: str
 
 
+class CreateInventoryItemRequest(BaseModel):
+    """Manual entry of a stock line that is not tracked yet (logistics is hand-entered)."""
+
+    station_id: str
+    kind: str  # fuel | food | spare | waste
+    name: str
+    quantity: float
+    unit: str
+    subtype: str | None = None
+    capacity: float | None = None
+    reserve_class: str = "routine"
+    checked_by: str | None = None
+
+
 class ConvoyAssignmentDetail(BaseModel):
     member_name: str
     vehicle_asset_id: str | None

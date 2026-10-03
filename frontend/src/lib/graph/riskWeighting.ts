@@ -59,5 +59,5 @@ export function computeWeightedRisk(healthScore: number, type: NodeType): number
 export function weightedRiskColor(weightedRisk: number): string {
   if (weightedRisk >= 50) return '#EF4444' // crimson — critical
   if (weightedRisk >= 20) return '#F59E0B' // amber — at risk
-  return '#10B981' // emerald — healthy
+  return '#1F9E6D' // emerald — healthy
 }

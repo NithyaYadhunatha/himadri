@@ -1,6 +1,7 @@
 """
 Router: Energy & Logistics Supply Chain endpoints (FR-26…43).
 GET  /inventory?station=&kind=
+POST /inventory         (create a stock line by hand)
 POST /inventory/{id}/count
 GET  /logistics/endurance?station=
 GET  /convoys           POST /convoys           POST /convoys/{id}/assign
@@ -24,6 +25,7 @@ from backend.models.tables import Advisory, Asset, Convoy, ConvoyAssignment, Inv
 from backend.schemas.schemas import (
     AdvisoryDetail,
     AssignConvoyRequest,
+    CreateInventoryItemRequest,
     ConvoyDetail,
     CreateConvoyRequest,
     CreateWasteRecordRequest,
@@ -49,6 +51,38 @@ async def list_inventory(station: str | None = Query(default=None), kind: str | 
         q = q.where(InventoryItem.kind == kind)
     result = await db.execute(q)
     return [InventoryItemDetail.model_validate(i) for i in result.scalars().all()]
+
+
+@router.post(
+    "/inventory",
+    response_model=InventoryItemDetail,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_bearer)],
+    operation_id="create_inventory_item",
+)
+async def create_inventory_item(body: CreateInventoryItemRequest, db: AsyncSession = Depends(get_db)) -> InventoryItemDetail:
+    """Create a stock line by hand — logistics inventory is entered by people, not sensors."""
+    if body.kind not in {"fuel", "food", "spare", "waste"}:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="kind must be fuel, food, spare or waste")
+    slug = "".join(c if c.isalnum() else "-" for c in body.name.lower()).strip("-")[:60] or "item"
+    item = InventoryItem(
+        id=f"{body.station_id}-inventory-{body.kind}-{slug}-{int(datetime.now(timezone.utc).timestamp())}",
+        station_id=body.station_id,
+        kind=body.kind,
+        subtype=body.subtype,
+        name=body.name,
+        quantity=body.quantity,
+        unit=body.unit,
+        capacity=body.capacity,
+        reserve_class=body.reserve_class,
+        last_checked=datetime.now(timezone.utc).replace(tzinfo=None),
+        checked_by=body.checked_by,
+        provenance="unverified",
+    )
+    db.add(item)
+    await db.flush()
+    await audit_engine.record(db, user_id=body.checked_by, role=None, station_id=item.station_id, action="inventory.create", resource=item.id, detail={"quantity": body.quantity})
+    return InventoryItemDetail.model_validate(item)
 
 
 @router.post(

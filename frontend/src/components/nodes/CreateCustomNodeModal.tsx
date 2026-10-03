@@ -23,8 +23,8 @@ interface CreateCustomNodeModalProps {
 type Step = 'form' | 'analyzing' | 'creating' | 'done'
 
 const inputClass =
-  'w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/60'
-const labelClass = 'font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block'
+  'w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-cyan/60'
+const labelClass = 'font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block'
 
 export function CreateCustomNodeModal({ open, onClose, onCreated }: CreateCustomNodeModalProps) {
   const [nodeName, setNodeName] = useState('')
@@ -175,7 +175,7 @@ export function CreateCustomNodeModal({ open, onClose, onCreated }: CreateCustom
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={busy}
-                className="w-full flex items-center gap-2 border border-dashed border-brand-border rounded px-3 py-2.5 text-sm text-white/60 hover:text-white hover:border-cyan/40 transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2 border border-dashed border-brand-border rounded px-3 py-2.5 text-sm text-white/75 hover:text-white hover:border-cyan/40 transition-colors disabled:opacity-50"
               >
                 <FileUp size={14} className="shrink-0" />
                 {file ? file.name : 'Choose a file…'}

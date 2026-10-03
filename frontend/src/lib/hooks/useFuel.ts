@@ -88,7 +88,10 @@ export function useFuelEndurance(station: string, pollMs = 30000): FuelState {
           return
         }
         const latest = await get<Latest>(`readings/latest?keys=${series.map((s) => encodeURIComponent(s.key)).join(',')}`)
-        const from = naiveUtc(Date.now() - 24 * 3600 * 1000)
+        // Anchor the window to the newest reading, not to "now": when telemetry is
+        // stale (link down, simulator paused) a wall-clock window would be empty.
+        const newest = Math.max(0, ...Object.values(latest).map((l) => (l ? new Date(l.ts.endsWith('Z') ? l.ts : l.ts + 'Z').getTime() : 0)))
+        const from = naiveUtc((newest > 0 ? Math.min(newest, Date.now()) : Date.now()) - 48 * 3600 * 1000)
         const tanks: TankStat[] = []
         const measured: number[] = []
         const perTank: Bucket[][] = []

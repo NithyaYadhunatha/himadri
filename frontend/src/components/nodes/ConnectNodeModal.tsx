@@ -84,7 +84,7 @@ export function ConnectNodeModal({ open, onClose, onCreated }: ConnectNodeModalP
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[#16283A]/45 backdrop-blur-sm z-40"
             onClick={onClose}
           />
           <motion.div
@@ -103,7 +103,7 @@ export function ConnectNodeModal({ open, onClose, onCreated }: ConnectNodeModalP
               </div>
               <button
                 onClick={onClose}
-                className="text-white/40 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
+                className="text-white/62 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
                 aria-label="Close"
               >
                 <X size={16} />
@@ -113,27 +113,27 @@ export function ConnectNodeModal({ open, onClose, onCreated }: ConnectNodeModalP
             <div className="p-4 space-y-4">
               {!result ? (
                 <>
-                  <p className="text-xs font-sans text-white/50">
+                  <p className="text-xs font-sans text-white/70">
                     Creates an asset record on the backend. Copy the Asset ID + API Key it returns into the device
                     manifest for the physical sensor/agent you want to monitor it with (see Admin → Devices) — this
                     only creates the record, it does not register a device.
                   </p>
 
                   <div>
-                    <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block">
+                    <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block">
                       Asset Name
                     </label>
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Diesel Generator 4"
-                      className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/60"
+                      className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-cyan/60"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block">
+                      <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block">
                         Category
                       </label>
                       <select
@@ -147,7 +147,7 @@ export function ConnectNodeModal({ open, onClose, onCreated }: ConnectNodeModalP
                       </select>
                     </div>
                     <div>
-                      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block">
+                      <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block">
                         Station
                       </label>
                       <select
@@ -164,25 +164,25 @@ export function ConnectNodeModal({ open, onClose, onCreated }: ConnectNodeModalP
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block">
+                      <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block">
                         Subtype
                       </label>
                       <input
                         value={subtype}
                         onChange={(e) => setSubtype(e.target.value)}
                         placeholder="generator"
-                        className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/60"
+                        className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-cyan/60"
                       />
                     </div>
                     <div>
-                      <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1 block">
+                      <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1 block">
                         Zone
                       </label>
                       <input
                         value={zoneId}
                         onChange={(e) => setZoneId(e.target.value)}
                         placeholder="power-house"
-                        className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/60"
+                        className="w-full bg-brand-bg border border-brand-border rounded px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-cyan/60"
                       />
                     </div>
                   </div>
