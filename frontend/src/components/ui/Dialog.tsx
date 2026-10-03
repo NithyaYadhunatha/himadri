@@ -33,7 +33,7 @@ export function Dialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#16283A]/45 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
@@ -45,7 +45,7 @@ export function Dialog({
           </h2>
           <button
             onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
+            className="text-white/62 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
             aria-label="Close"
           >
             <X size={14} />

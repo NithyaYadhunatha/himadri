@@ -83,7 +83,7 @@ export default function DiagnosisPage() {
             <Stethoscope size={16} className="text-cyan" />
             Guided Fault Diagnosis
           </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">
+          <p className="text-white/62 text-xs mt-1 font-sans">
             Pick an asset (or a category), flag what you&apos;ve observed, and get ranked probable causes with a
             recommended check sequence.
           </p>
@@ -92,7 +92,7 @@ export default function DiagnosisPage() {
         <div className="bg-brand-surface border border-brand-border rounded p-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1">Asset (optional)</label>
+              <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-1">Asset (optional)</label>
               <select
                 value={assetId}
                 onChange={(e) => { setAssetId(e.target.value); setEvidence(new Set()) }}
@@ -105,8 +105,8 @@ export default function DiagnosisPage() {
               </select>
             </div>
             <div>
-              <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-1">
-                Category {assetId && <span className="text-white/20">(from selected asset)</span>}
+              <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-1">
+                Category {assetId && <span className="text-white/50">(from selected asset)</span>}
               </label>
               <select
                 value={effectiveCategory}
@@ -124,7 +124,7 @@ export default function DiagnosisPage() {
 
           {evidenceOptions.length > 0 && (
             <div>
-              <label className="font-mono text-[10px] text-white/40 uppercase tracking-widest block mb-2">Observed evidence</label>
+              <label className="font-mono text-[10px] text-white/62 uppercase tracking-widest block mb-2">Observed evidence</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {evidenceOptions.map((e) => (
                   <label key={e} className="flex items-center gap-2 text-xs font-sans text-white/70 bg-brand-bg border border-brand-border rounded px-2.5 py-2 cursor-pointer hover:border-cyan/30">
@@ -145,15 +145,15 @@ export default function DiagnosisPage() {
 
         {causes && (
           <div className="space-y-3">
-            <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest">Ranked Probable Causes</h2>
+            <h2 className="font-mono text-xs text-white/70 uppercase tracking-widest">Ranked Probable Causes</h2>
             {causes.length === 0 && (
-              <p className="text-xs font-mono text-white/30 italic">No causes matched the given evidence.</p>
+              <p className="text-xs font-mono text-white/55 italic">No causes matched the given evidence.</p>
             )}
             {causes.map((cause, i) => (
               <div key={cause.cause} className="bg-brand-surface border border-brand-border rounded p-4">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-white/30">#{i + 1}</span>
+                    <span className="font-mono text-xs text-white/55">#{i + 1}</span>
                     <span className="text-sm font-sans font-semibold text-white">{cause.cause}</span>
                   </div>
                   <span className="font-mono text-sm font-bold text-cyan shrink-0">{cause.score_pct.toFixed(0)}%</span>
@@ -167,7 +167,7 @@ export default function DiagnosisPage() {
                 )}
                 {cause.check_sequence.length > 0 && (
                   <div className="mt-2">
-                    <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                    <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                       <AlertTriangle size={10} /> Check sequence
                     </p>
                     <ol className="space-y-1 list-decimal list-inside">

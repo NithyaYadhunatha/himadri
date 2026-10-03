@@ -44,8 +44,8 @@ export function CardHeader({ title, subtitle, actions, className = '' }: CardHea
   return (
     <div className={`flex items-start justify-between gap-2 ${className}`}>
       <div>
-        <h3 className="font-mono text-xs font-semibold tracking-widest text-white/60 uppercase">{title}</h3>
-        {subtitle && <p className="text-white/40 text-xs mt-0.5">{subtitle}</p>}
+        <h3 className="font-mono text-xs font-semibold tracking-widest text-white/75 uppercase">{title}</h3>
+        {subtitle && <p className="text-white/62 text-xs mt-0.5">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
     </div>

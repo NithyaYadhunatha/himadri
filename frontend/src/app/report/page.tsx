@@ -26,7 +26,7 @@ interface Fc { points: { t: number; gust: number }[] }
 function Row({ k, v, tone }: { k: string; v: string; tone?: Tone }) {
   return (
     <div className="flex items-baseline justify-between gap-6 py-2 border-b border-brand-border/70">
-      <span className="text-[13px] text-white/60">{k}</span>
+      <span className="text-[13px] text-white/75">{k}</span>
       <span className={`font-mono text-[13px] num font-semibold ${tone === 'ok' ? 'text-emerald' : tone === 'warn' ? 'text-amber' : tone === 'crit' ? 'text-crimson' : 'text-white'}`}>{v}</span>
     </div>
   )
@@ -81,7 +81,7 @@ export default function ReportPage() {
             <div>
               <p className="eyebrow">Himadri · Station command</p>
               <h2 className="font-display text-[34px] leading-tight text-white mt-1">{STATION_LABELS[station]} Station — situation report</h2>
-              <p className="font-mono text-[11px] text-white/50 mt-1.5">Generated {new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · data: deployed HIMADRI backend, provenance on each line</p>
+              <p className="font-mono text-[11px] text-white/70 mt-1.5">Generated {new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · data: deployed HIMADRI backend, provenance on each line</p>
             </div>
             <Pill tone={chain.data?.valid ? 'ok' : 'crit'}>{chain.data?.valid ? 'ledger verified' : 'ledger check pending'}</Pill>
           </header>
@@ -98,14 +98,14 @@ export default function ReportPage() {
               </section>
 
               <section>
-                <h3 className="eyebrow mb-2">2 · Fuel & endurance <span className="normal-case tracking-normal text-white/35">(derived from tank sensors)</span></h3>
+                <h3 className="eyebrow mb-2">2 · Fuel & endurance <span className="normal-case tracking-normal text-white/58">(derived from tank sensors)</span></h3>
                 <Row k="Fuel on hand" v={`${fmtNum(fuel.totalL)} L`} />
                 <Row k="Fitted burn rate" v={fuel.burnLph ? `${fmtNum(fuel.burnLph)} L/h` : '—'} />
                 <Row k={`Endurance vs ${iso} d isolation`} v={fuel.days !== null ? `${fmtNum(fuel.days)} d (${margin! >= 0 ? '+' : ''}${fmtNum(margin)} d)` : '—'} tone={margin === null ? undefined : margin >= 30 ? 'ok' : margin >= 0 ? 'warn' : 'crit'} />
               </section>
 
               <section>
-                <h3 className="eyebrow mb-2">3 · Weather <span className="normal-case tracking-normal text-white/35">(live · Open-Meteo)</span></h3>
+                <h3 className="eyebrow mb-2">3 · Weather <span className="normal-case tracking-normal text-white/58">(live · Open-Meteo)</span></h3>
                 <Row k="Now" v={wx.data ? `${wx.data.temperatureC.toFixed(0)}°C · ${wx.data.weatherLabel}` : '—'} />
                 <Row k="Wind / gust" v={wx.data ? `${wx.data.windSpeedKmh.toFixed(0)} / ${wx.data.windGustKmh.toFixed(0)} km/h` : '—'} />
                 <Row k="Peak gust, next 72 h" v={peak !== null ? `${peak.toFixed(0)} km/h` : '—'} tone={peak === null ? undefined : peak < 40 ? 'ok' : peak < 70 ? 'warn' : 'crit'} />
@@ -120,7 +120,7 @@ export default function ReportPage() {
               </section>
 
               <section className="md:col-span-2">
-                <h3 className="eyebrow mb-2">5 · Highest risks <span className="normal-case tracking-normal text-white/35">(weighted factors, evidence attached)</span></h3>
+                <h3 className="eyebrow mb-2">5 · Highest risks <span className="normal-case tracking-normal text-white/58">(weighted factors, evidence attached)</span></h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   {topRisk.map((r) => {
                     const f = [...r.factors].sort((a, b) => b.score * b.weight - a.score * a.weight)[0]
@@ -128,7 +128,7 @@ export default function ReportPage() {
                       <div key={r.subsystem} className="rounded-xl border border-brand-border p-4">
                         <p className="font-mono text-[11px] uppercase tracking-wider text-white">{r.subsystem}</p>
                         <p className="font-display text-[32px] text-white num leading-none mt-1">{r.score.toFixed(0)}</p>
-                        <p className="font-mono text-[10.5px] text-white/50 mt-2 leading-snug">{f?.evidence}</p>
+                        <p className="font-mono text-[10.5px] text-white/70 mt-2 leading-snug">{f?.evidence}</p>
                       </div>
                     )
                   })}
@@ -138,11 +138,11 @@ export default function ReportPage() {
               <section className="md:col-span-2">
                 <h3 className="eyebrow mb-2">6 · Open alerts</h3>
                 {(alerts.data ?? []).length === 0 ? (
-                  <p className="text-[13px] text-white/60">None.</p>
+                  <p className="text-[13px] text-white/75">None.</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {(alerts.data ?? []).slice(0, 6).map((a, i) => (
-                      <li key={i} className="text-[13px] text-white/80"><b className="uppercase text-[11px] font-mono">{a.severity}</b> — {a.message} <span className="text-white/40 font-mono text-[11px]">({a.asset_id}, first {ago(a.first_seen)})</span></li>
+                      <li key={i} className="text-[13px] text-white/80"><b className="uppercase text-[11px] font-mono">{a.severity}</b> — {a.message} <span className="text-white/62 font-mono text-[11px]">({a.asset_id}, first {ago(a.first_seen)})</span></li>
                     ))}
                   </ul>
                 )}
@@ -160,7 +160,7 @@ export default function ReportPage() {
             </div>
           )}
 
-          <footer className="mt-8 pt-4 border-t border-brand-border font-mono text-[10px] text-white/40 leading-relaxed">
+          <footer className="mt-8 pt-4 border-t border-brand-border font-mono text-[10px] text-white/62 leading-relaxed">
             Figures marked derived are computed from live sensors; simulated feeds are labelled as such in the app. Weather thresholds are operational conventions of this platform, not an official warning. Generated by Himadri — PS 26060, ISRO / NCPOR.
           </footer>
         </article>

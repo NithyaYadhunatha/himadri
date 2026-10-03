@@ -85,7 +85,7 @@ function ZoneBandOverlay({ boxes }: { boxes: ZoneLayoutBox[] }) {
             className={`absolute -top-1 left-2.5 -translate-y-full font-mono uppercase tracking-wider flex items-center gap-1 rounded px-1.5 py-0.5 ${
               box.kind === 'band'
                 ? 'text-[11px] text-[#1D1C93] font-bold bg-[#FFFFFFee] border border-[#1D1C9333]'
-                : 'text-[9px] text-[#08033099] bg-[#FFFFFFcc]'
+                : 'text-[10px] text-[#08033099] bg-[#FFFFFFcc]'
             }`}
           >
             {box.restricted && <Lock size={box.kind === 'band' ? 9 : 8} />}
@@ -176,7 +176,7 @@ function toFlowEdge(
   const isImpactEdge = dimmed && inChain(blastRadiusIds)
 
   const color = isDependencyEdge
-    ? '#00D4FF'
+    ? '#1868A0'
     : isImpactEdge
       ? '#D4820A'
       : score >= 80 ? '#0F8A6A' : score >= 50 ? '#D4820A' : '#C23B3B'
@@ -209,7 +209,7 @@ function CanvasLegend({ colorMode }: { colorMode: ColorMode }) {
   if (colorMode === 'type') {
     return (
       <div className="absolute bottom-12 left-3 z-10 bg-brand-surface/90 border border-brand-border rounded p-2.5 shadow-lg pointer-events-none max-w-[160px]">
-        <p className="font-mono text-[8px] text-white/40 uppercase tracking-wider mb-2">Node Type</p>
+        <p className="font-mono text-[10px] text-white/62 uppercase tracking-wider mb-2">Node Type</p>
         <div className="space-y-1">
           {NODE_TYPE_CATEGORIES.map((cat) => (
             <div key={cat.types[0]} className="flex items-center gap-1.5">
@@ -217,7 +217,7 @@ function CanvasLegend({ colorMode }: { colorMode: ColorMode }) {
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: cat.config.color }}
               />
-              <span className="font-mono text-[9px] text-white/60">{cat.config.label}</span>
+              <span className="font-mono text-[10px] text-white/75">{cat.config.label}</span>
             </div>
           ))}
         </div>
@@ -235,12 +235,12 @@ function CanvasLegend({ colorMode }: { colorMode: ColorMode }) {
   ]
   return (
     <div className="absolute bottom-12 left-3 z-10 bg-brand-surface/90 border border-brand-border rounded p-2.5 shadow-lg pointer-events-none">
-      <p className="font-mono text-[8px] text-white/40 uppercase tracking-wider mb-2">Health</p>
+      <p className="font-mono text-[10px] text-white/62 uppercase tracking-wider mb-2">Health</p>
       <div className="space-y-1">
         {buckets.map((b) => (
           <div key={b.label} className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
-            <span className="font-mono text-[9px] text-white/60">{b.label}</span>
+            <span className="font-mono text-[10px] text-white/75">{b.label}</span>
           </div>
         ))}
       </div>
@@ -255,15 +255,15 @@ function CanvasLegend({ colorMode }: { colorMode: ColorMode }) {
 function ImpactLegend({ dependencyCount, impactCount }: { dependencyCount: number; impactCount: number }) {
   return (
     <div className="absolute bottom-12 right-3 z-10 bg-brand-surface/90 border border-brand-border rounded p-2.5 shadow-lg pointer-events-none">
-      <p className="font-mono text-[8px] text-white/40 uppercase tracking-wider mb-2">Impact Analysis</p>
+      <p className="font-mono text-[10px] text-white/62 uppercase tracking-wider mb-2">Impact Analysis</p>
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#00D4FF' }} />
-          <span className="font-mono text-[9px] text-white/60">Depends on ({dependencyCount})</span>
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#1868A0' }} />
+          <span className="font-mono text-[10px] text-white/75">Depends on ({dependencyCount})</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#D4820A' }} />
-          <span className="font-mono text-[9px] text-white/60">Impacted if it fails ({impactCount})</span>
+          <span className="font-mono text-[10px] text-white/75">Impacted if it fails ({impactCount})</span>
         </div>
       </div>
     </div>
@@ -546,7 +546,7 @@ function FlowCanvasInner({
           <ZoneBandOverlay boxes={zoneBoxes} />
         </ViewportPortal>
         <Controls
-          className="!bg-brand-surface !border-brand-border [&_button]:!bg-brand-surface [&_button]:!border-brand-border [&_button]:!text-white/60 [&_button:hover]:!text-white"
+          className="!bg-brand-surface !border-brand-border [&_button]:!bg-brand-surface [&_button]:!border-brand-border [&_button]:!text-white/75 [&_button:hover]:!text-white"
           showInteractive={false}
         />
         <MiniMap
@@ -571,7 +571,7 @@ function FlowCanvasInner({
         <button
           onClick={handleRelayout}
           className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-brand-surface border border-brand-border
-            rounded px-2.5 py-1.5 text-[10px] font-mono text-white/60 uppercase tracking-wider
+            rounded px-2.5 py-1.5 text-[10px] font-mono text-white/75 uppercase tracking-wider
             hover:text-white hover:border-white/30 transition-colors"
         >
           <LayoutGrid size={11} />

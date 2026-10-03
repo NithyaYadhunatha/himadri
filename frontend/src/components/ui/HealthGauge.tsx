@@ -78,7 +78,7 @@ export function HealthGauge({
             {score}
           </span>
           {label && (
-            <span className="text-white/40 uppercase tracking-wider" style={{ fontSize: size * 0.1 }}>
+            <span className="text-white/62 uppercase tracking-wider" style={{ fontSize: size * 0.1 }}>
               {label}
             </span>
           )}

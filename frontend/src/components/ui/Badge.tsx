@@ -16,7 +16,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: 'bg-amber/20 text-amber border border-amber/40',
   healthy: 'bg-emerald/20 text-emerald border border-emerald/40',
   info: 'bg-cyan/20 text-cyan border border-cyan/40',
-  neutral: 'bg-brand-surface text-white/50 border border-brand-border',
+  neutral: 'bg-brand-surface text-white/70 border border-brand-border',
 }
 
 const dotColors: Record<BadgeVariant, string> = {

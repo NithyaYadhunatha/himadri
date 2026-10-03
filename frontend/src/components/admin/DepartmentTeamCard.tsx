@@ -39,12 +39,12 @@ export function DepartmentTeamCard({ department }: { department: MockDepartment 
             subtitle={`${department.description} · ${members.length} member(s)`}
           />
         </div>
-        <ChevronDown size={16} className={`text-white/40 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={16} className={`text-white/62 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
       <div className="divide-y divide-brand-border border-t border-brand-border">
         {members.length === 0 && (
-          <div className="px-4 py-6 text-center text-white/40 text-sm">No members left in this department.</div>
+          <div className="px-4 py-6 text-center text-white/62 text-sm">No members left in this department.</div>
         )}
         {members.map((member) => {
           const expanded = expandedId === member.id
@@ -79,7 +79,7 @@ export function DepartmentTeamCard({ department }: { department: MockDepartment 
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-white/40 truncate">{member.role}</p>
+                    <p className="text-xs text-white/62 truncate">{member.role}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -96,7 +96,7 @@ export function DepartmentTeamCard({ department }: { department: MockDepartment 
                   </Button>
                   <ChevronDown
                     size={14}
-                    className={`text-white/30 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                    className={`text-white/55 transition-transform ${expanded ? 'rotate-180' : ''}`}
                   />
                 </div>
               </div>
@@ -121,8 +121,8 @@ export function DepartmentTeamCard({ department }: { department: MockDepartment 
 function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2 text-xs">
-      <span className="text-white/30">{icon}</span>
-      <span className="text-white/40 w-14 shrink-0">{label}</span>
+      <span className="text-white/55">{icon}</span>
+      <span className="text-white/62 w-14 shrink-0">{label}</span>
       <span className="text-white/70">{value}</span>
     </div>
   )

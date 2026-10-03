@@ -162,7 +162,7 @@ export function createGenericAssetPanel(curatedData: Record<string, GenericAsset
             <button
               type="button"
               onClick={() => setAdvancedOpen((v) => !v)}
-              className="flex items-center gap-1.5 font-mono text-[10px] text-white/40 uppercase tracking-widest hover:text-white/70 transition-colors"
+              className="flex items-center gap-1.5 font-mono text-[10px] text-white/62 uppercase tracking-widest hover:text-white/70 transition-colors"
             >
               <ChevronDown size={12} className={`transition-transform ${advancedOpen ? 'rotate-0' : '-rotate-90'}`} />
               Recent Events
@@ -172,14 +172,14 @@ export function createGenericAssetPanel(curatedData: Record<string, GenericAsset
                 {recentEvents.map((e, i) => (
                   <div key={i} className="bg-brand-bg border border-brand-border rounded p-2 flex items-start gap-2">
                     <span
-                      className="font-mono text-[9px] uppercase tracking-wide shrink-0 w-16"
+                      className="font-mono text-[10px] uppercase tracking-wide shrink-0 w-16"
                       style={{ color: e.severity === 'CRITICAL' ? '#C23B3B' : e.severity === 'WARNING' ? '#D4820A' : '#626079' }}
                     >
                       {e.severity}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-xs text-white/70">{e.description}</p>
-                      <p className="font-mono text-[9px] text-white/30 mt-0.5">{formatTimestamp(e.timestamp)}</p>
+                      <p className="font-mono text-[10px] text-white/55 mt-0.5">{formatTimestamp(e.timestamp)}</p>
                     </div>
                   </div>
                 ))}
