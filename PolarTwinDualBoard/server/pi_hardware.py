@@ -68,6 +68,11 @@ class PiHardware:
         self._servo_angle = _env_int("PI_SERVO_START_ANGLE", "90", 0, 180)
         self._wrist_angle = _env_int("PI_WRIST_START_ANGLE", "90", 0, 180)
         self._wrist_pwm: Any = None
+        # Software PWM jitters, which makes an idle servo buzz and wobble. After
+        # a move the servo gets this long to arrive, then pulses stop so it
+        # stays still. 0 keeps pulses on permanently (holding torque, but jitter).
+        self.servo_hold_seconds = max(0.0, float(os.getenv("PI_SERVO_HOLD_SECONDS", "1.0")))
+        self._release_timers: dict[str, threading.Timer] = {}
 
         self._gpio: Any = None
         self._servo_pwm: Any = None
@@ -103,6 +108,8 @@ class PiHardware:
         self._wrist_pwm = GPIO.PWM(self.wrist_pin, 50)
         self._wrist_pwm.start(self._servo_duty_cycle(self._wrist_angle))
         time.sleep(0.05)
+        self._schedule_release("arm")
+        self._schedule_release("wrist")
         self._thread = threading.Thread(target=self._sample_loop, name="pi-sensors", daemon=True)
         self._thread.start()
 
@@ -175,6 +182,24 @@ class PiHardware:
             self.servo_max_pulse_us,
         )
 
+    def _schedule_release(self, name: str) -> None:
+        """Stop PWM pulses shortly after a move so the servo stops wobbling."""
+        if self.servo_hold_seconds <= 0:
+            return
+        previous = self._release_timers.pop(name, None)
+        if previous is not None:
+            previous.cancel()
+        timer = threading.Timer(self.servo_hold_seconds, self._release_servo, args=(name,))
+        timer.daemon = True
+        self._release_timers[name] = timer
+        timer.start()
+
+    def _release_servo(self, name: str) -> None:
+        pwm = self._servo_pwm if name == "arm" else self._wrist_pwm
+        with self._lock:
+            if pwm is not None and not self._stop.is_set():
+                pwm.ChangeDutyCycle(0)
+
     def set_servo_angle(self, angle: int) -> None:
         if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
             raise ValueError("servo angle must be an integer from 0 to 180")
@@ -183,6 +208,7 @@ class PiHardware:
         with self._lock:
             self._servo_pwm.ChangeDutyCycle(self._servo_duty_cycle(angle))
             self._servo_angle = angle
+        self._schedule_release("arm")
 
     def set_wrist_angle(self, angle: int) -> None:
         if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
@@ -192,9 +218,12 @@ class PiHardware:
         with self._lock:
             self._wrist_pwm.ChangeDutyCycle(self._servo_duty_cycle(angle))
             self._wrist_angle = angle
+        self._schedule_release("wrist")
 
     def close(self) -> None:
         self._stop.set()
+        for timer in self._release_timers.values():
+            timer.cancel()
         if self._thread is not None:
             self._thread.join(timeout=1.0)
         if self._servo_pwm is not None:
