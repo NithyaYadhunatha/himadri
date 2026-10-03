@@ -147,7 +147,7 @@ export default function FloorPlanPage() {
           <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
             Floor Plan — {station.toUpperCase()}
           </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">
+          <p className="text-white/62 text-xs mt-1 font-sans">
             Every room as a box, colored by the selected overlay. Click a room to see what&rsquo;s inside it.
           </p>
         </div>
@@ -160,15 +160,15 @@ export default function FloorPlanPage() {
             {/* Stat strip */}
             <div className="grid grid-cols-3 gap-3">
               <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1868A040', background: 'linear-gradient(155deg, #1868A014 0%, #1868A004 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Fuel size={10} /> Fuel Endurance</p>
-                <p className="font-mono text-xl font-bold text-white mt-1">{fuelDays ?? '—'} <span className="text-[10px] text-white/40">days</span></p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest flex items-center gap-1"><Fuel size={10} /> Fuel Endurance</p>
+                <p className="font-mono text-xl font-bold text-white mt-1">{fuelDays ?? '—'} <span className="text-[10px] text-white/62">days</span></p>
               </div>
               <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#B23A2E40', background: 'linear-gradient(155deg, #B23A2E14 0%, #B23A2E04 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><AlertTriangle size={10} /> Open Alerts</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest flex items-center gap-1"><AlertTriangle size={10} /> Open Alerts</p>
                 <p className="font-mono text-xl font-bold text-white mt-1">{openAlerts.length}</p>
               </div>
               <div className="relative overflow-hidden rounded-lg border p-3.5" style={{ borderColor: '#1F9E6D40', background: 'linear-gradient(155deg, #1F9E6D14 0%, #1F9E6D04 100%)' }}>
-                <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest flex items-center gap-1"><Truck size={10} /> Active Convoys</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest flex items-center gap-1"><Truck size={10} /> Active Convoys</p>
                 <p className="font-mono text-xl font-bold text-white mt-1">{activeConvoys}</p>
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function FloorPlanPage() {
                     key={s.key}
                     onClick={() => setSectionKey(s.key)}
                     className={`px-3 py-1.5 rounded-md font-mono text-[10px] uppercase tracking-wider whitespace-nowrap transition-colors ${
-                      activeSection?.key === s.key ? 'bg-cyan text-brand-bg font-bold' : 'text-white/50 hover:text-white hover:bg-brand-surface-3'
+                      activeSection?.key === s.key ? 'bg-cyan text-brand-bg font-bold' : 'text-white/70 hover:text-white hover:bg-brand-surface-3'
                     }`}
                   >
                     {s.label}
@@ -197,7 +197,7 @@ export default function FloorPlanPage() {
                   key={m.id}
                   onClick={() => setOverlay(m.id)}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border font-mono text-[10px] uppercase tracking-wider transition-colors ${
-                    overlay === m.id ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'border-brand-border text-white/50 hover:text-white hover:border-white/30'
+                    overlay === m.id ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'border-brand-border text-white/70 hover:text-white hover:border-white/30'
                   }`}
                 >
                   <m.icon size={11} />
@@ -227,7 +227,7 @@ export default function FloorPlanPage() {
                         {room.restricted && <Lock size={11} className="text-amber shrink-0 mt-0.5" />}
                       </div>
                       <div className="flex items-end justify-between">
-                        <span className="font-mono text-[9px] text-white/40">{room.assets.length} asset{room.assets.length === 1 ? '' : 's'}</span>
+                        <span className="font-mono text-[10px] text-white/62">{room.assets.length} asset{room.assets.length === 1 ? '' : 's'}</span>
                         <span className="font-mono text-lg font-bold" style={{ color }}>{value}</span>
                       </div>
                     </button>
@@ -242,20 +242,20 @@ export default function FloorPlanPage() {
       {/* Room detail side panel */}
       {selectedRoom && (
         <div className="fixed inset-0 z-40 flex justify-end" onClick={() => setSelectedRoom(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[#16283A]/35 backdrop-blur-[2px]" />
           <div className="relative w-[360px] h-full bg-brand-surface border-l border-brand-border shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-brand-border sticky top-0 bg-brand-surface">
               <div>
                 <h2 className="font-mono text-sm font-semibold text-white">{selectedRoom.name}</h2>
-                <p className="font-mono text-[9px] text-white/30 uppercase tracking-wider mt-0.5">
+                <p className="font-mono text-[10px] text-white/55 uppercase tracking-wider mt-0.5">
                   {selectedRoom.kind}{selectedRoom.restricted ? ' · restricted' : ''}{selectedRoom.floor != null ? ` · floor ${selectedRoom.floor}` : ''}
                 </p>
               </div>
-              <button onClick={() => setSelectedRoom(null)} className="text-white/40 hover:text-white"><X size={16} /></button>
+              <button onClick={() => setSelectedRoom(null)} className="text-white/62 hover:text-white"><X size={16} /></button>
             </div>
             <div className="p-4 space-y-1.5">
               {selectedRoom.assets.length === 0 ? (
-                <p className="text-xs font-mono text-white/30 italic">No assets tagged to this room.</p>
+                <p className="text-xs font-mono text-white/55 italic">No assets tagged to this room.</p>
               ) : (
                 selectedRoom.assets.map((a) => (
                   <button

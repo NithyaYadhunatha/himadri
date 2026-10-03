@@ -65,7 +65,7 @@ interface InlineLoaderProps {
 
 export function InlineLoader({ text = 'Loading...' }: InlineLoaderProps) {
   return (
-    <div className="flex items-center gap-2 text-white/40 text-sm">
+    <div className="flex items-center gap-2 text-white/62 text-sm">
       <div className="w-4 h-4 border border-cyan/40 border-t-cyan rounded-full animate-spin" />
       <span className="font-mono text-xs">{text}</span>
     </div>
@@ -83,7 +83,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       <div className="w-10 h-10 rounded-full bg-crimson/10 border border-crimson/30 flex items-center justify-center">
         <span className="text-crimson text-lg">!</span>
       </div>
-      <p className="text-white/50 text-sm">{message}</p>
+      <p className="text-white/70 text-sm">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
@@ -100,10 +100,10 @@ export function EmptyState({ message, hint }: { message: string; hint?: string }
   return (
     <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
       <div className="w-10 h-10 rounded-full bg-brand-surface-3 border border-brand-border flex items-center justify-center">
-        <span className="text-white/30 text-sm">—</span>
+        <span className="text-white/55 text-sm">—</span>
       </div>
-      <p className="text-white/50 text-sm">{message}</p>
-      {hint && <p className="text-white/30 text-xs">{hint}</p>}
+      <p className="text-white/70 text-sm">{message}</p>
+      {hint && <p className="text-white/55 text-xs">{hint}</p>}
     </div>
   )
 }

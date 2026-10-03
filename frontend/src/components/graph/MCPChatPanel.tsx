@@ -183,12 +183,12 @@ export function MCPChatPanel({ nodes = [] }: Props) {
                 HIMADRI Agent
               </span>
               {nodes.length > 0 && (
-                <span className="font-mono text-[9px] text-white/30">· {nodes.length} assets</span>
+                <span className="font-mono text-[10px] text-white/55">· {nodes.length} assets</span>
               )}
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/30 hover:text-white transition-colors"
+              className="text-white/55 hover:text-white transition-colors"
               aria-label="Close chat"
             >
               <X size={14} />
@@ -199,8 +199,8 @@ export function MCPChatPanel({ nodes = [] }: Props) {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
             {messages.length === 0 && !thinking && (
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <Bot size={28} className="text-white/20 mb-3" />
-                <p className="font-mono text-[11px] text-white/40 leading-relaxed">
+                <Bot size={28} className="text-white/50 mb-3" />
+                <p className="font-mono text-[11px] text-white/62 leading-relaxed">
                   Ask me anything about Maitri or Bharati — asset health, dependencies,
                   risk, logistics, or scenarios.
                 </p>
@@ -228,7 +228,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               <div className="flex justify-start">
                 <div className="bg-brand-bg border border-brand-border rounded-lg px-3 py-2 flex items-center gap-2">
                   <Loader2 size={12} className="text-cyan animate-spin" />
-                  <span className="font-mono text-[11px] text-white/40">Thinking...</span>
+                  <span className="font-mono text-[11px] text-white/62">Thinking...</span>
                 </div>
               </div>
             )}
@@ -249,7 +249,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               onKeyDown={handleKeyDown}
               placeholder="Ask about your infrastructure..."
               rows={2}
-              className="flex-1 resize-none bg-brand-surface border border-brand-border rounded px-3 py-2 text-[12px] font-sans text-white placeholder:text-white/30 focus:outline-none focus:border-cyan/50 transition-colors"
+              className="flex-1 resize-none bg-brand-surface border border-brand-border rounded px-3 py-2 text-[12px] font-sans text-white placeholder:text-white/55 focus:outline-none focus:border-cyan/50 transition-colors"
             />
             <button
               onClick={sendMessage}

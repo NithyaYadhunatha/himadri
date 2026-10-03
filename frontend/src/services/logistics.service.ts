@@ -88,6 +88,26 @@ export const logisticsService = {
     }))
   },
 
+  // Manual entry of a brand-new stock line. Mock mode appends to the in-memory
+  // list; the live backend has no POST /inventory handler yet (the Next.js route
+  // forwards it anyway), so a failure there is surfaced to the user verbatim.
+  createItem: async (input: { station_id: string; category: string; name: string; unit: string; quantity: number; reorder_threshold: number | null }): Promise<InventoryItem> => {
+    if (USE_MOCK) {
+      const item: InventoryItem = {
+        id: `${input.station_id}-inventory-${input.category}-${Date.now()}`,
+        ...input,
+        last_counted_at: new Date().toISOString(),
+      }
+      ;(mockInventory[input.station_id] ?? (mockInventory[input.station_id] = [])).push(item)
+      return Promise.resolve(item)
+    }
+    return json(await fetch('/api/inventory', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    }))
+  },
+
   getEndurance: async (station: string): Promise<EnduranceProjection> => {
     if (USE_MOCK) return Promise.resolve(mockEndurance[station] ?? mockEndurance.maitri)
     return json(await fetch(`/api/logistics/endurance?station=${encodeURIComponent(station)}`))

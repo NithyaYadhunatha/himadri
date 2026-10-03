@@ -45,7 +45,7 @@ function SegmentBtn({
       className={`flex items-center gap-1 px-2 py-1 text-[10px] font-mono rounded transition-colors ${
         active
           ? 'bg-cyan/20 text-cyan border border-cyan/40'
-          : 'text-white/40 border border-transparent hover:text-white/70 hover:border-brand-border'
+          : 'text-white/62 border border-transparent hover:text-white/70 hover:border-brand-border'
       }`}
     >
       {children}
@@ -71,7 +71,7 @@ function ToggleBtn({
       className={`flex items-center gap-1 px-2 py-1 text-[10px] font-mono rounded border transition-colors ${
         active
           ? 'bg-cyan/20 text-cyan border-cyan/40'
-          : 'text-white/40 border-brand-border hover:text-white/70'
+          : 'text-white/62 border-brand-border hover:text-white/70'
       }`}
     >
       {children}
@@ -108,7 +108,7 @@ export function ViewControlsBar({
     <div className="flex items-center gap-3 px-4 py-1.5 border-b border-brand-border bg-brand-bg shrink-0 overflow-x-auto">
       {/* Color mode — the one toggle actually reached for mid-session */}
       <div className="flex items-center gap-1 shrink-0">
-        <span className="font-mono text-[9px] text-white/25 uppercase tracking-wider mr-1">Color</span>
+        <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider mr-1">Color</span>
         <SegmentBtn active={colorMode === 'type'} onClick={() => onColorMode('type')} title="Color by node type">
           Type
         </SegmentBtn>
@@ -126,7 +126,7 @@ export function ViewControlsBar({
         <button
           onClick={() => setDisplayOpen((o) => !o)}
           className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono rounded border transition-colors ${
-            displayOpen ? 'bg-cyan/20 text-cyan border-cyan/40' : 'text-white/40 border-brand-border hover:text-white/70'
+            displayOpen ? 'bg-cyan/20 text-cyan border-cyan/40' : 'text-white/62 border-brand-border hover:text-white/70'
           }`}
         >
           <SlidersHorizontal size={10} />
@@ -137,7 +137,7 @@ export function ViewControlsBar({
         {displayOpen && (
           <div className="absolute top-full left-0 mt-1.5 z-20 w-64 bg-brand-surface border border-brand-border rounded-lg shadow-xl p-3 space-y-3">
             <div>
-              <span className="font-mono text-[9px] text-white/40 uppercase tracking-wider">Layout</span>
+              <span className="font-mono text-[10px] text-white/62 uppercase tracking-wider">Layout</span>
               <div className="flex items-center gap-1 mt-1.5">
                 <SegmentBtn active={layoutPreset === 'TB'} onClick={() => onLayoutPreset('TB')} title="Zone-banded / hierarchical top-down">
                   <AlignStartVertical size={10} />
@@ -155,7 +155,7 @@ export function ViewControlsBar({
             </div>
 
             <div>
-              <span className="font-mono text-[9px] text-white/40 uppercase tracking-wider">Node Size</span>
+              <span className="font-mono text-[10px] text-white/62 uppercase tracking-wider">Node Size</span>
               <div className="flex items-center gap-1 mt-1.5">
                 <SegmentBtn active={nodeSizeMode === 'compact'} onClick={() => onNodeSizeMode('compact')} title="Compact nodes">S</SegmentBtn>
                 <SegmentBtn active={nodeSizeMode === 'normal'} onClick={() => onNodeSizeMode('normal')} title="Normal nodes">M</SegmentBtn>
@@ -164,7 +164,7 @@ export function ViewControlsBar({
             </div>
 
             <div>
-              <span className="font-mono text-[9px] text-white/40 uppercase tracking-wider">Overlays</span>
+              <span className="font-mono text-[10px] text-white/62 uppercase tracking-wider">Overlays</span>
               <div className="flex items-center gap-1 mt-1.5">
                 <ToggleBtn active={showEdgeLabels} onClick={() => onShowEdgeLabels(!showEdgeLabels)} title="Toggle edge labels">
                   <Type size={10} />
@@ -183,7 +183,7 @@ export function ViewControlsBar({
         <button
           onClick={onFullscreen}
           title="Toggle fullscreen"
-          className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-white/40 border border-transparent rounded hover:text-white/70 hover:border-brand-border transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-white/62 border border-transparent rounded hover:text-white/70 hover:border-brand-border transition-colors"
         >
           <Maximize2 size={10} />
           Fullscreen

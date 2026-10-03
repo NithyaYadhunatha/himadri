@@ -46,14 +46,14 @@ export default function AuditPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-[1400px] mx-auto space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+            <h1 className="font-mono text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <ScrollText size={16} className="text-cyan" />
               Audit Trail — {station.toUpperCase()}
             </h1>
-            <p className="text-white/40 text-xs mt-1 font-sans">
+            <p className="text-white/70 text-sm mt-1.5 font-sans">
               Tamper-evident privileged-action log. Every entry is hash-chained to the previous one.
             </p>
           </div>
@@ -69,11 +69,11 @@ export default function AuditPage() {
               <p className={`text-sm font-sans font-medium ${verifyResult.valid ? 'text-emerald' : 'text-crimson'}`}>
                 {verifyResult.valid ? 'Hash chain verified — no tampering detected' : 'Hash chain broken'}
               </p>
-              <p className="text-xs font-mono text-white/50 mt-1">
+              <p className="text-xs font-mono text-white/70 mt-1">
                 {verifyResult.checked} entries checked
                 {verifyResult.broken_at_seq !== null && ` · break at seq ${verifyResult.broken_at_seq}`}
               </p>
-              {verifyResult.message && <p className="text-xs font-sans text-white/60 mt-1">{verifyResult.message}</p>}
+              {verifyResult.message && <p className="text-xs font-sans text-white/75 mt-1">{verifyResult.message}</p>}
             </div>
           </div>
         )}
@@ -85,7 +85,7 @@ export default function AuditPage() {
         {!loading && !error && entries.length > 0 && (
           <div className="bg-brand-surface border border-brand-border rounded overflow-hidden">
             <table className="w-full text-xs">
-              <thead className="bg-brand-bg text-white/40 font-mono uppercase text-[10px]">
+              <thead className="bg-brand-bg text-white/62 font-mono uppercase text-[10px]">
                 <tr>
                   <th className="text-left px-3 py-2">Seq</th>
                   <th className="text-left px-3 py-2">Actor</th>
@@ -98,12 +98,12 @@ export default function AuditPage() {
               <tbody>
                 {entries.map((e) => (
                   <tr key={e.seq} className="border-t border-brand-border">
-                    <td className="px-3 py-2 font-mono text-white/30">{e.seq}</td>
+                    <td className="px-3 py-2 font-mono text-white/55">{e.seq}</td>
                     <td className="px-3 py-2 text-white/70">{e.actor}</td>
                     <td className="px-3 py-2"><Badge variant="info" size="sm">{e.action}</Badge></td>
-                    <td className="px-3 py-2 font-mono text-white/50">{e.target ?? '—'}</td>
-                    <td className="px-3 py-2 font-mono text-white/30 uppercase">{e.station_id ?? '—'}</td>
-                    <td className="px-3 py-2 font-mono text-white/30">{new Date(e.created_at).toLocaleString()}</td>
+                    <td className="px-3 py-2 font-mono text-white/70">{e.target ?? '—'}</td>
+                    <td className="px-3 py-2 font-mono text-white/55 uppercase">{e.station_id ?? '—'}</td>
+                    <td className="px-3 py-2 font-mono text-white/55">{new Date(e.created_at).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

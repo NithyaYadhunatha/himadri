@@ -179,7 +179,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
           <div className="flex items-center gap-1">
             <Link
               href={`/assets/${node.id}/passport`}
-              className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/50 hover:text-cyan hover:border-cyan/40 transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/70 hover:text-cyan hover:border-cyan/40 transition-colors"
               title="Open this asset's QR passport"
             >
               <QrCode size={13} />
@@ -187,7 +187,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             <button
               type="button"
               onClick={() => setLogsOpen(true)}
-              className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/50 hover:text-white hover:border-white/20 transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/70 hover:text-white hover:border-white/20 transition-colors"
               title="View node logs"
             >
               <ScrollText size={13} />
@@ -220,7 +220,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
                 <h3 className="font-sans font-semibold text-white text-sm leading-tight truncate">
                   {node.label}
                 </h3>
-                <p className="text-white/40 text-xs mt-0.5 font-mono flex items-center gap-1.5">
+                <p className="text-white/62 text-xs mt-0.5 font-mono flex items-center gap-1.5">
                   {(() => {
                     const { icon: TypeIcon, label } = getNodeTypeConfig(node.type)
                     return (
@@ -237,12 +237,12 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
                     {node.health}
                   </Badge>
                   {node.version && (
-                    <span className="text-white/30 text-[10px] font-mono">{node.version}</span>
+                    <span className="text-white/55 text-[10px] font-mono">{node.version}</span>
                   )}
                 </div>
-                <p className="text-white/25 text-[10px] font-mono mt-1">Updated {formatTimestamp(node.lastSync)}</p>
+                <p className="text-white/50 text-[10px] font-mono mt-1">Updated {formatTimestamp(node.lastSync)}</p>
                 <p className="text-[10px] font-mono mt-1" title="Type-weighted risk — derived from health score × node-type criticality, not the backend's raw risk_score">
-                  <span className="text-white/30">TYPE-WEIGHTED RISK </span>
+                  <span className="text-white/55">TYPE-WEIGHTED RISK </span>
                   <span style={{ color: weightedRiskColor(computeWeightedRisk(node.healthScore, node.type)) }}>
                     {computeWeightedRisk(node.healthScore, node.type).toFixed(0)}
                   </span>
@@ -268,7 +268,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             {/* Sparkline trend */}
             {detail?.trend && (
               <div>
-                <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-1">24H HEALTH TREND</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-1">24H HEALTH TREND</p>
                 <Sparkline data={detail.trend} color={healthColor} height={40} />
               </div>
             )}
@@ -283,8 +283,8 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="bg-brand-bg border border-brand-border rounded p-2.5">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Icon size={11} className="text-white/40" />
-                    <span className="font-mono text-[10px] text-white/40 uppercase">{label}</span>
+                    <Icon size={11} className="text-white/62" />
+                    <span className="font-mono text-[10px] text-white/62 uppercase">{label}</span>
                   </div>
                   <p className="font-mono text-xs text-white truncate">{value}</p>
                 </div>
@@ -295,13 +295,13 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             {(node.dependencies.length > 0 || node.dependents.length > 0) && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Link2 size={11} className="text-white/40" />
-                  <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Dependency Map</p>
+                  <Link2 size={11} className="text-white/62" />
+                  <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">Dependency Map</p>
                 </div>
                 <div className="space-y-2">
                   {node.dependencies.length > 0 && (
                     <div>
-                      <p className="mb-1 text-[9px] font-mono uppercase tracking-wider text-cyan/70">Upstream dependencies</p>
+                      <p className="mb-1 text-[10px] font-mono uppercase tracking-wider text-cyan/70">Upstream dependencies</p>
                       <div className="flex flex-wrap gap-1">
                         {node.dependencies.map((id) => {
                           const dependency = dependencyNodes.find((candidate) => candidate.id === id)
@@ -314,7 +314,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
                   )}
                   {node.dependents.length > 0 && (
                     <div>
-                      <p className="mb-1 text-[9px] font-mono uppercase tracking-wider text-amber/70">Downstream dependents</p>
+                      <p className="mb-1 text-[10px] font-mono uppercase tracking-wider text-amber/70">Downstream dependents</p>
                       <div className="flex flex-wrap gap-1">
                         {node.dependents.map((id) => {
                           const dependent = dependentNodes.find((candidate) => candidate.id === id)
@@ -332,7 +332,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             {/* Active alerts */}
             {detail && detail.alerts.length > 0 && (
               <div>
-                <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-2">Active Alerts</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-2">Active Alerts</p>
                 <div className="space-y-1.5">
                   {detail.alerts.map((alert) => (
                     <div
@@ -356,7 +356,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             {/* Remediation actions */}
             {actions.length > 0 && (
               <div>
-                <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-2">
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-2">
                   Remediation Actions
                 </p>
                 <div className="space-y-2">
@@ -365,7 +365,7 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-white font-sans font-medium">{action.name}</p>
-                          <p className="text-[10px] text-white/40 mt-0.5 font-sans">{action.estimatedTime} · {action.blastRadiusReduction}% blast radius reduction</p>
+                          <p className="text-[10px] text-white/62 mt-0.5 font-sans">{action.estimatedTime} · {action.blastRadiusReduction}% blast radius reduction</p>
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <div className="flex-1 h-1 bg-brand-border rounded-full overflow-hidden">
                               <div
@@ -409,8 +409,8 @@ export function NodeInspector({ node, open, onClose, allNodes = [], onSelectNode
             {/* Agent credentials — re-fetchable node_id + api_key */}
             <div>
               <div className="flex items-center gap-1.5 mb-2">
-                <KeyRound size={11} className="text-white/40" />
-                <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Agent Credentials</p>
+                <KeyRound size={11} className="text-white/62" />
+                <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">Agent Credentials</p>
               </div>
               {credentials ? (
                 <div className="space-y-2">

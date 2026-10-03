@@ -36,8 +36,12 @@
   --color-violet-brand: #6E7FCE; /* rare secondary accent (chart pills), cooled to sit with the ice palette */
 
   /* Fonts */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', Menlo, Monaco, monospace;
+  /* next/font (layout.tsx) registers Inter / JetBrains Mono under hashed family
+     names and exposes them as --font-inter / --font-jetbrains. The old values
+     named the raw families, which only resolve if the fonts are installed on
+     the viewer's machine — so most people silently got system fonts. */
+  --font-sans: var(--font-inter), 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', Consolas, Menlo, Monaco, monospace;
 
   /* Border radius — softened from the old sharp 4px "terminal" look to a
      warmer, more beautified feel that matches the cream/beige palette. */
@@ -72,7 +76,7 @@ html, body {
   color: #16283A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
 /* ── Keyframes ────────────────────────────────────────────────── */
@@ -112,9 +116,9 @@ html, body {
 .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: #E7F1F8; }
-::-webkit-scrollbar-thumb { background: #B9D6E6; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #B9D6E6; border-radius: 4px; border: 2px solid #E7F1F8; }
 ::-webkit-scrollbar-thumb:hover { background: #93BFD8; }
 
 /* ── React Flow overrides ─────────────────────────────────────── */
@@ -138,8 +142,8 @@ html, body {
   border: 1px solid #B9D6E6 !important;
   border-radius: 8px !important;
   color: #16283A !important;
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 11px !important;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
 }
 
 /* ── Selection ────────────────────────────────────────────────── */
@@ -153,3 +157,9 @@ html, body {
   outline: 1px solid rgba(24, 104, 160, 0.5);
   outline-offset: 2px;
 }
+
+/* ── Form controls ────────────────────────────────────────────── */
+input::placeholder, textarea::placeholder { color: rgba(22, 40, 58, 0.5); opacity: 1; }
+select, input, textarea { color: #16283A; }
+select option { background: #F7FBFD; color: #16283A; }
+input[type='number']::-webkit-inner-spin-button { opacity: 0.5; }

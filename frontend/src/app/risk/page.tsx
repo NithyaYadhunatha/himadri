@@ -34,14 +34,14 @@ function RiskCellTile({ cell, onClick }: { cell: RiskCell; onClick: () => void }
           "heatmap" reading beyond just the tinted background. */}
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: color, opacity: cell.score / 100 }} />
       <div className="flex items-center justify-between w-full">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-white/60">{cell.label}</span>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-white/75">{cell.label}</span>
         <Gauge size={13} style={{ color }} />
       </div>
       <span className="font-mono text-4xl font-bold leading-none" style={{ color }}>{Math.round(cell.score)}</span>
       <div className="w-full h-1.5 rounded-full bg-brand-bg/60 overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, cell.score)}%`, background: color }} />
       </div>
-      <span className="font-mono text-[9px] text-white/30 uppercase tracking-wider">
+      <span className="font-mono text-[10px] text-white/55 uppercase tracking-wider">
         {cell.factors.length} factor{cell.factors.length === 1 ? '' : 's'} · click to explain
       </span>
     </button>
@@ -74,18 +74,18 @@ export default function RiskHeatmapPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-[1400px] mx-auto space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
+            <h1 className="font-mono text-lg font-bold text-white uppercase tracking-wider">
               Antarctic Risk Heatmap — {station.toUpperCase()}
             </h1>
-            <p className="text-white/40 text-xs mt-1 font-sans">
+            <p className="text-white/70 text-sm mt-1.5 font-sans">
               Every cell explains itself — click one to see its contributing factors, weights, and evidence.
             </p>
           </div>
           {generatedAt && (
-            <span className="font-mono text-[10px] text-white/30 shrink-0">
+            <span className="font-mono text-[10px] text-white/55 shrink-0">
               Generated {new Date(generatedAt).toLocaleString()}
             </span>
           )}
@@ -107,7 +107,7 @@ export default function RiskHeatmapPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setSelected(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16283A]/45 backdrop-blur-sm p-4" onClick={() => setSelected(null)}>
           <div
             className="w-full max-w-lg bg-brand-surface border border-brand-border rounded shadow-2xl max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
@@ -117,19 +117,19 @@ export default function RiskHeatmapPage() {
                 <AlertTriangle size={15} style={{ color: scoreColor(selected.score) }} />
                 <h2 className="font-mono text-sm font-semibold text-white uppercase tracking-wider">{selected.label}</h2>
               </div>
-              <button onClick={() => setSelected(null)} className="text-white/40 hover:text-white transition-colors">
+              <button onClick={() => setSelected(null)} className="text-white/62 hover:text-white transition-colors">
                 <X size={16} />
               </button>
             </div>
             <div className="p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] text-white/40 uppercase">Overall Score</span>
+                <span className="font-mono text-[10px] text-white/62 uppercase">Overall Score</span>
                 <span className="font-mono text-lg font-bold" style={{ color: scoreColor(selected.score) }}>
                   {Math.round(selected.score)}
                 </span>
               </div>
               {selected.factors.length === 0 ? (
-                <p className="text-xs font-mono text-white/30 italic">No factor breakdown provided by the backend for this cell.</p>
+                <p className="text-xs font-mono text-white/55 italic">No factor breakdown provided by the backend for this cell.</p>
               ) : (
                 selected.factors.map((f) => (
                   <div key={f.name} className="bg-brand-bg border border-brand-border rounded p-3 space-y-1.5">
@@ -140,8 +140,8 @@ export default function RiskHeatmapPage() {
                     <div className="h-1 bg-brand-border rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${Math.min(100, f.score)}%`, backgroundColor: scoreColor(f.score) }} />
                     </div>
-                    <p className="text-[10px] font-mono text-white/40">Weight {(f.weight * 100).toFixed(0)}%</p>
-                    <p className="text-[11px] font-sans text-white/60 leading-relaxed">{f.evidence}</p>
+                    <p className="text-[10px] font-mono text-white/62">Weight {(f.weight * 100).toFixed(0)}%</p>
+                    <p className="text-[11px] font-sans text-white/75 leading-relaxed">{f.evidence}</p>
                   </div>
                 ))
               )}

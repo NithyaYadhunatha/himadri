@@ -24,7 +24,7 @@ export function CustomNodePanel({ node }: NodeTypePanelProps) {
           ))}
         </div>
         {!node.subtype && metadataEntries.length === 0 && (
-          <p className="text-[10px] font-mono text-white/30 italic">
+          <p className="text-[10px] font-mono text-white/55 italic">
             No additional details recorded for this custom asset yet.
           </p>
         )}

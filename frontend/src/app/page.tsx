@@ -80,7 +80,7 @@ export default async function LandingPage() {
           </div>
           <div className="flex flex-col">
             <span className="font-mono font-bold text-white text-base tracking-widest leading-none">HIMADRI</span>
-            <span className="font-mono text-[9px] text-cyan/70 tracking-widest uppercase mt-1">Smart India Hackathon 2026</span>
+            <span className="font-mono text-[10px] text-cyan/70 tracking-widest uppercase mt-1">Smart India Hackathon 2026</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default async function LandingPage() {
             <>
               <Link
                 href={ROUTES.TWIN}
-                className="font-mono text-xs uppercase tracking-widest text-white/60 hover:text-white transition-colors px-3 py-2"
+                className="font-mono text-xs uppercase tracking-widest text-white/75 hover:text-white transition-colors px-3 py-2"
               >
                 Mission Control
               </Link>
@@ -108,7 +108,7 @@ export default async function LandingPage() {
             <>
               <Link
                 href="/sign-in"
-                className="font-mono text-xs uppercase tracking-widest text-white/60 hover:text-white transition-colors px-3 py-2"
+                className="font-mono text-xs uppercase tracking-widest text-white/75 hover:text-white transition-colors px-3 py-2"
               >
                 Sign In
               </Link>
@@ -140,7 +140,7 @@ export default async function LandingPage() {
           <span className="text-cyan drop-shadow-[0_0_20px_rgba(31, 158, 109,0.4)]">Antarctic stations</span>
         </h1>
 
-        <p className="mt-6 max-w-2xl text-sm md:text-base font-sans text-white/50 leading-relaxed">
+        <p className="mt-6 max-w-2xl text-sm md:text-base font-sans text-white/70 leading-relaxed">
           HIMADRI maps every power, water, waste, and science-instrument dependency at Maitri and Bharati, watches
           station health in real time, and rehearses supply-chain and equipment failure before an isolation-window
           crisis forces the question.
@@ -157,7 +157,7 @@ export default async function LandingPage() {
                 <ArrowRight size={16} />
               </Link>
               <div className="flex flex-col items-center gap-2.5">
-                <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">Or go straight to a station</span>
+                <span className="font-mono text-[10px] text-white/55 uppercase tracking-widest">Or go straight to a station</span>
                 <StationEntryButtons />
               </div>
             </>
@@ -170,7 +170,7 @@ export default async function LandingPage() {
                 <Clock size={16} />
                 Check Access Status
               </Link>
-              <p className="font-mono text-xs text-white/30 tracking-wider">
+              <p className="font-mono text-xs text-white/55 tracking-wider">
                 A Station Leader or HQ Operator will activate your account shortly.
               </p>
             </>
@@ -198,7 +198,7 @@ export default async function LandingPage() {
           {STATS.map((s) => (
             <div key={s.label} className="bg-brand-bg px-6 py-5 flex flex-col items-center">
               <span className="font-mono text-2xl font-bold text-cyan">{s.value}</span>
-              <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest mt-1 text-center">
+              <span className="font-mono text-[10px] text-white/62 uppercase tracking-widest mt-1 text-center">
                 {s.label}
               </span>
             </div>
@@ -214,7 +214,7 @@ export default async function LandingPage() {
               <Network size={18} className="text-emerald" />
             </div>
             <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-white">Station Twin</h3>
-            <p className="text-xs font-sans text-white/40 mt-2 mb-5 leading-relaxed">
+            <p className="text-xs font-sans text-white/62 mt-2 mb-5 leading-relaxed">
               The live observation deck. Read-only reality — every asset, every dependency, every provenance-tagged
               fact, watched continuously across both stations.
             </p>
@@ -223,7 +223,7 @@ export default async function LandingPage() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2 text-xs font-mono text-white/60 hover:text-emerald transition-colors group"
+                    className="flex items-center gap-2 text-xs font-mono text-white/75 hover:text-emerald transition-colors group"
                   >
                     <span className="w-1 h-1 rounded-full bg-emerald/60 group-hover:bg-emerald shrink-0" />
                     {item.label}
@@ -238,7 +238,7 @@ export default async function LandingPage() {
               <GitBranch size={18} className="text-cyan" />
             </div>
             <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-white">Operations</h3>
-            <p className="text-xs font-sans text-white/40 mt-2 mb-5 leading-relaxed">
+            <p className="text-xs font-sans text-white/62 mt-2 mb-5 leading-relaxed">
               The war room. Fuel/food endurance modeling, subsystem risk scoring, and energy &amp; logistics planning
               before you commit a convoy or a generator swap.
             </p>
@@ -247,7 +247,7 @@ export default async function LandingPage() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2 text-xs font-mono text-white/60 hover:text-cyan transition-colors group"
+                    className="flex items-center gap-2 text-xs font-mono text-white/75 hover:text-cyan transition-colors group"
                   >
                     <span className="w-1 h-1 rounded-full bg-cyan/60 group-hover:bg-cyan shrink-0" />
                     {item.label}
@@ -263,7 +263,7 @@ export default async function LandingPage() {
       <section className="relative z-10 px-6 md:px-10 pb-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">How it works</p>
+            <p className="font-mono text-[10px] text-white/55 uppercase tracking-widest mb-2">How it works</p>
             <h2 className="font-mono text-xl font-bold text-white uppercase tracking-widest">
               Discover → Monitor → Simulate → Respond
             </h2>
@@ -271,12 +271,12 @@ export default async function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {PIPELINE.map((step, i) => (
               <div key={step.label} className="relative bg-brand-bg border border-brand-border rounded p-5">
-                <span className="absolute top-3 right-3 font-mono text-[9px] text-white/20">
+                <span className="absolute top-3 right-3 font-mono text-[10px] text-white/50">
                   0{i + 1}
                 </span>
                 <step.icon size={18} className="text-cyan mb-3" />
                 <p className="font-mono text-xs font-bold text-white uppercase tracking-widest">{step.label}</p>
-                <p className="text-[11px] font-sans text-white/40 mt-2 leading-relaxed">{step.desc}</p>
+                <p className="text-[11px] font-sans text-white/62 mt-2 leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -285,13 +285,13 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-brand-border px-6 md:px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-white/30">
+        <div className="flex items-center gap-2 text-white/55">
           <Sparkles size={14} />
           <span className="font-mono text-[10px] uppercase tracking-widest">
             Smart India Hackathon 2026 — PS 26060 · ISRO / NCPOR
           </span>
         </div>
-        <span className="font-mono text-[10px] text-white/20 uppercase tracking-widest">
+        <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest">
           HIMADRI © 2026 — Digital Twin for Maitri &amp; Bharati Research Stations
         </span>
       </footer>

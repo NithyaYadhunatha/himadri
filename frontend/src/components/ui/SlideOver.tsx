@@ -42,7 +42,7 @@ export function SlideOver({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[#16283A]/45 backdrop-blur-sm z-40"
             onClick={onClose}
           />
 
@@ -64,12 +64,12 @@ export function SlideOver({
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-white/40 text-xs mt-0.5">{subtitle}</p>
+                    <p className="text-white/62 text-xs mt-0.5">{subtitle}</p>
                   )}
                 </div>
                 <button
                   onClick={onClose}
-                  className="text-white/40 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
+                  className="text-white/62 hover:text-white transition-colors p-1 rounded hover:bg-white/5"
                   aria-label="Close panel"
                 >
                   <X size={16} />

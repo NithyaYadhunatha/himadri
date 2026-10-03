@@ -48,7 +48,7 @@ export function Header() {
         </div>
         <div className="hidden sm:flex flex-col leading-none">
           <span className="font-mono font-bold text-white text-sm tracking-widest">HIMADRI</span>
-          <span className="font-mono text-[8px] text-cyan/70 tracking-widest uppercase mt-0.5">SIH 2026</span>
+          <span className="font-mono text-[10px] text-cyan/70 tracking-widest uppercase mt-0.5">SIH 2026</span>
         </div>
       </Link>
 
@@ -62,7 +62,7 @@ export function Header() {
               key={group.label}
               href={group.items[0].href}
               className={`font-mono text-[11px] tracking-widest uppercase transition-all flex items-center h-full relative px-3 whitespace-nowrap rounded-md ${
-                isActive ? 'text-cyan bg-cyan/10 font-bold' : 'text-white/45 hover:text-white/80 hover:bg-brand-surface-2'
+                isActive ? 'text-cyan bg-cyan/10 font-bold' : 'text-white/65 hover:text-white/80 hover:bg-brand-surface-2'
               }`}
             >
               {group.label}
@@ -81,7 +81,7 @@ export function Header() {
                 type="button"
                 onClick={() => setStation(s)}
                 className={`font-mono text-[10px] uppercase tracking-wider px-2 py-1.5 transition-colors ${
-                  station === s ? 'bg-cyan/20 text-cyan font-bold' : 'text-white/40 hover:text-white/70'
+                  station === s ? 'bg-cyan/20 text-cyan font-bold' : 'text-white/62 hover:text-white/70'
                 }`}
               >
                 {STATION_LABELS[s]}
@@ -93,7 +93,7 @@ export function Header() {
             className="flex items-center gap-1.5 rounded-md border border-brand-border bg-brand-surface-2 px-2.5 py-1.5"
             title="Your account is scoped to this station only"
           >
-            <Lock size={10} className="text-white/40" />
+            <Lock size={10} className="text-white/62" />
             <span className="font-mono text-[10px] uppercase tracking-wider text-white/70 font-bold">{STATION_LABELS[station]}</span>
           </div>
         )}
@@ -103,10 +103,10 @@ export function Header() {
             <span className="absolute w-2 h-2 rounded-full bg-emerald animate-ping opacity-75" />
             <span className="relative w-1.5 h-1.5 rounded-full bg-emerald" />
           </span>
-          <span className="font-mono text-[9px] text-emerald font-bold tracking-widest leading-none">{LIVE_ASSET_COUNT} ASSETS</span>
+          <span className="font-mono text-[10px] text-emerald font-bold tracking-widest leading-none">{LIVE_ASSET_COUNT} ASSETS</span>
         </div>
 
-        <span className="hidden 2xl:inline font-mono text-[10px] text-white/40 tracking-wider tabular-nums">
+        <span className="hidden 2xl:inline font-mono text-[10px] text-white/62 tracking-wider tabular-nums">
           {time ? time.toLocaleTimeString('en-US', { hour12: false }) : '--:--:--'}
         </span>
 
@@ -115,7 +115,7 @@ export function Header() {
             className="relative flex items-center justify-center w-7 h-7 rounded-full bg-brand-surface-2 border border-brand-border cursor-help"
             title={`Auth bypassed for local testing — acting as ${MOCK_MEMBERSHIP.name} (${MOCK_MEMBERSHIP.role})`}
           >
-            <FlaskConical size={12} className="text-white/40" />
+            <FlaskConical size={12} className="text-white/62" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber border border-brand-surface" />
           </div>
         ) : (

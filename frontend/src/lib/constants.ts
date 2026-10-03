@@ -92,6 +92,7 @@ export const ROUTES = {
   PREDICTIVE: '/predictive',
   RISK: '/risk',
   DIAGNOSIS: '/diagnosis',
+  OVERVIEW: '/overview',
   ENERGY: '/energy',
   LOGISTICS: '/logistics',
   ENVIRONMENT: '/environment',
@@ -135,6 +136,7 @@ export const NAV_GROUPS = [
   {
     label: 'OPERATIONS',
     items: [
+      { label: 'Overview', href: ROUTES.OVERVIEW },
       { label: 'Energy', href: ROUTES.ENERGY },
       { label: 'Logistics', href: ROUTES.LOGISTICS },
       { label: 'Environment', href: ROUTES.ENVIRONMENT },

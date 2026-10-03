@@ -130,7 +130,7 @@ export default function Twin3DPage() {
             <p className="font-mono text-sm text-white/70 uppercase tracking-widest">
               {status === 'checking' ? `Loading ${stationLabel} 3D Twin…` : `${stationLabel} 3D Twin unavailable`}
             </p>
-            <p className="text-xs text-white/40 font-sans max-w-md leading-relaxed">
+            <p className="text-xs text-white/62 font-sans max-w-md leading-relaxed">
               {status === 'checking'
                 ? 'Checking the selected station build and preparing its Unity runtime.'
                 : `The ${stationLabel} Unity WebGL build could not be loaded. You can continue with the 2D station twin.`}

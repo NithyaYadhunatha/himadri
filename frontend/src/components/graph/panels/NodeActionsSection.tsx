@@ -235,19 +235,19 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="flex items-center gap-1.5">
-          <Zap size={11} className="text-white/40" />
-          <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+          <Zap size={11} className="text-white/62" />
+          <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">
             Node Actions
           </p>
           {!loading && actions.length > 0 && (
-            <span className="font-mono text-[9px] text-white/25">({actions.length})</span>
+            <span className="font-mono text-[10px] text-white/50">({actions.length})</span>
           )}
-          {loading && <Loader2 size={9} className="text-white/30 animate-spin" />}
+          {loading && <Loader2 size={9} className="text-white/55 animate-spin" />}
         </div>
         {expanded ? (
-          <ChevronUp size={12} className="text-white/30" />
+          <ChevronUp size={12} className="text-white/55" />
         ) : (
-          <ChevronDown size={12} className="text-white/30" />
+          <ChevronDown size={12} className="text-white/55" />
         )}
       </button>
 
@@ -255,7 +255,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
       {expanded && (
         <div className="mt-2 space-y-3">
           {!loading && actions.length === 0 && (
-            <p className="text-[10px] font-mono text-white/25 italic">
+            <p className="text-[10px] font-mono text-white/50 italic">
               No actions configured for this node type.
             </p>
           )}
@@ -270,7 +270,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Icon size={9} className={style.textClass} />
                     <span
-                      className={`font-mono text-[9px] uppercase tracking-widest ${style.textClass} opacity-70`}
+                      className={`font-mono text-[10px] uppercase tracking-widest ${style.textClass} opacity-70`}
                     >
                       {style.label}
                     </span>
@@ -310,7 +310,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
                               className={`rounded border px-2.5 py-2 space-y-1.5 ${style.confirmClass}`}
                             >
                               <p className="text-[10px] font-mono font-medium">{action.label}</p>
-                              <p className="text-[9px] font-sans opacity-70 leading-relaxed">
+                              <p className="text-[10px] font-sans opacity-70 leading-relaxed">
                                 {action.description}
                               </p>
                               <div className="flex gap-1.5 pt-0.5">
@@ -324,7 +324,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
                                 <button
                                   type="button"
                                   onClick={() => setPendingAction(null)}
-                                  className="flex-1 rounded border border-white/10 px-2 py-1 text-[10px] font-mono text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                                  className="flex-1 rounded border border-white/10 px-2 py-1 text-[10px] font-mono text-white/62 hover:text-white hover:border-white/20 transition-colors"
                                 >
                                   Cancel
                                 </button>
@@ -360,7 +360,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
           <div className="pt-2 border-t border-brand-border/50">
             {addingAction ? (
               <div className="bg-brand-surface border border-brand-border rounded p-2.5 space-y-2">
-                <p className="text-[10px] font-mono text-white/50 uppercase">New Custom Action</p>
+                <p className="text-[10px] font-mono text-white/70 uppercase">New Custom Action</p>
                 <input
                   type="text"
                   placeholder="Action Name"
@@ -393,7 +393,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
                   <button
                     type="button"
                     onClick={() => setAddingAction(false)}
-                    className="flex-1 rounded border border-white/10 px-2 py-1 text-[10px] font-mono text-white/40 hover:text-white transition-colors"
+                    className="flex-1 rounded border border-white/10 px-2 py-1 text-[10px] font-mono text-white/62 hover:text-white transition-colors"
                   >
                     Cancel
                   </button>
@@ -403,7 +403,7 @@ export function NodeActionsSection({ node }: NodeActionsSectionProps) {
               <button
                 type="button"
                 onClick={() => setAddingAction(true)}
-                className="w-full flex items-center justify-center gap-1.5 rounded border border-dashed border-white/10 py-1.5 text-[10px] font-mono text-white/40 hover:text-cyan hover:border-cyan/30 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 rounded border border-dashed border-white/10 py-1.5 text-[10px] font-mono text-white/62 hover:text-cyan hover:border-cyan/30 transition-colors"
               >
                 <Plus size={10} />
                 <span>Add Custom Action</span>

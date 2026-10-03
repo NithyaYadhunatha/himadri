@@ -37,8 +37,8 @@ function StatTile({ icon: Icon, label, value, sub }: { icon: React.ElementType; 
     <div className="flex items-center gap-2.5 rounded border border-brand-border bg-brand-bg px-3 py-2.5">
       <Icon size={15} className="text-cyan shrink-0" />
       <div className="min-w-0">
-        <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">{label}</p>
-        <p className="font-mono text-sm text-white leading-tight">{value}{sub && <span className="text-white/40 text-xs ml-1">{sub}</span>}</p>
+        <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">{label}</p>
+        <p className="font-mono text-sm text-white leading-tight">{value}{sub && <span className="text-white/62 text-xs ml-1">{sub}</span>}</p>
       </div>
     </div>
   )
@@ -126,12 +126,12 @@ export default function EnvironmentPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-[1400px] mx-auto space-y-8">
         <div>
-          <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest">
+          <h1 className="font-mono text-lg font-bold text-white uppercase tracking-wider">
             Environmental Monitoring — {station.toUpperCase()}
           </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">Live regional conditions, science-instrument health, waste/carbon reporting, and advisories.</p>
+          <p className="text-white/70 text-sm mt-1.5 font-sans">Live regional conditions, science-instrument health, waste/carbon reporting, and advisories.</p>
         </div>
 
         {loading && <div className="flex justify-center py-16"><InlineLoader text="Loading environmental data…" /></div>}
@@ -141,12 +141,12 @@ export default function EnvironmentPage() {
           <>
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest flex items-center gap-1.5">
+                <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
                   {(() => { const Icon = weatherIcon(weather?.weatherCode ?? 0); return <Icon size={13} /> })()} Live Conditions — Around the Station
                 </h2>
                 <div className="flex items-center gap-2">
                   {weather && !weatherLoading && (
-                    <span className="font-mono text-[9px] text-white/30">
+                    <span className="font-mono text-[10px] text-white/55">
                       {new Date(weather.observedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })} UTC · {weather.source}
                     </span>
                   )}
@@ -166,7 +166,7 @@ export default function EnvironmentPage() {
                     {(() => { const Icon = weatherIcon(weather.weatherCode); return <Icon size={34} className="text-cyan shrink-0" /> })()}
                     <div>
                       <p className="font-mono text-3xl text-white leading-none">{Math.round(weather.temperatureC)}°C</p>
-                      <p className="text-xs font-sans text-white/50 mt-1">{weather.weatherLabel} · feels like {Math.round(weather.feelsLikeC)}°C</p>
+                      <p className="text-xs font-sans text-white/70 mt-1">{weather.weatherLabel} · feels like {Math.round(weather.feelsLikeC)}°C</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
@@ -176,7 +176,7 @@ export default function EnvironmentPage() {
                     <StatTile icon={Droplets} label="Humidity" value={`${Math.round(weather.humidityPct)}%`} />
                     <StatTile icon={Gauge} label="Pressure" value={`${Math.round(weather.pressureHpa)}`} sub="hPa" />
                   </div>
-                  <p className="font-mono text-[9px] text-white/25 mt-3">
+                  <p className="font-mono text-[10px] text-white/50 mt-3">
                     {weather.latitude.toFixed(2)}°S, {weather.longitude.toFixed(2)}°E · auto-refreshes every {WEATHER_POLL_MS / 60_000} min
                   </p>
                 </div>
@@ -185,18 +185,18 @@ export default function EnvironmentPage() {
 
             {aws && (
               <section>
-                <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Thermometer size={13} /> AWS Instrument Health — {aws.name}
                 </h2>
                 <div className="bg-brand-surface border border-brand-border rounded p-4">
                   <Sparkline data={aws.trend} color="#1868A0" height={60} />
-                  <p className="font-mono text-[10px] text-white/30 mt-2">Health score {aws.healthScore} · {aws.health}</p>
+                  <p className="font-mono text-[10px] text-white/55 mt-2">Health score {aws.healthScore} · {aws.health}</p>
                 </div>
               </section>
             )}
 
             <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <Telescope size={13} /> Science Instrument Health
               </h2>
               {instruments.length === 0 ? (
@@ -209,7 +209,7 @@ export default function EnvironmentPage() {
                         <span className="text-sm font-sans text-white truncate">{i.name}</span>
                         <Badge variant={i.health === 'healthy' ? 'healthy' : i.health === 'degraded' ? 'warning' : 'critical'} size="sm">{i.health}</Badge>
                       </div>
-                      <p className="font-mono text-[10px] text-white/40">Health {i.healthScore}</p>
+                      <p className="font-mono text-[10px] text-white/62">Health {i.healthScore}</p>
                       {i.alerts.length > 0 && (
                         <p className="text-[10px] font-mono text-amber mt-1">{i.alerts.length} alert(s)</p>
                       )}
@@ -220,7 +220,7 @@ export default function EnvironmentPage() {
             </section>
 
             <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <Recycle size={13} /> Waste &amp; Carbon
               </h2>
               {waste.length === 0 ? (
@@ -228,7 +228,7 @@ export default function EnvironmentPage() {
               ) : (
                 <div className="bg-brand-surface border border-brand-border rounded overflow-hidden mb-3">
                   <table className="w-full text-xs">
-                    <thead className="bg-brand-bg text-white/40 font-mono uppercase text-[10px]">
+                    <thead className="bg-brand-bg text-white/62 font-mono uppercase text-[10px]">
                       <tr><th className="text-left px-3 py-2">Category</th><th className="text-right px-3 py-2">Quantity (kg)</th><th className="text-left px-3 py-2">Method</th><th className="text-left px-3 py-2">Recorded</th></tr>
                     </thead>
                     <tbody>
@@ -236,8 +236,8 @@ export default function EnvironmentPage() {
                         <tr key={w.id} className="border-t border-brand-border">
                           <td className="px-3 py-2 text-white/80 font-mono">{w.category}</td>
                           <td className="px-3 py-2 text-right font-mono text-white/70">{w.quantity_kg}</td>
-                          <td className="px-3 py-2 text-white/50">{w.method}</td>
-                          <td className="px-3 py-2 text-white/30 font-mono">{new Date(w.recorded_at).toLocaleDateString()}</td>
+                          <td className="px-3 py-2 text-white/70">{w.method}</td>
+                          <td className="px-3 py-2 text-white/55 font-mono">{new Date(w.recorded_at).toLocaleDateString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -249,13 +249,13 @@ export default function EnvironmentPage() {
                   Generate Environmental Report
                 </Button>
                 {reports.length > 0 && (
-                  <span className="font-mono text-[10px] text-white/30">{reports.length} report(s) on file</span>
+                  <span className="font-mono text-[10px] text-white/55">{reports.length} report(s) on file</span>
                 )}
               </div>
             </section>
 
             <section>
-              <h2 className="font-mono text-xs text-white/50 uppercase tracking-widest mb-3">Advisories</h2>
+              <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest mb-3">Advisories</h2>
               {advisories.length === 0 ? (
                 <EmptyState message="No pending advisories" />
               ) : (
@@ -265,7 +265,7 @@ export default function EnvironmentPage() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant={a.status === 'accepted' ? 'healthy' : a.status === 'rejected' ? 'critical' : 'warning'} size="sm">{a.status}</Badge>
-                          <span className="font-mono text-[10px] text-white/40 uppercase">{a.kind}</span>
+                          <span className="font-mono text-[10px] text-white/62 uppercase">{a.kind}</span>
                         </div>
                         <p className="text-xs font-sans text-white/80">{a.message}</p>
                       </div>

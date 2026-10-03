@@ -66,13 +66,13 @@ export default function AlertsPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-[1400px] mx-auto space-y-6">
         <div>
-          <h1 className="font-mono text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+          <h1 className="font-mono text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <Bell size={16} className="text-cyan" />
             Alerts — {station.toUpperCase()}
           </h1>
-          <p className="text-white/40 text-xs mt-1 font-sans">Filter, acknowledge with a note, and jump to the affected asset on the twin.</p>
+          <p className="text-white/70 text-sm mt-1.5 font-sans">Filter, acknowledge with a note, and jump to the affected asset on the twin.</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -103,18 +103,18 @@ export default function AlertsPage() {
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Badge variant={severityVariant[a.severity]} size="sm" dot>{a.severity}</Badge>
                       <Badge variant="neutral" size="sm">{a.state}</Badge>
-                      <span className="font-mono text-[10px] text-white/30 uppercase">{a.category}</span>
-                      {a.occurrences > 1 && <span className="font-mono text-[10px] text-white/30">×{a.occurrences}</span>}
+                      <span className="font-mono text-[10px] text-white/55 uppercase">{a.category}</span>
+                      {a.occurrences > 1 && <span className="font-mono text-[10px] text-white/55">×{a.occurrences}</span>}
                     </div>
                     <p className="text-sm font-sans text-white/90">{a.message}</p>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className="font-mono text-[10px] text-white/30">First {new Date(a.first_seen).toLocaleString()}</span>
-                      <span className="font-mono text-[10px] text-white/30">Last {new Date(a.last_seen).toLocaleString()}</span>
+                      <span className="font-mono text-[10px] text-white/55">First {new Date(a.first_seen).toLocaleString()}</span>
+                      <span className="font-mono text-[10px] text-white/55">Last {new Date(a.last_seen).toLocaleString()}</span>
                       <Link href={ROUTES.TWIN} className="font-mono text-[10px] text-cyan hover:underline flex items-center gap-1">
                         <ExternalLink size={10} /> View on twin
                       </Link>
                     </div>
-                    {a.ack_note && <p className="text-[11px] font-mono text-white/40 mt-1.5 italic">Ack note: {a.ack_note}</p>}
+                    {a.ack_note && <p className="text-[11px] font-mono text-white/62 mt-1.5 italic">Ack note: {a.ack_note}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     {a.state === 'open' && (

@@ -81,12 +81,12 @@ export default function AssetPassportPage() {
           <button
             onClick={() => setQrOpen(true)}
             title="Show this passport's QR code"
-            className="absolute top-4 right-4 flex items-center justify-center w-9 h-9 rounded-lg border border-brand-border bg-brand-surface text-white/50 hover:text-cyan hover:border-cyan/40 transition-colors"
+            className="absolute top-4 right-4 flex items-center justify-center w-9 h-9 rounded-lg border border-brand-border bg-brand-surface text-white/70 hover:text-cyan hover:border-cyan/40 transition-colors"
           >
             <QrCode size={16} />
           </button>
           <h1 className="font-mono text-lg font-bold text-white pr-12">{passport.name}</h1>
-          <p className="font-mono text-[11px] text-white/40 mt-1">
+          <p className="font-mono text-[11px] text-white/62 mt-1">
             {passport.category}{passport.subtype ? ` / ${passport.subtype}` : ''} · {passport.station_id.toUpperCase()}
             {passport.zone_id ? ` / ${passport.zone_id}` : ''}
           </p>
@@ -107,14 +107,14 @@ export default function AssetPassportPage() {
           <div className="p-5 flex flex-col items-center gap-4">
             <div className="text-center">
               <p className="font-mono text-xs font-semibold text-white">{passport.name}</p>
-              <p className="font-mono text-[9px] text-white/40 uppercase tracking-wider mt-0.5">{passport.id}</p>
+              <p className="font-mono text-[10px] text-white/62 uppercase tracking-wider mt-0.5">{passport.id}</p>
             </div>
             {url && (
-              <div className="bg-white rounded-lg p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
+              <div className="bg-[#FFFFFF] rounded-lg p-3 border border-brand-border">
                 <QRCodeSVG value={url} size={180} level="M" />
               </div>
             )}
-            <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/40 text-center max-w-[220px] leading-relaxed">
+            <p className="flex items-center gap-1.5 font-mono text-[10px] text-white/62 text-center max-w-[220px] leading-relaxed">
               <Smartphone size={12} className="text-cyan shrink-0" />
               Scan to pull up this asset&rsquo;s passport on a phone in the field.
             </p>
@@ -128,12 +128,12 @@ export default function AssetPassportPage() {
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(passport.identity ?? {}).map(([key, value]) => (
               <div key={key} className="bg-brand-bg border border-brand-border rounded p-2">
-                <p className="font-mono text-[9px] text-white/40 uppercase">{humanize(key)}</p>
+                <p className="font-mono text-[10px] text-white/62 uppercase">{humanize(key)}</p>
                 <p className="font-mono text-xs text-white/80 truncate">{String(value)}</p>
               </div>
             ))}
             {Object.keys(passport.identity ?? {}).length === 0 && (
-              <p className="text-xs font-mono text-white/30 italic col-span-2">No identity fields on file.</p>
+              <p className="text-xs font-mono text-white/55 italic col-span-2">No identity fields on file.</p>
             )}
           </div>
         </section>
@@ -143,12 +143,12 @@ export default function AssetPassportPage() {
             <Clock size={12} /> 30-Day Telemetry History
           </p>
           {passport.telemetry_history.length === 0 ? (
-            <p className="text-xs font-mono text-white/30 italic">No telemetry history recorded.</p>
+            <p className="text-xs font-mono text-white/55 italic">No telemetry history recorded.</p>
           ) : (
             <div className="max-h-56 overflow-y-auto space-y-1">
               {passport.telemetry_history.slice(0, 30).map((point, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px] font-mono border-b border-brand-border/50 py-1">
-                  <span className="text-white/40">{new Date(point.timestamp).toLocaleString()}</span>
+                  <span className="text-white/62">{new Date(point.timestamp).toLocaleString()}</span>
                   <span className="text-white/70 truncate max-w-[60%]">
                     {Object.entries(point.values).map(([k, v]) => `${k}: ${v}`).join(', ')}
                   </span>
@@ -164,23 +164,23 @@ export default function AssetPassportPage() {
           </p>
           <div className="space-y-2 mb-4">
             {passport.maintenance_log.length === 0 ? (
-              <p className="text-xs font-mono text-white/30 italic">No maintenance events logged.</p>
+              <p className="text-xs font-mono text-white/55 italic">No maintenance events logged.</p>
             ) : (
               passport.maintenance_log.map((entry) => (
                 <div key={entry.id} className="bg-brand-bg border border-brand-border rounded p-2.5">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-mono text-[10px] text-cyan uppercase">{entry.type}</span>
-                    <span className="font-mono text-[9px] text-white/30">{new Date(entry.logged_at).toLocaleString()}</span>
+                    <span className="font-mono text-[10px] text-white/55">{new Date(entry.logged_at).toLocaleString()}</span>
                   </div>
                   <p className="text-xs font-sans text-white/70">{entry.description}</p>
-                  {entry.logged_by && <p className="text-[10px] font-mono text-white/30 mt-1">by {entry.logged_by}</p>}
+                  {entry.logged_by && <p className="text-[10px] font-mono text-white/55 mt-1">by {entry.logged_by}</p>}
                 </div>
               ))
             )}
           </div>
 
           <div className="border-t border-brand-border pt-3 space-y-2">
-            <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Log Maintenance Event</p>
+            <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">Log Maintenance Event</p>
             <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-2">
               <select value={maintType} onChange={(e) => setMaintType(e.target.value)} className="bg-brand-bg border border-brand-border rounded px-2 py-2 text-xs text-white focus:outline-none focus:border-cyan/50">
                 <option>Preventive</option>
@@ -193,7 +193,7 @@ export default function AssetPassportPage() {
                 value={maintDesc}
                 onChange={(e) => setMaintDesc(e.target.value)}
                 placeholder="What was done…"
-                className="bg-brand-bg border border-brand-border rounded px-3 py-2 text-xs text-white placeholder:text-white/25 focus:outline-none focus:border-cyan/50"
+                className="bg-brand-bg border border-brand-border rounded px-3 py-2 text-xs text-white placeholder:text-white/50 focus:outline-none focus:border-cyan/50"
               />
             </div>
             <Button variant="primary" size="sm" icon={<Plus size={13} />} loading={submitting} disabled={!maintDesc.trim()} onClick={handleLogMaintenance}>

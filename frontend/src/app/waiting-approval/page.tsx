@@ -33,7 +33,7 @@ export default async function WaitingApprovalPage() {
           <h1 className="font-mono text-sm font-semibold tracking-widest text-white uppercase">
             Awaiting Access
           </h1>
-          <p className="text-white/50 text-sm mt-2 leading-relaxed">
+          <p className="text-white/70 text-sm mt-2 leading-relaxed">
             You&apos;re signed in — a Station Leader or HQ Operator needs to assign you a station and role before
             you can access HIMADRI. Refresh this page once you&apos;ve been notified.
           </p>
