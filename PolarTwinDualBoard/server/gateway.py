@@ -6,6 +6,7 @@ available physical sensor readings to the backend's digital-twin ingest API.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import os
@@ -187,6 +188,17 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def open_arduino() -> serial.Serial | None:
+    """Open the Uno port, or return None to run in Pi-only (robotic arm) mode."""
+    if ARDUINO_PORT.strip().lower() in {"", "none"}:
+        return None
+    try:
+        return serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25)
+    except (serial.SerialException, OSError) as error:
+        print(f"Arduino unavailable ({error}); running in Pi-only mode (servos, HC-SR04, IR)")
+        return None
+
+
 def main() -> None:
     ingest_urls = backend_ingest_urls(BACKEND_URL)
     gateway_id = "polar-twin-uno"
@@ -209,8 +221,8 @@ def main() -> None:
 
     session = requests.Session()
     try:
-      with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
-          print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
+      with (open_arduino() or contextlib.nullcontext()) as arduino:
+          print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT if arduino else 'Pi-only (no Uno)'} @ {ARDUINO_BAUD}")
           print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
           serial_lines = SerialLineBuffer()
           invalid_packets = 0
@@ -219,6 +231,7 @@ def main() -> None:
           next_backend_attempt = 0.0
           next_command_poll = 0.0
           last_command_warning = 0.0
+          next_pi_report = 0.0
           while True:
             now = time.monotonic()
             if now >= next_command_poll:
@@ -243,6 +256,8 @@ def main() -> None:
                             else:
                                 hardware.set_wrist_angle(int(angle_text))
                         else:
+                            if arduino is None:
+                                raise ValueError("Arduino not connected; cannot send " + command)
                             arduino.write((command + "\n").encode("ascii"))
                             arduino.flush()
                         if index:
@@ -254,10 +269,19 @@ def main() -> None:
                         print(f"Command polling unavailable: {error}")
                         last_command_warning = now
 
-            chunk = arduino.read(max(1, arduino.in_waiting))
-            if not chunk:
-                continue
-            for raw_line in serial_lines.feed(chunk):
+            if arduino is None:
+                # No Uno: report Pi-owned readings (servo angles, HC-SR04, IR) at ~1 Hz.
+                time.sleep(0.25)
+                if now < next_pi_report or hardware is None:
+                    continue
+                next_pi_report = now + 1.0
+                lines = [json.dumps({"device": "polar-twin-uno", "acceleration": {}, "system": {}})]
+            else:
+                chunk = arduino.read(max(1, arduino.in_waiting))
+                if not chunk:
+                    continue
+                lines = serial_lines.feed(chunk)
+            for raw_line in lines:
                 line = raw_line.strip()
                 if not line:
                     continue
