@@ -161,6 +161,25 @@ async def send_command(device_id: str, body: DeviceCommand) -> dict:
     return {"deviceId": device_id, "command": body.command, "value": body.value, "accepted": True}
 
 
+class ArmMove(BaseModel):
+    """Target angles in degrees (0-180). Omit a joint to leave it unchanged."""
+    arm: int | None = Field(default=None, ge=0, le=180)
+    wrist: int | None = Field(default=None, ge=0, le=180)
+
+
+@router.post(
+    "/v1/arm",
+    dependencies=[Depends(require_bearer)],
+    operation_id="move_robotic_arm",
+)
+async def move_arm(body: ArmMove) -> dict:
+    """Move the robotic arm (servo-01) and/or wrist (servo-02) in one call."""
+    angles = await digitaltwin_bridge.move_arm(body.arm, body.wrist)
+    if angles is None:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Provide arm and/or wrist angle 0-180")
+    return {"accepted": True, "arm": angles.get("servo-01"), "wrist": angles.get("servo-02")}
+
+
 @router.post(
     "/devices/{device_id}/command",
     dependencies=[Depends(require_bearer)],
