@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "station": "bharati",
+  "structuralOpacity": 0.015,
+  "floorOpacity": 0.06,
+  "nodes": [
+    { "id": "ENERGY_SOLAR_01", "label": "Solar Array", "card": true, "detail": "PV FIELD" },
+    { "id": "ENERGY_WIND_01", "label": "Wind Turbine", "card": true, "detail": "WIND GENERATION" },
+    { "id": "SYS_INVERTER_01", "label": "Microgrid Inverter" },
+    { "id": "SYS_MICROGRID_01", "label": "Microgrid", "card": true, "detail": "STATION BUS CONTROLLER" },
+    { "id": "SYS_BATTERY_01", "label": "Battery Bank" },
+    { "id": "POWER_CHARGER_01", "label": "Station Load", "card": true, "detail": "HAB DISTRIBUTION" },
+
+    { "id": "SYS_TEMP_SENSOR_01", "label": "Temp Sensor" },
+    { "id": "SYS_HVAC_CONTROLLER_01", "label": "HVAC Controller" },
+    { "id": "SYS_HVAC_01", "label": "HVAC" },
+
+    { "id": "SYS_GAS_SENSOR_01", "label": "Gas / Smoke Sensor" },
+    { "id": "SYS_SAFETY_01", "label": "Life Safety Panel" },
+    { "id": "SYS_ALARM_01", "label": "Alarm" },
+
+    { "id": "SYS_ARDUINO_01", "label": "Arduino" },
+    { "id": "SYS_RPI_01", "label": "Pi Gateway", "card": true, "detail": "COMMS RACK" },
+    { "id": "SYS_BACKEND_01", "label": "Backend" },
+    { "id": "SYS_DIGITAL_TWIN_01", "label": "Digital Twin", "card": true, "detail": "HIMADRI CONSOLE" },
+
+    { "id": "AWS_01", "label": "AWS" },
+    { "id": "AWS_LOGGER_01", "label": "AWS Logger" },
+    { "id": "MAG_FLUXGATE_01", "label": "Fluxgate Mag" },
+    { "id": "MAG_LOGGER_01", "label": "Mag Logger" },
+    { "id": "DGPS_SENSOR_01", "label": "DGPS" },
+    { "id": "DGPS_LOGGER_01", "label": "DGPS Logger" },
+    { "id": "GPS_RECEIVER_01", "label": "GPS Receiver" },
+    { "id": "GPS_LOGGER_01", "label": "GPS Logger" },
+    { "id": "GEC_SENSOR_01", "label": "GEC Sensor" },
+    { "id": "GEC_LOGGER_01", "label": "GEC Logger" },
+    { "id": "RAD_IERMON_01", "label": "IERMON" }
+  ],
+  "dependencies": [
+    { "source": "ENERGY_SOLAR_01", "target": "SYS_INVERTER_01", "type": "power", "label": "PV DC" },
+    { "source": "ENERGY_WIND_01", "target": "SYS_INVERTER_01", "type": "power", "label": "Wind AC" },
+    { "source": "SYS_INVERTER_01", "target": "SYS_MICROGRID_01", "type": "power", "label": "Conditioned AC" },
+    { "source": "SYS_MICROGRID_01", "target": "SYS_BATTERY_01", "type": "power", "label": "Charge / Discharge" },
+    { "source": "SYS_MICROGRID_01", "target": "POWER_CHARGER_01", "type": "power", "label": "Station Bus" },
+    { "source": "POWER_CHARGER_01", "target": "SYS_HVAC_01", "type": "power", "label": "HVAC Feed" },
+    { "source": "POWER_CHARGER_01", "target": "SYS_RPI_01", "type": "power", "label": "Comms Rack Feed" },
+    { "source": "POWER_CHARGER_01", "target": "SYS_SAFETY_01", "type": "power", "label": "Safety Panel Feed" },
+    { "source": "POWER_CHARGER_01", "target": "AWS_LOGGER_01", "type": "power", "label": "Field Cable" },
+    { "source": "POWER_CHARGER_01", "target": "MAG_LOGGER_01", "type": "power", "label": "Field Cable" },
+
+    { "source": "AWS_01", "target": "AWS_LOGGER_01", "type": "data", "label": "Met Signals" },
+    { "source": "AWS_LOGGER_01", "target": "SYS_ARDUINO_01", "type": "data", "label": "Serial Link" },
+    { "source": "SYS_ARDUINO_01", "target": "SYS_RPI_01", "type": "data", "label": "Serial Telemetry" },
+    { "source": "MAG_FLUXGATE_01", "target": "MAG_LOGGER_01", "type": "data", "label": "Field Data" },
+    { "source": "MAG_LOGGER_01", "target": "SYS_RPI_01", "type": "data", "label": "Station LAN" },
+    { "source": "DGPS_SENSOR_01", "target": "DGPS_LOGGER_01", "type": "data", "label": "GNSS Obs" },
+    { "source": "DGPS_LOGGER_01", "target": "SYS_RPI_01", "type": "data", "label": "Station LAN" },
+    { "source": "GPS_RECEIVER_01", "target": "GPS_LOGGER_01", "type": "data", "label": "GNSS Obs" },
+    { "source": "GPS_LOGGER_01", "target": "SYS_RPI_01", "type": "data", "label": "Station LAN" },
+    { "source": "GEC_SENSOR_01", "target": "GEC_LOGGER_01", "type": "data", "label": "Air-Earth Current" },
+    { "source": "GEC_LOGGER_01", "target": "SYS_RPI_01", "type": "data", "label": "Station LAN" },
+    { "source": "RAD_IERMON_01", "target": "SYS_RPI_01", "type": "data", "label": "Dose Rate" },
+    { "source": "SYS_MICROGRID_01", "target": "SYS_RPI_01", "type": "data", "label": "Bus Metrics" },
+    { "source": "SYS_RPI_01", "target": "SYS_BACKEND_01", "type": "data", "label": "HTTPS Ingest" },
+    { "source": "SYS_BACKEND_01", "target": "SYS_DIGITAL_TWIN_01", "type": "data", "label": "Realtime Stream" },
+
+    { "source": "SYS_TEMP_SENSOR_01", "target": "SYS_HVAC_CONTROLLER_01", "type": "control", "label": "Temperature Input" },
+    { "source": "SYS_HVAC_CONTROLLER_01", "target": "SYS_HVAC_01", "type": "control", "label": "HVAC Command" },
+
+    { "source": "SYS_GAS_SENSOR_01", "target": "SYS_SAFETY_01", "type": "safety", "label": "Hazard Signal" },
+    { "source": "SYS_SAFETY_01", "target": "SYS_ALARM_01", "type": "safety", "label": "Alarm Trigger" },
+    { "source": "SYS_SAFETY_01", "target": "SYS_MICROGRID_01", "type": "safety", "label": "Load Shed" },
+    { "source": "SYS_SAFETY_01", "target": "SYS_HVAC_CONTROLLER_01", "type": "safety", "label": "Vent Override" }
+  ]
+}

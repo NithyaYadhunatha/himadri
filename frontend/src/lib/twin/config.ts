@@ -6,6 +6,30 @@
 
 import type { AssetDef, HeatVariable, RoomDef } from './types'
 
+export interface MaitriNavigationRoom extends RoomDef {
+  wing: 'North' | 'South'
+  /** Existing monitored room hosted in this physical room, if any. */
+  monitoredRoomId?: string
+}
+
+/** Every physical room reached from Maitri's main corridor. */
+export const MAITRI_ROOMS: MaitriNavigationRoom[] = [
+  ...Array.from({ length: 8 }, (_, i) => ({
+    id: `maitri-north-${i + 1}`,
+    name: `North Room ${String(i + 1).padStart(2, '0')}`,
+    short: `N${String(i + 1).padStart(2, '0')}`,
+    wing: 'North' as const,
+    ...(i === 3 ? { monitoredRoomId: 'room-01' } : i === 4 ? { monitoredRoomId: 'room-02' } : {}),
+  })),
+  ...Array.from({ length: 8 }, (_, i) => ({
+    id: `maitri-south-${i + 1}`,
+    name: `South Room ${String(i + 1).padStart(2, '0')}`,
+    short: `S${String(i + 1).padStart(2, '0')}`,
+    wing: 'South' as const,
+    ...(i === 3 ? { monitoredRoomId: 'room-03' } : {}),
+  })),
+]
+
 export const ROOMS: RoomDef[] = [
   { id: 'room-01', name: 'Environmental Monitoring', short: 'Room 1' },
   { id: 'room-02', name: 'Safety & Occupancy', short: 'Room 2' },
@@ -32,6 +56,7 @@ export const ASSETS: AssetDef[] = [
 // the console hides them rather than present them as monitored hardware.
 export const ASSET_BY_ID: Record<string, AssetDef> = Object.fromEntries(ASSETS.map((a) => [a.id, a]))
 export const roomOf = (id: string) => ROOMS.find((r) => r.id === id)
+export const maitriRoomOf = (id: string) => MAITRI_ROOMS.find((r) => r.id === id)
 export const assetsInRoom = (roomId: string) => ASSETS.filter((a) => a.roomId === roomId)
 
 /** Controls offered per asset. Only what the existing command API accepts. */

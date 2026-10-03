@@ -10,7 +10,9 @@ same Mosquitto broker (backend.config.settings.MQTT_BROKER_HOST/PORT).
 Device catalog below mirrors the 14 devices built in the
 Unity project's Assets/Editor/DigitalTwinSceneBuilder.cs (the Data(...) calls
 in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01`,
-which is a Pi-owned physical actuator exposed through the API.
+which is a Pi-owned physical actuator exposed through the API, and `servo-02`,
+its software-only partner. Together they drive the two joints of Unity's
+Room 3 robotic arm (servo-01 = lower arm, servo-02 = upper arm).
 
 Nine devices have a real sensor/actuator on the PolarTwinDualBoard
 rig (see PolarTwin/himadri/PolarTwinDualBoard/docs/architecture.md). The rest
@@ -67,6 +69,9 @@ DEVICE_CATALOG: dict[str, dict[str, Any]] = {
     "sensor-ultrasonic-01": dict(name="HC-SR04 Distance Sensor", deviceType="distance", roomId="room-02", unit="cm", warning=120, critical=40, kind="numeric", inverse=True),
     "sensor-ir-01": dict(name="IR Presence Sensor", deviceType="ir", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
     "servo-01": dict(name="Position Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
+    # No physical channel yet: SET_ANGLE updates it directly (see publish_command), and a
+    # gateway may also report it through telemetry ingest like any other device.
+    "servo-02": dict(name="Arm Upper Servo", deviceType="servo", roomId="room-02", unit="deg", warning=181, critical=181, kind="numeric", inverse=False),
     # Keep the legacy Unity device ID so existing WebGL builds continue to
     # receive updates; the physical channel is the Uno D10 Hall-effect module.
     "sensor-door-01": dict(name="Hall Effect Sensor", deviceType="hall-effect", roomId="room-02", unit="state", warning=1, critical=1, kind="boolean", inverse=False),
@@ -121,6 +126,17 @@ _HARDWARE_GATEWAY_ID = "polar-twin-uno"
 _HARDWARE_COMMANDS: dict[str, tuple[str, str]] = {
     "buzzer-01": ("BUZZER:OFF", "BUZZER:ON"),
 }
+_SERVO_IDS = frozenset({"servo-01", "servo-02"})
+
+
+def _valid_servo_angle(value: Any) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(value)
+        and int(value) == value
+        and 0 <= int(value) <= 180
+    )
 
 
 def compute_numeric_status(value: float, warning: float, critical: float, inverse: bool) -> str:
@@ -159,7 +175,7 @@ async def _set_device(device_id: str, value: float, display_value: str = "", sta
     meta = DEVICE_CATALOG[device_id]
     if not display_value and device_id == "sensor-door-01":
         display_value = "MAGNET DETECTED" if value >= 0.5 else "FIELD CLEAR"
-    elif not display_value and device_id == "servo-01":
+    elif not display_value and device_id in _SERVO_IDS:
         display_value = f"{int(value)}°"
     if status is None:
         if meta["kind"] == "numeric":
@@ -336,25 +352,24 @@ async def publish_command(device_id: str, command: str, value: Any) -> bool:
             "value": enabled,
             "queuedAt": _now_ms(),
         })
-    elif device_id == "servo-01":
-        if (
-            command != "SET_ANGLE"
-            or isinstance(value, bool)
-            or not isinstance(value, (int, float))
-            or not math.isfinite(value)
-            or int(value) != value
-            or not 0 <= int(value) <= 180
-        ):
+    elif device_id in _SERVO_IDS:
+        if command != "SET_ANGLE" or not _valid_servo_angle(value):
             return False
         angle = int(value)
-        _hardware_commands[_HARDWARE_GATEWAY_ID].append({
-            "commandId": uuid.uuid4().hex,
-            "gatewayId": _HARDWARE_GATEWAY_ID,
-            "deviceId": device_id,
-            "wireCommand": f"SERVO:{angle}",
-            "value": angle,
-            "queuedAt": _now_ms(),
-        })
+        if device_id == "servo-01":
+            _hardware_commands[_HARDWARE_GATEWAY_ID].append({
+                "commandId": uuid.uuid4().hex,
+                "gatewayId": _HARDWARE_GATEWAY_ID,
+                "deviceId": device_id,
+                "wireCommand": f"SERVO:{angle}",
+                "value": angle,
+                "queuedAt": _now_ms(),
+            })
+        else:
+            # servo-02 has no hardware: the commanded angle is the state. servo-01 instead
+            # waits for the Pi to report the angle it actually reached.
+            for device in await _set_device(device_id, float(angle)):
+                await digital_twin_ws.broadcast(_device_update_message(device))
 
     if _publisher_client is not None:
         try:

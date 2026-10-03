@@ -2,7 +2,7 @@
 
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
-import { ASSET_BY_ID, assetsInRoom, ROOMS, roomOf } from '@/lib/twin/config'
+import { ASSET_BY_ID, assetsInRoom, MAITRI_ROOMS, maitriRoomOf, ROOMS, roomOf } from '@/lib/twin/config'
 import { digitalTwinBridge } from '@/lib/twin/bridge'
 import { STATION_LABELS, STATIONS } from '@/lib/constants'
 import { effectiveStatus, useTwin } from '@/lib/twin/store'
@@ -13,8 +13,9 @@ import { useNow } from './now'
 type Tab = 'station' | 'room' | 'asset' | 'power'
 
 export function TwinConfigurator() {
-  const [tab, setTab] = useState<Tab>('asset')
+  const [tab, setTab] = useState<Tab>('room')
   const [open, setOpen] = useState(true)
+  const [navigationRoomId, setNavigationRoomId] = useState(MAITRI_ROOMS[0].id)
   const station = useStationStore((s) => s.station)
   const canSwitch = useStationStore((s) => s.canSwitch)
   const setStation = useStationStore((s) => s.setStation)
@@ -36,6 +37,12 @@ export function TwinConfigurator() {
     digitalTwinBridge.focusRoom(id)
     if (asset && asset.roomId !== id) select(null)
   }
+  function pickNavigationRoom(id: string) {
+    setNavigationRoomId(id)
+    const room = maitriRoomOf(id)
+    if (room?.monitoredRoomId) pickRoom(room.monitoredRoomId)
+    digitalTwinBridge.focusRoom(id)
+  }
   function pickAsset(id: string) {
     select(id || null)
     if (id) digitalTwinBridge.focusAsset(id)
@@ -43,7 +50,7 @@ export function TwinConfigurator() {
 
   return (
     <div className="tw-panel">
-      <PanelHead title="PolarTwin configurator">
+      <PanelHead title="Maitri room configurator">
         <StatusPill s={mode === 'demo' ? 'normal' : LINK_META[link].tone} label={mode === 'demo' ? 'DEMO' : LINK_META[link].label} />
         <button className="tw-ib" style={{ width: 24, height: 24 }} aria-label={open ? 'Collapse configurator' : 'Expand configurator'} onClick={() => setOpen(!open)}>
           {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -68,20 +75,34 @@ export function TwinConfigurator() {
                 </Field>
               </>
             )}
-            {(tab === 'room' || tab === 'asset') && (
+            {tab === 'room' && (
               <Field label="Room">
-                <select className="tw-sel" value={roomId} onChange={(e) => pickRoom(e.target.value)}>
-                  {ROOMS.map((r) => <option key={r.id} value={r.id}>{r.short} — {r.name}</option>)}
+                <select className="tw-sel" value={navigationRoomId} onChange={(e) => pickNavigationRoom(e.target.value)}>
+                  <optgroup label="North side">
+                    {MAITRI_ROOMS.filter((r) => r.wing === 'North').map((r) => <option key={r.id} value={r.id}>{r.short} — {r.name}{r.monitoredRoomId ? ' · MONITORED' : ''}</option>)}
+                  </optgroup>
+                  <optgroup label="South side">
+                    {MAITRI_ROOMS.filter((r) => r.wing === 'South').map((r) => <option key={r.id} value={r.id}>{r.short} — {r.name}{r.monitoredRoomId ? ' · MONITORED' : ''}</option>)}
+                  </optgroup>
                 </select>
               </Field>
             )}
-            {tab === 'room' && roomAssets.map((a) => (
-              <button key={a.id} className="tw-card" style={{ marginBottom: 5, display: 'flex', gap: 8, alignItems: 'center' }} onClick={() => pickAsset(a.id)}>
-                <Dot s={effectiveStatus(latest[a.id], now)} /><span style={{ flex: 1 }}>{a.name}</span><span className="tw-sub">{a.role}</span>
-              </button>
-            ))}
+            {tab === 'room' && (
+              maitriRoomOf(navigationRoomId)?.monitoredRoomId ? (
+                assetsInRoom(maitriRoomOf(navigationRoomId)!.monitoredRoomId!).filter((a) => a.hardware).map((a) => (
+                  <button key={a.id} className="tw-card" style={{ marginBottom: 5, display: 'flex', gap: 8, alignItems: 'center' }} onClick={() => pickAsset(a.id)}>
+                    <Dot s={effectiveStatus(latest[a.id], now)} /><span style={{ flex: 1 }}>{a.name}</span><span className="tw-sub">{a.role}</span>
+                  </button>
+                ))
+              ) : <p className="tw-sub" style={{ margin: '4px 0 0' }}>Physical room marker only — no PolarTwin hardware is assigned here.</p>
+            )}
             {tab === 'asset' && (
               <>
+                <Field label="Monitored room">
+                  <select className="tw-sel" value={roomId} onChange={(e) => pickRoom(e.target.value)}>
+                    {ROOMS.map((r) => <option key={r.id} value={r.id}>{r.short} — {r.name}</option>)}
+                  </select>
+                </Field>
                 <Field label="Asset">
                   <select className="tw-sel" value={selectedId && asset?.roomId === roomId ? selectedId : ''} onChange={(e) => pickAsset(e.target.value)}>
                     <option value="">Select an asset…</option>

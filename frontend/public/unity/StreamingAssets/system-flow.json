@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "station": "maitri",
+  "structuralOpacity": 0.015,
+  "floorOpacity": 0.06,
+  "nodes": [
+    { "id": "MAIN_POWER_BUS", "label": "Main Power Bus", "position": [13.5, 5.0, 0.0], "card": true, "detail": "STATION SUPPLY" },
+    { "id": "UPS_BANK", "label": "UPS Bank", "position": [11.25, 4.6, 2.6] },
+    { "id": "DIST_BOARD", "label": "Hab Distribution", "position": [7.0, 5.1, 0.0] },
+    { "id": "PI_GATEWAY", "label": "Pi Gateway", "position": [0.0, 5.0, 0.0], "card": true, "detail": "MERGE + HTTPS POST" },
+    { "id": "ARDUINO_UNO", "label": "Arduino Uno", "position": [3.9, 4.5, -1.7] },
+    { "id": "BACKEND_API", "label": "Backend Ingest", "position": [-8.0, 5.1, 0.0] },
+    { "id": "DIGITAL_TWIN", "label": "Digital Twin", "position": [-13.5, 5.0, 0.0], "card": true, "detail": "HIMADRI CONSOLE" },
+
+    { "id": "sensor-dht-01", "label": "Temperature", "card": true },
+    { "id": "sensor-humidity-01", "label": "Humidity" },
+    { "id": "sensor-mq2-01", "label": "MQ-2 Gas" },
+    { "id": "buzzer-01", "label": "Alarm Buzzer" },
+    { "id": "status-led-01", "label": "Status LED" },
+
+    { "id": "sensor-ultrasonic-01", "label": "HC-SR04" },
+    { "id": "sensor-ir-01", "label": "IR Presence" },
+    { "id": "sensor-door-01", "label": "Hall Sensor" },
+    { "id": "occupancy-indicator-01", "label": "Occupancy" },
+
+    { "id": "sensor-vibration-01", "label": "Vibration" },
+    { "id": "motor-01", "label": "Drive Motor", "card": true },
+    { "id": "relay-01", "label": "Control Relay" },
+    { "id": "equipment-state-01", "label": "Equipment State" },
+    { "id": "failure-indicator-01", "label": "Failure Light" }
+  ],
+  "dependencies": [
+    { "source": "MAIN_POWER_BUS", "target": "DIST_BOARD", "type": "power", "label": "415 V AC" },
+    { "source": "UPS_BANK", "target": "DIST_BOARD", "type": "power", "label": "UPS Backup" },
+    { "source": "DIST_BOARD", "target": "PI_GATEWAY", "type": "power", "label": "5 V Supply" },
+    { "source": "DIST_BOARD", "target": "relay-01", "type": "power", "label": "Motor Feed" },
+    { "source": "relay-01", "target": "motor-01", "type": "power", "label": "Switched Supply" },
+    { "source": "PI_GATEWAY", "target": "ARDUINO_UNO", "type": "power", "label": "USB 5 V" },
+
+    { "source": "sensor-dht-01", "target": "ARDUINO_UNO", "type": "data", "label": "DHT11" },
+    { "source": "sensor-humidity-01", "target": "ARDUINO_UNO", "type": "data", "label": "DHT11" },
+    { "source": "sensor-mq2-01", "target": "ARDUINO_UNO", "type": "data", "label": "Analog A0" },
+    { "source": "sensor-door-01", "target": "ARDUINO_UNO", "type": "data", "label": "Hall D10" },
+    { "source": "ARDUINO_UNO", "target": "PI_GATEWAY", "type": "data", "label": "USB Serial JSON" },
+    { "source": "sensor-ultrasonic-01", "target": "PI_GATEWAY", "type": "data", "label": "GPIO Echo" },
+    { "source": "sensor-ir-01", "target": "PI_GATEWAY", "type": "data", "label": "GPIO" },
+    { "source": "sensor-vibration-01", "target": "PI_GATEWAY", "type": "data", "label": "Vibration" },
+    { "source": "motor-01", "target": "equipment-state-01", "type": "data", "label": "Run State" },
+    { "source": "PI_GATEWAY", "target": "BACKEND_API", "type": "data", "label": "HTTPS Ingest" },
+    { "source": "BACKEND_API", "target": "DIGITAL_TWIN", "type": "data", "label": "WebSocket" },
+
+    { "source": "ARDUINO_UNO", "target": "buzzer-01", "type": "control", "label": "Buzzer Command" },
+    { "source": "ARDUINO_UNO", "target": "status-led-01", "type": "control", "label": "Status LED" },
+    { "source": "sensor-ir-01", "target": "occupancy-indicator-01", "type": "control", "label": "Derived Occupancy" },
+    { "source": "PI_GATEWAY", "target": "relay-01", "type": "control", "label": "Relay Coil" },
+
+    { "source": "sensor-mq2-01", "target": "buzzer-01", "type": "safety", "label": "Gas Alarm" },
+    { "source": "sensor-vibration-01", "target": "failure-indicator-01", "type": "safety", "label": "Fault Trip" }
+  ]
+}

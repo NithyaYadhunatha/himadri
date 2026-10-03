@@ -1,0 +1,317 @@
+{
+  "version": 1,
+  "station": "bharati",
+  "disclaimer": "Instrument list from NPDC material on scientific instruments at Bharati/Maitri. Positions are digital-twin demonstration zones, not surveyed instrument locations.",
+  "labels": { "markerDistance": 80, "nameDistance": 24, "fullDistance": 8 },
+  "zones": [
+    { "id": "geomagnetic", "name": "Geomagnetic Area", "color": "#A78BFA", "glyph": "M", "bounds": [-58.0, -45.2, -34.5, -36.5] },
+    { "id": "geodesy", "name": "Geodesy / GPS Area", "color": "#2DD4BF", "glyph": "G", "bounds": [-33.5, -45.2, -21.5, -37.0] },
+    { "id": "atmospheric", "name": "Atmospheric Electricity Area", "color": "#FB923C", "glyph": "A", "bounds": [-11.0, -45.2, -2.0, -37.0] },
+    { "id": "weather", "name": "Weather Observation Area", "color": "#38BDF8", "glyph": "W", "bounds": [2.5, -45.2, 15.0, -36.0] },
+    { "id": "energy", "name": "Energy Area", "color": "#84CC16", "glyph": "E", "bounds": [10.8, -27.5, 20.5, -1.5] },
+    { "id": "radiation", "name": "Radiation Monitoring Area", "color": "#FACC15", "glyph": "R", "bounds": [-34.0, 4.5, -21.5, 12.5] },
+    { "id": "systems", "name": "Station Systems", "color": "#94A3B8", "glyph": "S", "bounds": [-15.0, -21.0, -4.5, -0.4], "stakes": false }
+  ],
+  "equipment": [
+    {
+      "id": "NON_MAG_HUT_01", "name": "IIG Non-Magnetic Hut", "shortName": "NMH-01", "category": "Geomagnetic Research", "zone": "geomagnetic",
+      "description": "Small isolated hut built without ferrous material so it does not disturb the field being measured.",
+      "purpose": "Absolute geomagnetic field measurements.",
+      "model": "non_magnetic_hut", "position": [-54.5, 0, -40.8], "rotation": [0, 90, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-50.0, 0, -40.8] },
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "MAG_FLUXGATE_01", "name": "3-Axis Fluxgate Magnetometer", "shortName": "MAG-FG-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Vector magnetometer recording the X, Y and Z components of the geomagnetic field.",
+      "purpose": "Continuous recording of geomagnetic field variations.",
+      "model": "fluxgate_magnetometer", "position": [-47.5, 0, -42.0], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-47.5, 0, -39.2] },
+      "telemetry": { "sources": [], "fields": ["fieldX", "fieldY", "fieldZ", "fieldTotal", "deviceStatus"] }
+    },
+    {
+      "id": "MAG_LOGGER_01", "name": "Fluxgate Magnetometer Data Logger", "shortName": "MAG-LOG-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Data acquisition unit that digitises and stores the fluxgate magnetometer output.",
+      "purpose": "Logging of fluxgate magnetometer data.",
+      "model": "data_logger", "position": [-51.0, 0, -37.8], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["MAG_FLUXGATE_01"],
+      "telemetry": { "sources": [], "fields": ["loggerState", "sampleInterval", "connection", "storageFree"] }
+    },
+    {
+      "id": "MAG_PROTON_01", "name": "Proton Precession Magnetometer", "shortName": "MAG-PPM-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Scalar magnetometer measuring total field strength from the precession frequency of protons.",
+      "purpose": "Total (scalar) geomagnetic field measurement.",
+      "model": "proton_magnetometer", "position": [-43.8, 0, -39.0], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-44.6, 0, -37.0] }, "cables": ["MAG_PROTON_HOUSING_01"],
+      "telemetry": { "sources": [], "fields": ["fieldTotal", "measurementStatus", "acquisitionState", "signalQuality"] }
+    },
+    {
+      "id": "MAG_PROTON_SENSOR_01", "name": "Proton Precession Magnetometer Sensor", "shortName": "MAG-PPS-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Sensor bottle holding a proton-rich fluid and pick-up coil, mounted on a non-magnetic staff.",
+      "purpose": "Sensing element of the proton precession magnetometer.",
+      "model": "proton_sensor", "position": [-43.0, 0, -43.0], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false,
+      "telemetry": { "sources": [], "fields": ["signalQuality", "deviceStatus"] }
+    },
+    {
+      "id": "MAG_PROTON_HOUSING_01", "name": "Proton Precession Magnetometer Sensor Housing", "shortName": "MAG-PPH-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Weatherproof, non-magnetic outdoor enclosure for the proton magnetometer sensor electronics.",
+      "purpose": "Protects the sensor installation from wind, snow and temperature extremes.",
+      "model": "proton_housing", "position": [-41.4, 0, -42.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["MAG_PROTON_SENSOR_01"],
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "MAG_INDUCTION_01", "name": "Induction Coil Magnetometer", "shortName": "MAG-IC-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Pair of orthogonal search coils measuring fast magnetic field fluctuations (pulsations).",
+      "purpose": "High-frequency geomagnetic variation measurement.",
+      "model": "induction_coil", "position": [-38.0, 0, -42.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-38.6, 0, -39.6] },
+      "telemetry": { "sources": [], "fields": ["variationX", "variationY", "frequencyHz", "signalQuality"] }
+    },
+    {
+      "id": "MAG_INDUCTION_LOGGER_01", "name": "Induction Coil Magnetometer Data Logger", "shortName": "MAG-ICL-01", "category": "Geomagnetic Monitoring", "zone": "geomagnetic",
+      "description": "Data acquisition unit for the induction coil magnetometer channels.",
+      "purpose": "Logging of induction coil magnetometer data.",
+      "model": "data_logger", "variant": "solar", "position": [-35.8, 0, -38.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["MAG_INDUCTION_01"],
+      "telemetry": { "sources": [], "fields": ["loggerState", "sampleInterval", "connection", "storageFree"] }
+    },
+    {
+      "id": "DGPS_SENSOR_01", "name": "Differential GPS Sensor", "shortName": "DGPS-01", "category": "Geodesy / GPS", "zone": "geodesy",
+      "description": "Geodetic GNSS antenna on a concrete survey monument.",
+      "purpose": "Precise differential positioning.",
+      "model": "dgps_antenna", "position": [-30.5, 0, -42.3], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-30.5, 0, -39.4] },
+      "telemetry": { "sources": ["station-reference"], "fields": ["latitude", "longitude", "altitudeM", "satellites", "fixType", "signalQuality"] }
+    },
+    {
+      "id": "DGPS_LOGGER_01", "name": "Differential GPS Data Logger", "shortName": "DGPS-LOG-01", "category": "Geodesy / GPS", "zone": "geodesy",
+      "description": "Receiver and logger recording raw observations from the DGPS antenna.",
+      "purpose": "Logging of DGPS observations.",
+      "model": "data_logger", "position": [-32.2, 0, -38.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["DGPS_SENSOR_01"],
+      "telemetry": { "sources": [], "fields": ["loggerState", "connection", "storageFree", "lastTransmission"] }
+    },
+    {
+      "id": "GPS_RECEIVER_01", "name": "GPS Receiver", "shortName": "GPS-01", "category": "Geodesy / GPS", "zone": "geodesy",
+      "description": "Mast-mounted GNSS antenna with receiver unit.",
+      "purpose": "Position and timing reference.",
+      "model": "gps_receiver", "position": [-26.5, 0, -42.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-26.0, 0, -39.6] },
+      "telemetry": { "sources": ["station-reference"], "fields": ["latitude", "longitude", "altitudeM", "satellites", "signalQuality", "fixType", "lastSync"] }
+    },
+    {
+      "id": "GPS_LOGGER_01", "name": "GPS Receiver and Data Logger", "shortName": "GPS-LOG-01", "category": "Geodesy / GPS", "zone": "geodesy",
+      "description": "Combined GPS receiver and data logger enclosure.",
+      "purpose": "Recording of GPS position and timing data.",
+      "model": "data_logger", "position": [-28.2, 0, -38.6], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["GPS_RECEIVER_01"],
+      "telemetry": { "sources": ["station-reference"], "fields": ["latitude", "longitude", "satellites", "fixType", "loggerState", "lastSync"] }
+    },
+    {
+      "id": "GPS_ICM_01", "name": "GPS Receiver for ICM", "shortName": "GPS-ICM-01", "category": "Geodesy / GPS", "zone": "geodesy",
+      "description": "GPS receiver used with the ICM system.",
+      "purpose": "Position and time reference for the ICM installation.",
+      "model": "gps_receiver", "variant": "icm", "position": [-23.4, 0, -41.0], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-23.4, 0, -38.4] },
+      "telemetry": { "sources": ["station-reference"], "fields": ["latitude", "longitude", "altitudeM", "satellites", "signalQuality", "fixType", "lastSync"] }
+    },
+    {
+      "id": "GEC_SENSOR_01", "name": "Global Electric Circuit Sensor", "shortName": "GEC-01", "category": "Atmospheric Electricity", "zone": "atmospheric",
+      "description": "Mast-mounted field mill measuring the atmospheric (fair-weather) electric field.",
+      "purpose": "Global electric circuit studies.",
+      "model": "gec_sensor", "position": [-7.5, 0, -42.2], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-7.0, 0, -39.2] },
+      "telemetry": { "sources": [], "fields": ["electricField", "voltageV", "measurementStatus", "signalQuality"] }
+    },
+    {
+      "id": "GEC_LOGGER_01", "name": "Global Electric Circuit Data Logger", "shortName": "GEC-LOG-01", "category": "Atmospheric Electricity", "zone": "atmospheric",
+      "description": "Data logger recording the global electric circuit sensor output.",
+      "purpose": "Logging of atmospheric electric field data.",
+      "model": "data_logger", "variant": "solar", "position": [-4.2, 0, -38.8], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["GEC_SENSOR_01"],
+      "telemetry": { "sources": [], "fields": ["loggerState", "electricField", "connection", "storageFree", "lastReading"] }
+    },
+    {
+      "id": "AWS_01", "name": "Automatic Weather Station", "shortName": "AWS-01", "category": "Weather Monitoring", "zone": "weather",
+      "description": "Mast with wind speed and direction sensors, temperature/humidity sensor in a radiation shield, pressure sensor and weatherproof electronics enclosure.",
+      "purpose": "Unattended surface meteorological observations.",
+      "model": "aws_mast", "position": [8.5, 0, -41.5], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [8.0, 0, -37.8] },
+      "telemetry": { "sources": ["regional-weather"], "fields": ["temperatureC", "humidityPct", "pressureHpa", "windSpeedKmh", "windDirectionDeg", "windGustKmh", "conditions"] }
+    },
+    {
+      "id": "AWS_LOGGER_01", "name": "Automatic Weather Station Data Logger", "shortName": "AWS-LOG-01", "category": "Weather Monitoring", "zone": "weather",
+      "description": "Logger collecting and transmitting the AWS sensor readings.",
+      "purpose": "Data logging and transmission for the AWS.",
+      "model": "data_logger", "variant": "solar", "position": [5.0, 0, -38.2], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+      "navigable": false, "minimap": false, "cables": ["AWS_01"],
+      "telemetry": { "sources": [], "fields": ["loggerState", "connection", "sampleInterval", "lastTransmission", "supplyVoltageV"] }
+    },
+    {
+      "id": "RAD_IERMON_01", "name": "Indian Environmental Radiation Monitoring System", "shortName": "IERMON-01", "category": "Radiation Monitoring", "zone": "radiation",
+      "description": "Solar-powered pole-mounted unit with a gamma detector, electronics and telemetry antenna.",
+      "purpose": "Continuous ambient gamma dose-rate monitoring.",
+      "model": "iermon", "position": [-31.0, 0, 9.5], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [-31.0, 0, 6.3] },
+      "telemetry": { "sources": [], "fields": ["gammaDoseRate", "detectorStatus", "measurementStatus", "alarmState"] }
+    },
+    {
+      "id": "RAD_SHELTER_01", "name": "Radiation Instrument Shelter", "shortName": "RAD-SHELTER", "category": "Radiation Monitoring", "zone": "radiation",
+      "kind": "prop", "model": "radiation_shelter", "position": [-26.0, 0, 9.6], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "collider": "box", "colliderCenter": [0, 0.45, 0], "colliderSize": [2.6, 0.9, 0.9],
+      "interactive": false, "navigable": false, "minimap": false
+    },
+    {
+      "id": "RAD_MGP_01", "name": "MGP Radiation Survey Meter", "shortName": "RAD-MGP-01", "category": "Radiation Monitoring", "zone": "radiation",
+      "description": "Portable dose-rate survey meter with external probe.",
+      "purpose": "Radiation dose-rate surveys.",
+      "model": "survey_meter", "position": [-26.8, 0.92, 9.6], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "groundSnap": false, "collider": "none",
+      "teleport": { "position": [-26.4, 0, 7.2] },
+      "telemetry": { "sources": [], "fields": ["doseRate", "detectorStatus", "alarmState"] }
+    },
+    {
+      "id": "RAD_GAMMA_01", "name": "Rad Eye G Gamma Survey Meter", "shortName": "RAD-GAM-01", "category": "Radiation Monitoring", "zone": "radiation",
+      "description": "Pocket-size gamma survey meter in its charging cradle.",
+      "purpose": "Gamma dose-rate measurement.",
+      "model": "gamma_survey_meter", "position": [-26.0, 0.92, 9.6], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "groundSnap": false, "collider": "none",
+      "teleport": { "position": [-26.0, 0, 7.2] },
+      "telemetry": { "sources": [], "fields": ["gammaDoseRate", "detectorStatus", "alarmState"] }
+    },
+    {
+      "id": "RAD_REM_01", "name": "REM Counter", "shortName": "RAD-REM-01", "category": "Radiation Monitoring", "zone": "radiation",
+      "description": "Neutron dose-equivalent meter with polyethylene moderator.",
+      "purpose": "Neutron dose-equivalent rate measurement.",
+      "model": "rem_counter", "position": [-25.2, 0.92, 9.6], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "groundSnap": false, "collider": "none",
+      "teleport": { "position": [-25.6, 0, 7.2] },
+      "telemetry": { "sources": [], "fields": ["neutronDoseRate", "detectorStatus", "measurementStatus", "alarmState"] }
+    },
+    {
+      "id": "ENERGY_SOLAR_01", "name": "Solar Power Supply", "shortName": "SOLAR-01", "category": "Renewable Energy", "zone": "energy",
+      "description": "Photovoltaic array on a ballasted galvanised rack, tilted steeply for the high-latitude sun.",
+      "purpose": "Power for remote instruments.",
+      "model": "solar_array", "position": [15.5, 0, -22.5], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "teleport": { "position": [15.5, 0, -26.4] },
+      "telemetry": { "sources": [], "fields": ["operationalStatus", "generatedPowerW", "batteryPct"] }
+    },
+    {
+      "id": "ENERGY_WIND_01", "name": "Wind Mill", "shortName": "WIND-01", "category": "Renewable Energy", "zone": "energy",
+      "description": "Small guyed wind turbine charging the instrument battery bank.",
+      "purpose": "Wind power for remote instruments.",
+      "model": "wind_turbine", "position": [16.5, 0, -6.5], "rotation": [0, 180, 0], "scale": [1, 1, 1],
+      "collider": "box", "colliderCenter": [0, 1.6, 0], "colliderSize": [1.3, 3.2, 1.3],
+      "teleport": { "position": [12.6, 0, -10.0] },
+      "telemetry": { "sources": ["regional-weather"], "fields": ["windSpeedKmh", "windDirectionDeg", "generatedPowerW", "operationalStatus"] }
+    },
+    {
+      "id": "POWER_CHARGER_01", "name": "12V–24V Charger Unit", "shortName": "CHG-01", "category": "Power Conditioning", "zone": "systems",
+      "description": "Electrical-room cabinet with charge control and 12 V / 24 V DC conditioning for the instrument batteries.",
+      "purpose": "Charging and DC supply for remote instruments.",
+      "model": "charger_unit", "position": [-13.5, 5.52, -15.5], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "teleport": { "position": [-13.5, 5.52, -18.2] }, "cables": ["ENERGY_SOLAR_01", "ENERGY_WIND_01"],
+      "telemetry": { "sources": [], "fields": ["inputVoltageV", "outputVoltageV", "chargingStatus", "deviceStatus"] }
+    },
+    {
+      "id": "SYS_INVERTER_01", "name": "Solar Inverter", "shortName": "INV-01", "category": "Power", "zone": "systems",
+      "description": "DC to AC conversion stage for the Bharati station power chain.", "purpose": "Power conversion and conditioning.",
+      "model": "inverter", "position": [-13.5, 5.52, -16.4], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "teleport": { "position": [-13.5, 5.52, -18.2] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_MICROGRID_01", "name": "Station Microgrid Controller", "shortName": "GRID-01", "category": "Power", "zone": "systems",
+      "description": "Supervisory switchgear coordinating generation, storage and station loads.", "purpose": "Power distribution control.",
+      "model": "microgrid", "position": [-13.5, 5.52, -10.0], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "teleport": { "position": [-13.5, 5.52, -11.5] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_BATTERY_01", "name": "Battery Bank", "shortName": "BAT-01", "category": "Power", "zone": "systems",
+      "description": "Station electrical energy storage bank.", "purpose": "Store energy for station equipment.",
+      "model": "battery_bank", "position": [-13.5, 5.52, -16.9], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "teleport": { "position": [-13.5, 5.52, -18.2] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_ARDUINO_01", "name": "Arduino Sensor Controller", "shortName": "ARD-01", "category": "Data", "zone": "systems",
+      "description": "Local microcontroller collecting connected station sensor signals.", "purpose": "Sensor acquisition.",
+      "model": "arduino", "position": [-8.9, 7.02, -1.5], "rotation": [0, 180, 0], "scale": [1, 1, 1], "groundSnap": false,
+      "teleport": { "position": [-8.6, 5.52, -3.0] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_RPI_01", "name": "Raspberry Pi Gateway", "shortName": "RPI-01", "category": "Data", "zone": "systems",
+      "description": "Station gateway forwarding sensor telemetry to the backend.", "purpose": "Edge aggregation and transport.",
+      "model": "raspberry_pi", "position": [-8.2, 7.02, -1.5], "rotation": [0, 180, 0], "scale": [1, 1, 1], "groundSnap": false,
+      "teleport": { "position": [-8.6, 5.52, -3.0] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_BACKEND_01", "name": "Backend Services", "shortName": "API-01", "category": "Data", "zone": "systems",
+      "description": "Backend ingest and realtime services represented by the station server rack.", "purpose": "Telemetry ingest and distribution.",
+      "model": "server_rack", "position": [-6.65, 5.52, -2.7], "rotation": [0, 180, 0], "scale": [0.7, 0.7, 0.7], "groundSnap": false,
+      "teleport": { "position": [-6.1, 5.52, -3.6] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_DIGITAL_TWIN_01", "name": "3D Digital Twin Console", "shortName": "TWIN-01", "category": "Data", "zone": "systems",
+      "description": "Operator console rendering the live station digital twin.", "purpose": "Operational visualisation.",
+      "model": "digital_twin_console", "position": [-5.55, 5.52, -2.7], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "teleport": { "position": [-6.1, 5.52, -3.6] },
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_TEMP_SENSOR_01", "name": "Temperature Sensor", "shortName": "TEMP-01", "category": "Control", "zone": "systems",
+      "description": "Room temperature input for the air-conditioning control loop.", "purpose": "Environmental sensing.",
+      "model": "temperature_sensor", "position": [-13.2, 8.96, -12.8], "rotation": [0, 180, 0], "scale": [1, 1, 1], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_HVAC_CONTROLLER_01", "name": "HVAC Controller", "shortName": "HVAC-CTL", "category": "Control", "zone": "systems",
+      "description": "Controller translating environmental inputs into HVAC commands.", "purpose": "Climate control.",
+      "model": "controller", "position": [-12.25, 8.96, -12.8], "rotation": [0, 180, 0], "scale": [0.9, 0.9, 0.9], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_HVAC_01", "name": "HVAC Air Handler", "shortName": "AHU-01", "category": "Control", "zone": "systems",
+      "description": "Station air handling and thermal conditioning equipment.", "purpose": "Heating and ventilation.",
+      "model": "hvac", "position": [-11.0, 8.96, -12.8], "rotation": [0, 180, 0], "scale": [0.9, 0.9, 0.9], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_GAS_SENSOR_01", "name": "Gas and Smoke Sensor", "shortName": "GAS-01", "category": "Safety", "zone": "systems",
+      "description": "Local gas and smoke detection head.", "purpose": "Hazard detection.",
+      "model": "gas_sensor", "position": [-40.75, 5.52, -19.15], "rotation": [0, 180, 0], "scale": [1, 1, 1], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_SAFETY_01", "name": "Safety System Controller", "shortName": "SAFE-01", "category": "Safety", "zone": "systems",
+      "description": "Safety logic panel receiving hazard detector signals.", "purpose": "Alarm decision and interlock control.",
+      "model": "controller", "position": [-40.05, 5.52, -19.15], "rotation": [0, 180, 0], "scale": [0.8, 0.8, 0.8], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    },
+    {
+      "id": "SYS_ALARM_01", "name": "Station Alarm", "shortName": "ALARM-01", "category": "Safety", "zone": "systems",
+      "description": "Audible and visual station safety alarm.", "purpose": "Warn station occupants.",
+      "model": "alarm", "position": [-40.4, 6.75, -19.15], "rotation": [0, 180, 0], "scale": [1, 1, 1], "groundSnap": false,
+      "interactive": true, "navigable": true, "minimap": true,
+      "telemetry": { "sources": [], "fields": [] }
+    }
+  ]
+}
