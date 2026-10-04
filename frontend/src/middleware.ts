@@ -27,7 +27,8 @@ export default function middleware(req: Parameters<typeof withClerk>[0], event: 
 
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|wasm|data|gz|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // /unity/ is the static Unity WebGL export (incl. StreamingAssets/*.json the player fetches).
+    '/((?!_next|unity/|[^?]*\\.(?:html?|css|js(?!on)|wasm|data|gz|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     '/(api|trpc)(.*)',
     '/__clerk/:path*',
   ],

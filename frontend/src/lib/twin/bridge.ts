@@ -21,6 +21,17 @@ export type BridgeCommand =
   | { type: 'resetCamera' }
   | { type: 'toggleLayer'; layer: string; on: boolean }
   | { type: 'releasePointer' }
+  // Scientific equipment (Bharati build). See lib/twin/equipment.
+  | { type: 'hostReady' }
+  | { type: 'selectEquipment'; equipmentId: string }
+  | { type: 'clearEquipmentSelection' }
+  | { type: 'locateEquipment'; equipmentId: string }
+  | { type: 'teleportToEquipment'; equipmentId: string }
+  | { type: 'setEquipmentState'; equipmentId: string; state: EquipmentHealth }
+  | { type: 'setEquipmentTelemetry'; equipmentId: string; key: string; value: number }
+  | { type: 'setSystemFlow'; enabled: boolean }
+  | { type: 'setSystemFlowFilter'; filter: SystemFlowFilter }
+  | { type: 'setSystemFlowFocus'; componentId: string | null }
 
 export type BridgeEvent =
   | { type: 'assetSelected'; assetId: string }
@@ -29,6 +40,12 @@ export type BridgeEvent =
   | { type: 'assetStatusChanged'; assetId: string; state: Health }
   | { type: 'capabilities'; list: string[] }
   | { type: 'key'; key: string }
+  | { type: 'equipmentSelected'; equipmentId: string }
+  | { type: 'equipmentCleared' }
+
+/** Equipment status shown in 3D (glow, LEDs). 'unknown' = no data about the device. */
+export type EquipmentHealth = Health | 'unknown'
+export type SystemFlowFilter = 'all' | 'power' | 'data' | 'control' | 'safety'
 
 type Listener = (e: BridgeEvent) => void
 
@@ -38,6 +55,7 @@ class DigitalTwinBridge {
   private origin = ''
   private lastRoomState = new Map<string, Health>()
   private lastHighlight = new Map<string, string>()
+  private lastEquipment = new Map<string, string>()
   capabilities: string[] = []
   sceneLoaded = false
 
@@ -47,6 +65,7 @@ class DigitalTwinBridge {
     this.sceneLoaded = false
     this.lastRoomState.clear()
     this.lastHighlight.clear()
+    this.lastEquipment.clear()
     if (frame && typeof window !== 'undefined') this.origin = window.location.origin
   }
 
@@ -84,6 +103,26 @@ class DigitalTwinBridge {
     this.send({ type: 'setHeatmapMode', on, variable, opacity })
   }
   setHeatmapValues(values: Record<string, number>) { this.send({ type: 'setHeatmapValue', values }) }
+
+  // Scientific equipment (de-duplicated like the setters below: only changes cross the iframe).
+  locateEquipment(equipmentId: string) { this.send({ type: 'locateEquipment', equipmentId }) }
+  teleportToEquipment(equipmentId: string) { this.send({ type: 'teleportToEquipment', equipmentId }) }
+  clearEquipmentSelection() { this.send({ type: 'clearEquipmentSelection' }) }
+  setEquipmentState(equipmentId: string, state: EquipmentHealth) {
+    const k = `${equipmentId}|state`
+    if (this.lastEquipment.get(k) === state) return
+    this.lastEquipment.set(k, state)
+    this.send({ type: 'setEquipmentState', equipmentId, state })
+  }
+  setEquipmentTelemetry(equipmentId: string, key: string, value: number) {
+    const k = `${equipmentId}|${key}`
+    if (this.lastEquipment.get(k) === String(value)) return
+    this.lastEquipment.set(k, String(value))
+    this.send({ type: 'setEquipmentTelemetry', equipmentId, key, value })
+  }
+  setSystemFlow(enabled: boolean) { this.send({ type: 'setSystemFlow', enabled }) }
+  setSystemFlowFilter(filter: SystemFlowFilter) { this.send({ type: 'setSystemFlowFilter', filter }) }
+  setSystemFlowFocus(componentId: string | null) { this.send({ type: 'setSystemFlowFocus', componentId }) }
 
   // The two setters below are de-duplicated: telemetry arrives every ~2 s and
   // we only want to cross the iframe boundary when something actually changed.

@@ -2,8 +2,8 @@
    inverts text-white/bg tokens, so this file uses explicit values only. */
 .tw-root {
   --tw-bg: #070B12; --tw-bg2: #0D111A; --tw-bg3: #111827;
-  --tw-panel: rgba(15, 23, 42, 0.88); --tw-panel2: rgba(17, 24, 39, 0.90);
-  --tw-line: rgba(255, 255, 255, 0.08); --tw-line2: rgba(255, 255, 255, 0.14);
+  --tw-panel: rgba(29, 28, 92, 0.90); --tw-panel2: rgba(19, 15, 63, 0.92);
+  --tw-line: rgba(196, 181, 253, 0.12); --tw-line2: rgba(196, 181, 253, 0.22);
   --tw-text: #E5E7EB; --tw-mute: #94A3B8; --tw-dim: #64748B;
   --tw-accent: #84CC16; --tw-ok: #22C55E; --tw-warn: #F59E0B; --tw-crit: #EF4444;
   --tw-info: #38BDF8; --tw-purple: #8B5CF6; --tw-off: #6B7280;
@@ -23,13 +23,29 @@
 .tw-viewport { position: absolute; top: var(--topbar-h); left: var(--rail-w); right: 0; bottom: 0; z-index: 0; }
 .tw-viewport iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-.tw-panel { background: var(--tw-panel); border: 1px solid var(--tw-line); border-radius: 14px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 30px -10px rgba(0,0,0,.6); animation: tw-in .2s ease-out; }
+.tw-panel { background: linear-gradient(145deg, rgba(42, 38, 111, .92), rgba(17, 13, 58, .94)); border: 1px solid var(--tw-line); border-radius: 14px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 30px -10px rgba(17, 9, 73, .68); animation: tw-in .2s ease-out; }
+.tw-right > .tw-panel,
+.tw-rail {
+  background: linear-gradient(145deg, rgba(29, 28, 92, .94), rgba(13, 10, 47, .94));
+  border-color: rgba(160, 79, 184, .42);
+  box-shadow: 0 12px 34px -12px rgba(13, 5, 73, .72), inset 0 1px 0 rgba(221, 214, 254, .08);
+}
+.tw-right > .tw-panel .tw-ph { border-bottom-color: rgba(160, 79, 184, .24); }
+.tw-right > .tw-panel .tw-ph h2 { color: #C4B5FD; }
+.tw-right .tw-btn.pri,
+.tw-right .tw-btn.on {
+  background: rgba(160, 79, 184, .24);
+  border-color: rgba(192, 132, 252, .58);
+  color: #E9D5FF;
+}
+.tw-right .tw-btn.pri:hover:not(:disabled),
+.tw-right .tw-btn.on:hover:not(:disabled) { background: rgba(160, 79, 184, .36); }
 .tw-ph { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--tw-line); }
 .tw-ph h2 { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--tw-mute); flex: 1; }
 .tw-body { padding: 10px 12px; overflow: auto; }
 .tw-scroll { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
 
-.tw-top { position: absolute; top: 0; left: 0; right: 0; height: var(--topbar-h); display: flex; align-items: center; gap: 10px; padding: 0 var(--hud-gap); background: rgba(7,11,18,.94); border-bottom: 1px solid var(--tw-line); z-index: var(--z-top); min-width: 0; }
+.tw-top { position: absolute; top: 0; left: 0; right: 0; height: var(--topbar-h); display: flex; align-items: center; gap: 10px; padding: 0 var(--hud-gap); background: linear-gradient(90deg, rgba(20, 16, 66, .97), rgba(40, 35, 103, .95)); border-bottom: 1px solid rgba(196,181,253,.24); z-index: var(--z-top); min-width: 0; }
 .tw-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .14em; font-size: 11px; white-space: nowrap; }
 .tw-top .tw-banner { padding: 3px 10px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tw-top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
@@ -42,7 +58,7 @@ kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border-radius: 5
 .tw-rail .lbl { font-size: 7px; letter-spacing: .12em; color: var(--tw-dim); margin: 2px 0; }
 .tw-ib { position: relative; width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; background: transparent; color: var(--tw-mute); display: grid; place-items: center; transition: background .15s, color .15s; }
 .tw-ib:hover { background: rgba(255,255,255,.07); color: #fff; }
-.tw-ib[aria-pressed="true"] { background: rgba(132,204,22,.14); color: var(--tw-accent); border-color: rgba(132,204,22,.35); }
+.tw-ib[aria-pressed="true"] { background: rgba(160,79,184,.22); color: #E9D5FF; border-color: rgba(192,132,252,.5); }
 .tw-ib .tip { position: absolute; left: 40px; white-space: nowrap; background: #020617; border: 1px solid var(--tw-line2); padding: 3px 8px; border-radius: 6px; font-size: 10px; color: var(--tw-text); opacity: 0; pointer-events: none; transform: translateX(-4px); transition: opacity .12s, transform .12s; z-index: var(--z-dropdown); }
 .tw-ib:hover .tip, .tw-ib:focus-visible .tip { opacity: 1; transform: none; }
 .tw-ib .badge { position: absolute; top: -3px; right: -3px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--tw-crit); color: #fff; font-size: 8px; font-weight: 700; display: grid; place-items: center; }
@@ -52,7 +68,20 @@ kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border-radius: 5
 .tw-right .grow { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .tw-right .grow > .tw-body { flex: 1; min-height: 0; }
 
-.tw-cam { position: absolute; left: calc(var(--rail-w) + (100% - var(--rail-w) - var(--right-w) - var(--hud-gap)) / 2); bottom: var(--hud-gap); transform: translateX(-50%); z-index: var(--z-hud); max-width: calc(100% - var(--rail-w) - var(--right-w) - 3 * var(--hud-gap)); flex-wrap: wrap; justify-content: center; display: flex; gap: 4px; padding: 5px; border-radius: 12px; }
+.tw-cam { position: absolute; left: calc(var(--rail-w) + (100% - var(--rail-w) - var(--right-w) - var(--hud-gap)) / 2); bottom: var(--hud-gap); transform: translateX(-50%); z-index: var(--z-hud); width: min(1040px, calc(100% - var(--rail-w) - var(--right-w) - 3 * var(--hud-gap))); max-width: calc(100% - var(--rail-w) - var(--right-w) - 3 * var(--hud-gap)); align-items: center; justify-content: center; display: flex; gap: 4px; padding: 5px; border-radius: 12px; overflow: hidden; }
+.tw-cam-rooms { min-width: 0; flex: 1; display: flex; gap: 4px; overflow-x: auto; padding: 1px; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.tw-cam-rooms .tw-btn { flex: none; min-width: 38px; justify-content: center; padding-inline: 8px; }
+.tw-cam-rooms .tw-btn.monitored { color: #BEF264; border-color: rgba(132,204,34,.5); background: rgba(132,204,34,.12); }
+.tw-cam-title { flex: none; padding: 0 6px; color: var(--tw-mute); font-size: 9px; font-weight: 700; letter-spacing: .11em; }
+.tw-cam-bharati { width: auto; max-width: calc(100% - var(--rail-w) - var(--right-w) - 3 * var(--hud-gap)); flex-wrap: wrap; }
+.tw-cam-divider { width: 1px; height: 20px; margin: 0 3px; background: var(--tw-line2); }
+.tw-cam .tw-btn, .tw-flow-filters, .tw-cam-divider { flex: none; }
+.tw-flow-toggle { font-family: var(--font-mono), monospace; letter-spacing: .08em; }
+.tw-flow-filters { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--tw-line2); border-radius: 7px; background: rgba(20,14,65,.56); }
+.tw-flow-filters button { height: 20px; padding: 0 6px; border: 0; border-radius: 5px; background: transparent; color: var(--tw-mute); font: 700 8px/1 var(--font-mono), monospace; letter-spacing: .06em; }
+.tw-flow-filters button:hover { color: var(--tw-text); background: rgba(255,255,255,.07); }
+.tw-flow-filters button.active { color: #F5F3FF; background: rgba(139,92,246,.42); }
+.tw-flow-swatch { display: inline-block; width: 6px; height: 6px; margin-right: 4px; border-radius: 50%; vertical-align: 0; }
 .tw-btn { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--tw-line2); background: rgba(255,255,255,.04); font-size: 10px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; }
 .tw-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); }
 .tw-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -142,3 +171,19 @@ button.tw-card:hover { background: rgba(255,255,255,.07); }
 .tw-ctl-group h3 { margin: 0 0 6px; }
 .tw-ctl-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--tw-line); font-size: 11px; }
 .tw-ctl-row .keys { display: inline-flex; gap: 4px; }
+
+/* Scientific equipment details (Bharati): first card in the right column, never grows past it. */
+.tw-eq { flex: none; max-height: min(62%, 560px); display: flex; flex-direction: column; min-height: 0; }
+.tw-eq .tw-body { min-height: 0; }
+.tw-eq-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.tw-eq-head h3 { margin: 0 0 2px; font-size: 14px; font-weight: 700; line-height: 1.25; color: #fff; }
+.tw-eq-swatch { width: 4px; align-self: stretch; min-height: 32px; border-radius: 2px; flex: none; }
+.tw-eq-kv .tw-eq-row { display: contents; }
+.tw-eq-kv dd { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+.tw-eq-p { margin: 3px 0 0; font-size: 11px; line-height: 1.45; color: var(--tw-text); }
+.tw-eq-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tw-dimv { color: var(--tw-dim); }
+.tw-src { flex: none; padding: 0 5px; border-radius: 5px; font-size: 8px; font-weight: 700; letter-spacing: .08em; line-height: 15px; border: 1px solid var(--tw-line2); color: var(--tw-dim); }
+.tw-src.model, .tw-src.reference { color: #7DD3FC; border-color: rgba(56,189,248,.4); }
+.tw-src.simulated { color: #DDD6FE; border-color: rgba(139,92,246,.55); background: rgba(139,92,246,.14); }
+.tw-pill.info { color: #7DD3FC; border-color: rgba(56,189,248,.4); background: rgba(56,189,248,.1); }

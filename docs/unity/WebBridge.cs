@@ -9,34 +9,43 @@
 // (sensor-dht-01, sensor-mq2-01, buzzer-01 ...), matching the Data(...) calls in
 // DigitalTwinSceneBuilder.cs. Adjust FindAsset() if your hierarchy differs.
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using Maitri.DigitalTwin;
+using Maitri.SystemFlow;
 using UnityEngine;
 
 public class WebBridge : MonoBehaviour
 {
     [DllImport("__Internal")] private static extern void PolarTwinEmit(string json);
 
-    [SerializeField] private Camera cam;
-    [SerializeField] private Transform homePose;
-    [SerializeField] private Transform[] roomPoses = new Transform[3]; // room-01..03 camera anchors
+    private Camera cam;
+    private FirstPersonController player;
+    private Vector3 homePosition;
+    private Quaternion homeRotation;
 
     private readonly Dictionary<string, Renderer[]> cache = new();
-    private GameObject selected;
-
     // Commands the dashboard may send; announced so the UI knows what really works.
     private static readonly string[] Capabilities =
-        { "focusAsset", "focusRoom", "setAssetHighlight", "setRoomState", "resetCamera", "toggleLayer" };
+        { "focusAsset", "focusRoom", "setAssetHighlight", "setRoomState", "resetCamera", "toggleLayer",
+          "setSystemFlow", "setSystemFlowFilter", "setSystemFlowFocus" };
     // Add "setHeatmapMode" / "setHeatmapValue" once the overlay shader below is implemented.
 
     [System.Serializable] private class Cmd
     {
-        public string type, assetId, roomId, state, layer, variable;
-        public bool on; public float opacity;
+        public string type, assetId, roomId, state, layer, variable, filter, componentId;
+        public bool on, enabled; public float opacity;
     }
 
     private void Start()
     {
-        if (cam == null) cam = Camera.main;
+        cam = Camera.main;
+        player = FirstPersonController.Instance != null ? FirstPersonController.Instance : FindAnyObjectByType<FirstPersonController>();
+        if (player != null)
+        {
+            homePosition = player.transform.position;
+            homeRotation = player.transform.rotation;
+        }
         Emit("{\"type\":\"capabilities\",\"list\":[\"" + string.Join("\",\"", Capabilities) + "\"]}");
     }
 
@@ -47,11 +56,14 @@ public class WebBridge : MonoBehaviour
         switch (c.type)
         {
             case "focusAsset": Focus(FindAsset(c.assetId)); break;
-            case "focusRoom": FocusPose(RoomIndex(c.roomId)); break;
-            case "resetCamera": if (homePose) Snap(homePose); break;
+            case "focusRoom": FocusRoom(c.roomId); break;
+            case "resetCamera": Teleport(homePosition, homeRotation.eulerAngles.y); break;
             case "setAssetHighlight": Highlight(c.assetId, c.state); break;
             case "setRoomState": break; // TODO(scene): outline room volume by c.state (normal/warning/critical/offline)
             case "toggleLayer": break;  // TODO(scene): show/hide labels|rooms|sensors roots
+            case "setSystemFlow": if (SystemFlowManager.Instance) SystemFlowManager.Instance.SetVisible(c.enabled); break;
+            case "setSystemFlowFilter": if (SystemFlowManager.Instance) SystemFlowManager.Instance.SetFilter(c.filter); break;
+            case "setSystemFlowFocus": if (SystemFlowManager.Instance) SystemFlowManager.Instance.SetFocus(c.componentId); break;
         }
     }
 
@@ -69,9 +81,44 @@ public class WebBridge : MonoBehaviour
     }
 
     private GameObject FindAsset(string id) => string.IsNullOrEmpty(id) ? null : GameObject.Find(id);
-    private static int RoomIndex(string roomId) => roomId switch { "room-01" => 0, "room-02" => 1, "room-03" => 2, _ => -1 };
-    private void FocusPose(int i) { if (i >= 0 && i < roomPoses.Length && roomPoses[i]) Snap(roomPoses[i]); }
-    private void Snap(Transform t) { if (cam) cam.transform.SetPositionAndRotation(t.position, t.rotation); }
+    private void FocusRoom(string roomId)
+    {
+        var monitored = FindObjectsByType<RoomController>().FirstOrDefault(r => r.roomId == roomId);
+        if (monitored != null)
+        {
+            Teleport(monitored.navigationPoint, monitored.navigationYaw);
+            return;
+        }
+
+        if (!TryDoorName(roomId, out var doorName)) return;
+        var door = FindObjectsByType<AutoDoor>().FirstOrDefault(d => d.name == doorName);
+        if (door == null) return;
+        float side = Mathf.Sign(door.transform.position.z);
+        float floorY = door.transform.position.y - door.doorHeight * 0.5f;
+        var inside = new Vector3(door.transform.position.x, floorY + 0.1f, door.transform.position.z + side * 1.6f);
+        Teleport(inside, side > 0f ? 0f : 180f);
+    }
+
+    private static bool TryDoorName(string roomId, out string doorName)
+    {
+        doorName = null;
+        if (string.IsNullOrEmpty(roomId)) return false;
+        var parts = roomId.Split('-');
+        if (parts.Length != 3 || parts[0] != "maitri" || !int.TryParse(parts[2], out var number) || number < 1 || number > 8) return false;
+        string side = parts[1] == "north" ? "N" : parts[1] == "south" ? "S" : null;
+        if (side == null) return false;
+        doorName = $"Door_Corr_{side}_{number - 1:00}";
+        return true;
+    }
+
+    private void Teleport(Vector3 position, float yaw)
+    {
+        if (player == null) return;
+        var controller = player.GetComponent<CharacterController>();
+        if (controller != null) controller.enabled = false;
+        player.transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
+        if (controller != null) controller.enabled = true;
+    }
 
     private void Focus(GameObject go)
     {

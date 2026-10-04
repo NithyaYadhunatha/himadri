@@ -29,7 +29,9 @@ backend/**/.pytest_cache/
 .DS_Store
 Thumbs.db
 *.log
+//
 
+fixes
 
 postman
 .postman
