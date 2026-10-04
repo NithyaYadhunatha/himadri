@@ -19,7 +19,7 @@ import type { NodeHealth } from '@/types/nodes'
 function AssetCard({ asset, origin }: { asset: NodeHealth; origin: string }) {
   const { color } = getNodeTypeConfig(asset.type)
   return (
-    <div className="relative bg-white rounded-lg overflow-hidden flex flex-col items-center gap-2 border border-brand-border print:border-black/30 shadow-sm print:shadow-none">
+    <div className="relative bg-[#FFFFFF] rounded-lg overflow-hidden flex flex-col items-center gap-2 border border-brand-border print:border-black/30 shadow-sm print:shadow-none">
       <div className="w-full h-1.5" style={{ background: color }} />
       <div className="flex flex-col items-center gap-2 px-3 pb-3 pt-1">
         <QRCodeSVG value={`${origin}/assets/${asset.id}/passport`} size={92} level="M" />

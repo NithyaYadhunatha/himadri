@@ -197,13 +197,13 @@ export default function AdminTeamPage() {
         </div>
 
         <div className="relative w-full max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search people by name or email…"
-            className="w-full bg-brand-surface border border-brand-border rounded text-sm text-white pl-9 pr-3 py-2 focus:border-cyan outline-none placeholder:text-white/30"
+            className="w-full bg-brand-surface border border-brand-border rounded text-sm text-white pl-9 pr-3 py-2 focus:border-cyan outline-none placeholder:text-white/55"
           />
         </div>
       </div>
@@ -212,20 +212,20 @@ export default function AdminTeamPage() {
         <CardHeader title="Invite by Email" subtitle="Pre-assign a department and role — they land ACTIVE the moment they sign up" />
         <div className="mt-4 flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-[220px]">
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Email</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Email</label>
             <div className="relative mt-1">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55" />
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="person@company.com"
-                className="w-full bg-brand-bg border border-brand-border rounded text-sm text-white pl-9 pr-3 py-2 focus:border-cyan outline-none placeholder:text-white/30"
+                className="w-full bg-brand-bg border border-brand-border rounded text-sm text-white pl-9 pr-3 py-2 focus:border-cyan outline-none placeholder:text-white/55"
               />
             </div>
           </div>
           <div>
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Department</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Department</label>
             <select
               className={`${selectClass} mt-1 block`}
               value={inviteDepartment}
@@ -239,7 +239,7 @@ export default function AdminTeamPage() {
             </select>
           </div>
           <div>
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Role</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Role</label>
             <select
               className={`${selectClass} mt-1 block`}
               value={inviteRole}
@@ -265,15 +265,15 @@ export default function AdminTeamPage() {
           <CardHeader title="Invited — Awaiting Signup" subtitle={`${invited.length} invitation(s) sent, not yet accepted`} />
         </div>
         {loading ? (
-          <div className="p-6 flex justify-center text-white/40">
+          <div className="p-6 flex justify-center text-white/62">
             <Loader2 className="animate-spin" size={18} />
           </div>
         ) : invited.length === 0 ? (
-          <div className="p-6 text-center text-white/40 text-sm">No outstanding invitations.</div>
+          <div className="p-6 text-center text-white/62 text-sm">No outstanding invitations.</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-white/40 text-xs uppercase tracking-wider">
+              <tr className="text-left text-white/62 text-xs uppercase tracking-wider">
                 <th className="px-4 py-2 font-normal">Email</th>
                 <th className="px-4 py-2 font-normal">Department</th>
                 <th className="px-4 py-2 font-normal">Role</th>
@@ -284,8 +284,8 @@ export default function AdminTeamPage() {
               {invited.map((inv) => (
                 <tr key={inv.id} className="border-t border-brand-border">
                   <td className="px-4 py-2 text-white/80">{inv.email}</td>
-                  <td className="px-4 py-2 text-white/60">{inv.department ?? '—'}</td>
-                  <td className="px-4 py-2 text-white/60">{inv.role ?? '—'}</td>
+                  <td className="px-4 py-2 text-white/75">{inv.department ?? '—'}</td>
+                  <td className="px-4 py-2 text-white/75">{inv.role ?? '—'}</td>
                   <td className="px-4 py-2">
                     <Button
                       variant="danger"
@@ -309,15 +309,15 @@ export default function AdminTeamPage() {
           <CardHeader title="Pending Approvals" subtitle={`${pending.length} awaiting department/role assignment`} />
         </div>
         {loading ? (
-          <div className="p-6 flex justify-center text-white/40">
+          <div className="p-6 flex justify-center text-white/62">
             <Loader2 className="animate-spin" size={18} />
           </div>
         ) : pending.length === 0 ? (
-          <div className="p-6 text-center text-white/40 text-sm">No pending signups.</div>
+          <div className="p-6 text-center text-white/62 text-sm">No pending signups.</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-white/40 text-xs uppercase tracking-wider">
+              <tr className="text-left text-white/62 text-xs uppercase tracking-wider">
                 <th className="px-4 py-2 font-normal">Name</th>
                 <th className="px-4 py-2 font-normal">Email</th>
                 <th className="px-4 py-2 font-normal">Department</th>
@@ -331,7 +331,7 @@ export default function AdminTeamPage() {
                 return (
                   <tr key={p.membershipId} className="border-t border-brand-border">
                     <td className="px-4 py-2 text-white/80">{p.name}</td>
-                    <td className="px-4 py-2 text-white/60">{p.email}</td>
+                    <td className="px-4 py-2 text-white/75">{p.email}</td>
                     <td className="px-4 py-2">
                       <select
                         className={selectClass}
@@ -403,15 +403,15 @@ export default function AdminTeamPage() {
           <CardHeader title="Admins" subtitle={`${admins.length} with admin access — the main admin can't be removed here`} />
         </div>
         {loading ? (
-          <div className="p-6 flex justify-center text-white/40">
+          <div className="p-6 flex justify-center text-white/62">
             <Loader2 className="animate-spin" size={18} />
           </div>
         ) : admins.length === 0 ? (
-          <div className="p-6 text-center text-white/40 text-sm">No admins yet.</div>
+          <div className="p-6 text-center text-white/62 text-sm">No admins yet.</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-white/40 text-xs uppercase tracking-wider">
+              <tr className="text-left text-white/62 text-xs uppercase tracking-wider">
                 <th className="px-4 py-2 font-normal">Name</th>
                 <th className="px-4 py-2 font-normal">Email</th>
                 <th className="px-4 py-2 font-normal">Type</th>
@@ -425,7 +425,7 @@ export default function AdminTeamPage() {
                 return (
                   <tr key={m.membershipId} className="border-t border-brand-border">
                     <td className="px-4 py-2 text-white/80">{m.name}</td>
-                    <td className="px-4 py-2 text-white/60">{m.email}</td>
+                    <td className="px-4 py-2 text-white/75">{m.email}</td>
                     <td className="px-4 py-2">
                       {isMainAdmin ? (
                         <span className="text-[10px] font-mono uppercase tracking-wider text-amber bg-amber/10 border border-amber/30 rounded px-1.5 py-0.5">
@@ -437,7 +437,7 @@ export default function AdminTeamPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-white/60">{m.role}</td>
+                    <td className="px-4 py-2 text-white/75">{m.role}</td>
                     <td className="px-4 py-2">
                       {!isMainAdmin && (
                         <Button

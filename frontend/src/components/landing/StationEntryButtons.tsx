@@ -20,7 +20,7 @@ export function StationEntryButtons() {
 
   const enter = (station: StationId) => {
     forceSetStation(station)
-    router.push(ROUTES.MISSION)
+    router.push(ROUTES.OVERVIEW)
   }
 
   return (

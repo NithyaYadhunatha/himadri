@@ -183,12 +183,12 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               <Bot size={14} className="text-cyan" />
               <span className="font-display text-[16px] text-white">Ask Himadri</span>
               {nodes.length > 0 && (
-                <span className="font-mono text-[9px] text-white/30">· {nodes.length} assets</span>
+                <span className="font-mono text-[10px] text-white/55">· {nodes.length} assets</span>
               )}
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/30 hover:text-white transition-colors"
+              className="text-white/55 hover:text-white transition-colors"
               aria-label="Close chat"
             >
               <X size={14} />
@@ -201,7 +201,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               <div className="flex flex-col items-center justify-center h-full text-center px-4">
                 <Bot size={28} className="text-cyan/40 mb-3" />
                 <p className="font-display text-[18px] text-white leading-snug">Ask the station anything.</p>
-                <p className="font-mono text-[10.5px] text-white/45 leading-relaxed mt-1.5 mb-4">Answers come from live station data, with the source named.</p>
+                <p className="font-mono text-[10.5px] text-white/65 leading-relaxed mt-1.5 mb-4">Answers come from live station data, with the source named.</p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {["How long will our fuel last?", "Any open alerts?", "Is the convoy ready to leave?", "Is the audit chain intact?", "How is the uplink?", "Weather outlook?"].map((q) => (
                     <button key={q} onClick={() => setInput(q)} className="rounded-full border border-brand-border bg-brand-surface px-3 py-1.5 font-mono text-[10.5px] text-white/70 hover:border-cyan hover:text-cyan transition">{q}</button>
@@ -231,7 +231,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               <div className="flex justify-start">
                 <div className="bg-brand-bg border border-brand-border rounded-lg px-3 py-2 flex items-center gap-2">
                   <Loader2 size={12} className="text-cyan animate-spin" />
-                  <span className="font-mono text-[11px] text-white/40">Thinking...</span>
+                  <span className="font-mono text-[11px] text-white/62">Thinking...</span>
                 </div>
               </div>
             )}
@@ -252,7 +252,7 @@ export function MCPChatPanel({ nodes = [] }: Props) {
               onKeyDown={handleKeyDown}
               placeholder="Ask about fuel, alerts, convoy, link…"
               rows={2}
-              className="flex-1 resize-none bg-brand-surface border border-brand-border rounded px-3 py-2 text-[12px] font-sans text-white placeholder:text-white/30 focus:outline-none focus:border-cyan/50 transition-colors"
+              className="flex-1 resize-none bg-brand-surface border border-brand-border rounded px-3 py-2 text-[12px] font-sans text-white placeholder:text-white/55 focus:outline-none focus:border-cyan/50 transition-colors"
             />
             <button
               onClick={sendMessage}

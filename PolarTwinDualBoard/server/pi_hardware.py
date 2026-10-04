@@ -49,7 +49,10 @@ class PiHardware:
         self.echo_pin = _env_int("PI_ULTRASONIC_ECHO_BCM", "24", 0, 27)
         self.ir_pin = _env_int("PI_IR_BCM", "17", 0, 27)
         self.servo_pin = _env_int("PI_SERVO_BCM", "18", 0, 27)
-        if len({self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin}) != 4:
+        self.wrist_pin = _env_int("PI_WRIST_SERVO_BCM", "19", 0, 27)
+        if len(
+            {self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin, self.wrist_pin}
+        ) != 5:
             raise ValueError("Pi sensor and servo GPIO numbers must be unique")
         self.ir_active_low = _env_bool("PI_IR_ACTIVE_LOW", True)
         self.ir_debounce_samples = _env_int(
@@ -63,6 +66,13 @@ class PiHardware:
         if self.servo_min_pulse_us >= self.servo_max_pulse_us:
             raise ValueError("PI_SERVO_MIN_PULSE_US must be below PI_SERVO_MAX_PULSE_US")
         self._servo_angle = _env_int("PI_SERVO_START_ANGLE", "90", 0, 180)
+        self._wrist_angle = _env_int("PI_WRIST_START_ANGLE", "90", 0, 180)
+        self._wrist_pwm: Any = None
+        # Software PWM jitters, which makes an idle servo buzz and wobble. After
+        # a move the servo gets this long to arrive, then pulses stop so it
+        # stays still. 0 keeps pulses on permanently (holding torque, but jitter).
+        self.servo_hold_seconds = max(0.0, float(os.getenv("PI_SERVO_HOLD_SECONDS", "1.0")))
+        self._release_timers: dict[str, threading.Timer] = {}
 
         self._gpio: Any = None
         self._servo_pwm: Any = None
@@ -94,7 +104,12 @@ class PiHardware:
         GPIO.setup(self.servo_pin, GPIO.OUT, initial=GPIO.LOW)
         self._servo_pwm = GPIO.PWM(self.servo_pin, 50)
         self._servo_pwm.start(self._servo_duty_cycle(self._servo_angle))
+        GPIO.setup(self.wrist_pin, GPIO.OUT, initial=GPIO.LOW)
+        self._wrist_pwm = GPIO.PWM(self.wrist_pin, 50)
+        self._wrist_pwm.start(self._servo_duty_cycle(self._wrist_angle))
         time.sleep(0.05)
+        self._schedule_release("arm")
+        self._schedule_release("wrist")
         self._thread = threading.Thread(target=self._sample_loop, name="pi-sensors", daemon=True)
         self._thread.start()
 
@@ -157,6 +172,7 @@ class PiHardware:
                 if now - self._ir_at <= self.stale_seconds
                 else None,
                 "servo_angle": self._servo_angle,
+                "wrist_angle": self._wrist_angle,
             }
 
     def _servo_duty_cycle(self, angle: int) -> float:
@@ -166,6 +182,24 @@ class PiHardware:
             self.servo_max_pulse_us,
         )
 
+    def _schedule_release(self, name: str) -> None:
+        """Stop PWM pulses shortly after a move so the servo stops wobbling."""
+        if self.servo_hold_seconds <= 0:
+            return
+        previous = self._release_timers.pop(name, None)
+        if previous is not None:
+            previous.cancel()
+        timer = threading.Timer(self.servo_hold_seconds, self._release_servo, args=(name,))
+        timer.daemon = True
+        self._release_timers[name] = timer
+        timer.start()
+
+    def _release_servo(self, name: str) -> None:
+        pwm = self._servo_pwm if name == "arm" else self._wrist_pwm
+        with self._lock:
+            if pwm is not None and not self._stop.is_set():
+                pwm.ChangeDutyCycle(0)
+
     def set_servo_angle(self, angle: int) -> None:
         if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
             raise ValueError("servo angle must be an integer from 0 to 180")
@@ -174,14 +208,29 @@ class PiHardware:
         with self._lock:
             self._servo_pwm.ChangeDutyCycle(self._servo_duty_cycle(angle))
             self._servo_angle = angle
+        self._schedule_release("arm")
+
+    def set_wrist_angle(self, angle: int) -> None:
+        if isinstance(angle, bool) or not isinstance(angle, int) or not 0 <= angle <= 180:
+            raise ValueError("wrist angle must be an integer from 0 to 180")
+        if self._wrist_pwm is None:
+            raise RuntimeError("wrist PWM is not initialized")
+        with self._lock:
+            self._wrist_pwm.ChangeDutyCycle(self._servo_duty_cycle(angle))
+            self._wrist_angle = angle
+        self._schedule_release("wrist")
 
     def close(self) -> None:
         self._stop.set()
+        for timer in self._release_timers.values():
+            timer.cancel()
         if self._thread is not None:
             self._thread.join(timeout=1.0)
         if self._servo_pwm is not None:
             self._servo_pwm.stop()
+        if self._wrist_pwm is not None:
+            self._wrist_pwm.stop()
         if self._gpio is not None:
             self._gpio.cleanup(
-                (self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin)
+                (self.trigger_pin, self.echo_pin, self.ir_pin, self.servo_pin, self.wrist_pin)
             )

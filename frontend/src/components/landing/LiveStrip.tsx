@@ -27,7 +27,7 @@ export function LiveStrip() {
           <p className="font-display text-[40px] leading-none text-white mt-1.5">
             <AnimatedNumber value={i.v} />
           </p>
-          <p className="font-mono text-[10.5px] text-white/45 mt-1.5">{i.s}</p>
+          <p className="font-mono text-[10.5px] text-white/65 mt-1.5">{i.s}</p>
         </div>
       ))}
     </div>

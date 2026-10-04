@@ -1,6 +1,6 @@
 'use client'
 
-// Mission Control — the command-centre front page. Everything on it is read
+// Overview — the single dashboard for overall station operations. Everything on it is read
 // live from the deployed HIMADRI backend: fleet summary, endurance, generation,
 // risk model, alert stream, audit chain, command queue, sync state. The right
 // rail ("Backend at work") exists to make the engine behind the UI visible.
@@ -9,21 +9,21 @@ import { useMemo } from 'react'
 import {
   Activity,
   AlertTriangle,
-  ArrowUpRight,
   Boxes,
-  Database,
   Fuel,
-  GitBranch,
   Radio,
-  ShieldCheck,
   Zap,
 } from 'lucide-react'
 import { useStationStore } from '@/store/useStationStore'
 import { STATIONS, STATION_LABELS, ROUTES, type StationId } from '@/lib/constants'
 import { useBackend, usePoll } from '@/lib/hooks/usePoll'
-import { useFuelEndurance } from '@/lib/hooks/useFuel'
+import { useFuelOutlook } from '@/lib/hooks/useFuelOutlook'
 import { Kpi, Panel, PageHead, Pill, Meter, LiveDot, Skeleton, type Tone } from '@/components/ui/kit'
-import { ago, fmtBytes, fmtNum } from '@/lib/format'
+import { ago, fmtNum } from '@/lib/format'
+import { useForecastModel } from '@/lib/ml/useForecastModel'
+import { buildOutlook } from '@/lib/ml/outlook'
+import { useLedgerStore, useStockItems, type MergedStockItem } from '@/store/useLedgerStore'
+import { BandChart } from '@/components/forecast/ForecastCharts'
 
 interface Summary {
   total_assets: number
@@ -63,13 +63,6 @@ interface Alert {
   last_seen: string
   occurrences: number
 }
-interface AuditRow {
-  seq: number
-  ts: string
-  action: string
-  resource: string | null
-  station_id: string | null
-}
 interface Command {
   id: string
   asset_id: string
@@ -79,22 +72,6 @@ interface Command {
   requires_second_approval: boolean
   approved_by: string | null
   expires_at: string
-}
-interface SyncStatus {
-  link_state: string
-  queue_depth: number
-  bytes_budget: number
-  last_sync: string | null
-  paused: boolean
-}
-interface AuditVerify {
-  valid: boolean
-  checked: number
-}
-interface Accuracy {
-  model_version: string
-  classification: { f1: number; precision: number; recall: number }
-  evaluated_predictions: number
 }
 
 const sevTone = (s: string): Tone => (s === 'critical' || s === 'emergency' ? 'crit' : s === 'warning' ? 'warn' : 'primary')
@@ -144,24 +121,30 @@ export default function MissionControlPage() {
   const station = useStationStore((s) => s.station)
   const summary = useBackend<Summary>(`stations/${station}/summary`, 15000)
   const endurance = useBackend<Endurance>(`logistics/endurance?station=${station}`, 30000)
-  const fuel = useFuelEndurance(station)
+  const fuel = useFuelOutlook(station)
   const energy = useBackend<EnergySummary>(`energy/summary?station=${station}`, 20000)
   const risk = useBackend<RiskRow[]>(`analytics/risk?station=${station}`, 30000)
   const alerts = useBackend<Alert[]>(`alerts?station=${station}&state=open`, 15000)
-  const audit = useBackend<AuditRow[]>('audit?limit=60', 20000)
   const commands = useBackend<Command[]>(`commands?station=${station}`, 15000)
-  const sync = useBackend<SyncStatus>('sync/status', 12000)
   const forecast = usePoll<{ points: { t: number; gust: number; wind: number }[] }>(`/api/environment/forecast?station=${station}`, 900000)
   const convoys = useBackend<{ id: string; route_ref: string | null; state: string; medical_officer: string | null; assignments: { vehicle_asset_id: string | null }[] }[]>(`convoys?station=${station}`, 30000)
   const vehicles = useBackend<{ id: string; subtype: string; status: string }[]>(`vehicles?station=${station}`, 30000)
-  const chain = useBackend<AuditVerify>('audit/verify', 30000)
-  const accuracy = useBackend<Accuracy>('model-accuracy/accuracy', 60000)
-  const series = useBackend<unknown[]>('series', 120000)
+  const inventory = useBackend<MergedStockItem[]>(`inventory?station=${station}`, 60000)
+  const stock = useStockItems(station, inventory.data ?? [])
+  const { model } = useForecastModel()
+  const deliveries = useLedgerStore((st) => st.deliveries)
+  const entries = useLedgerStore((st) => st.entries)
+  const foodKg = stock.filter((i) => i.kind === 'food').reduce((a, i) => a + i.quantity, 0)
+  const stockFuelL = fuel.totalL || stock.filter((i) => i.kind === 'fuel').reduce((a, i) => a + i.quantity, 0)
+  const outlook = useMemo(
+    () => (model ? buildOutlook(model, station, { fuelL: stockFuelL, foodKg }, { deliveries, entries }) : null),
+    [model, station, stockFuelL, foodKg, deliveries, entries],
+  )
 
   const s = summary.data
   const e = endurance.data
   const isolation = e?.isolation_days_remaining ?? 150
-  const margin = fuel.days !== null ? fuel.days - isolation : null
+  const margin = fuel.daysUsed !== null ? fuel.daysUsed - isolation : null
   const sortedRisk = useMemo(() => [...(risk.data ?? [])].sort((a, b) => b.score - a.score), [risk.data])
   const topAlerts = useMemo(
     () =>
@@ -185,17 +168,14 @@ export default function MissionControlPage() {
     <div className="h-full overflow-y-auto">
       <div className="max-w-[1400px] mx-auto px-6 py-7">
         <PageHead
-          eyebrow={`Mission control · ${STATION_LABELS[station]} Station`}
+          eyebrow={`Overview · ${STATION_LABELS[station]} Station`}
           title="Every system, every dependency, one picture."
-          sub="Live state of the station, the engine that is watching it, and the evidence behind every number on this screen."
+          sub="Live state of the station — telemetry, alerts, fuel and food outlook, convoy readiness and the weakest systems — on one screen."
           right={
             <>
               <Pill tone="ok" dot>
                 Deployed backend · live
               </Pill>
-              <Link href={ROUTES.ARCHITECTURE} className="font-mono text-[11px] uppercase tracking-wider text-cyan hover:underline inline-flex items-center gap-1">
-                How it works <ArrowUpRight size={12} />
-              </Link>
             </>
           }
         />
@@ -219,12 +199,12 @@ export default function MissionControlPage() {
           />
           <Kpi
             label="Fuel endurance"
-            value={fuel.days !== null ? Math.round(fuel.days) : null}
+            value={fuel.daysUsed !== null ? Math.round(fuel.daysUsed) : null}
             unit="days"
-            tone={fuel.days === null ? "mute" : margin !== null && margin >= 0 ? "ok" : "crit"}
+            tone={fuel.daysUsed === null ? "mute" : margin !== null && margin >= 0 ? "ok" : "crit"}
             icon={<Fuel size={15} />}
             spark={fuel.history.map((h) => h.litres)}
-            hint={fuel.days !== null ? `${margin !== null && margin >= 0 ? "+" : ""}${fmtNum(margin)} d vs ${isolation} d isolation · derived from ${fuel.tanks.length} tank sensors` : fuel.loading ? "reading tank sensors…" : "no burn-rate data yet"}
+            hint={fuel.daysUsed !== null ? `${margin !== null && margin >= 0 ? "+" : ""}${fmtNum(margin)} d vs ${isolation} d isolation · ${fuel.source === "model" ? "model estimate (tank history flat/stale)" : `derived from ${fuel.tanks.length} tank sensors`}` : fuel.loading ? "reading tank sensors…" : "no burn-rate data yet"}
           />
           <Kpi
             label="Generation"
@@ -236,19 +216,20 @@ export default function MissionControlPage() {
             hint={energy.data?.load_kw != null ? `load ${fmtNum(energy.data.load_kw, 1)} kW` : 'from latest asset values'}
           />
           <Kpi
-            label="Uplink queue"
-            value={sync.data?.queue_depth ?? null}
-            unit="items"
-            tone={sync.data?.paused ? 'warn' : 'primary'}
-            icon={<Radio size={15} />}
-            hint={sync.data ? `budget ${fmtBytes(sync.data.bytes_budget)} · ${sync.data.last_sync ? ago(sync.data.last_sync) : 'awaiting HQ'}` : 'loading…'}
+            label="Food endurance"
+            value={outlook && foodKg > 0 ? (outlook.food.daysMid ?? null) : null}
+            unit="days"
+            tone={outlook?.food.daysMid != null && outlook.food.daysMid < 90 ? 'warn' : 'ok'}
+            icon={<Boxes size={15} />}
+            hint={outlook && foodKg > 0 ? `model range ${outlook.food.daysEarliest ?? '>'}–${outlook.food.daysLatest ?? '>'} d · ${fmtNum(foodKg)} kg counted` : 'no food stock counted — enter it on Logistics'}
           />
           <Kpi
-            label="Audit events chained"
-            value={chain.data?.checked ?? null}
-            tone={chain.data ? (chain.data.valid ? 'ok' : 'crit') : 'mute'}
-            icon={<ShieldCheck size={15} />}
-            hint={chain.data ? (chain.data.valid ? 'SHA-256 chain intact' : 'CHAIN BROKEN') : 'verifying…'}
+            label="Predicted fuel run-out"
+            value={outlook ? (outlook.fuel.daysMid ?? null) : null}
+            unit="days"
+            tone={outlook?.fuel.daysMid != null && outlook.fuel.daysMid < 30 ? 'crit' : outlook?.fuel.daysMid != null && outlook.fuel.daysMid < 90 ? 'warn' : 'ok'}
+            icon={<Fuel size={15} />}
+            hint={outlook ? `model, synthetic-trained · ${outlook.fuel.runoutDate ?? 'beyond horizon'}` : 'loading model…'}
           />
         </div>
 
@@ -265,7 +246,7 @@ export default function MissionControlPage() {
                 <p className="eyebrow">{c.k}</p>
                 <p className={`font-display text-[34px] leading-none mt-1.5 num ${c.tone === "ok" ? "text-emerald" : c.tone === "warn" ? "text-amber" : c.tone === "crit" ? "text-crimson" : "text-white"}`}>{c.v}</p>
                 <p className="font-mono text-[11px] text-white mt-2">{c.s}</p>
-                <p className="font-mono text-[10px] text-white/45">{c.d}</p>
+                <p className="font-mono text-[10px] text-white/65">{c.d}</p>
               </Link>
             ))}
           </div>
@@ -275,6 +256,22 @@ export default function MissionControlPage() {
             {wxBand ? (wxBand.t === "ok" ? "Weather is calm for the next 72 hours. " : `Gusts to ${peakGust?.toFixed(0)} km/h are forecast within 72 hours (${wxBand.l.toLowerCase()}) — hold outdoor work and convoy movement. `) : ""}
             {margin !== null ? (margin >= 0 ? `Fuel covers the isolation window with ${fmtNum(margin)} days to spare.` : `Fuel falls ${fmtNum(-margin)} days short of the isolation window.`) : ""}
           </p>
+        </Panel>
+
+        <Panel className="mt-5" eyebrow="Prediction layer" title="How long will the fuel last?"
+          right={<Pill tone="warn">model trained on synthetic data</Pill>}>
+          {outlook ? (
+            <>
+              <p className="text-[13.5px] text-white/75 mb-3">
+                {outlook.fuel.daysMid === null ? 'Fuel lasts beyond the model horizon.' : `At the forecast burn the fuel runs out in about ${outlook.fuel.daysMid} days (${outlook.fuel.daysEarliest ?? '>'}–${outlook.fuel.daysLatest ?? '>'} d range).`}{' '}
+                <Link href={ROUTES.ENERGY} className="text-cyan hover:underline">Details on Energy →</Link>
+              </p>
+              <BandChart
+                data={outlook.fuel.trajectory.filter((_, i) => i <= 120 && i % 2 === 0).map((p) => ({ x: p.date, mid: p.mid, lo: p.lo, hi: p.hi }))}
+                unit="L" height={230} yDomain={[0, 'auto']} yFormat={(v) => `${fmtNum(v / 1000)}k`} midName="Projected fuel level" bandName="Heavy ↔ light burn"
+              />
+            </>
+          ) : <Skeleton className="h-56" />}
         </Panel>
 
         <div className="grid xl:grid-cols-[1.35fr_1fr] gap-5 mt-5">
@@ -288,7 +285,7 @@ export default function MissionControlPage() {
               {risk.loading && !risk.data ? (
                 <Skeleton className="h-40" />
               ) : sortedRisk.length === 0 ? (
-                <p className="text-sm text-white/50">No risk cells computed for this station yet.</p>
+                <p className="text-sm text-white/70">No risk cells computed for this station yet.</p>
               ) : (
                 <ul className="space-y-3.5">
                   {sortedRisk.slice(0, 6).map((r) => (
@@ -300,7 +297,7 @@ export default function MissionControlPage() {
                         </span>
                       </div>
                       <Meter value={r.score} tone={riskTone(r.score)} height={6} />
-                      <p className="font-mono text-[10.5px] text-white/45 mt-1 truncate">
+                      <p className="font-mono text-[10.5px] text-white/65 mt-1 truncate">
                         driver: {[...r.factors].sort((a, b) => b.score * b.weight - a.score * a.weight)[0]?.evidence}
                       </p>
                     </li>
@@ -318,7 +315,7 @@ export default function MissionControlPage() {
               {alerts.loading && !alerts.data ? (
                 <div className="p-5"><Skeleton className="h-32" /></div>
               ) : topAlerts.length === 0 ? (
-                <p className="p-5 text-sm text-white/50 inline-flex items-center gap-2"><LiveDot tone="ok" /> No open alerts at {STATION_LABELS[station]}.</p>
+                <p className="p-5 text-sm text-white/70 inline-flex items-center gap-2"><LiveDot tone="ok" /> No open alerts at {STATION_LABELS[station]}.</p>
               ) : (
                 <ul className="divide-y divide-brand-border/70">
                   {topAlerts.map((a) => (
@@ -326,7 +323,7 @@ export default function MissionControlPage() {
                       <Pill tone={sevTone(a.severity)}>{a.severity}</Pill>
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] text-white truncate">{a.message}</p>
-                        <p className="font-mono text-[10.5px] text-white/45 truncate">
+                        <p className="font-mono text-[10.5px] text-white/65 truncate">
                           {a.category} · {a.asset_id ?? 'station-wide'} · last {ago(a.last_seen)}
                         </p>
                       </div>
@@ -350,30 +347,11 @@ export default function MissionControlPage() {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-5">
-            <Panel eyebrow="Engine room" title="Backend at work" right={<Pill tone="ok" dot>FastAPI · Postgres · Neo4j</Pill>}>
-              <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
-                {[
-                  { k: 'Assets modelled', v: fmtNum((s?.total_assets ?? 0) + 0), i: <Boxes size={14} />, sub: 'per station graph' },
-                  { k: 'Telemetry series', v: fmtNum(Array.isArray(series.data) ? series.data.length : null), i: <Activity size={14} />, sub: 'registered' },
-                  { k: 'Dependency edges', v: 'Neo4j', i: <GitBranch size={14} />, sub: 'blast-radius engine' },
-                  { k: 'Commands in flight', v: fmtNum(pending.length), i: <Radio size={14} />, sub: 'two-person gated' },
-                  { k: 'ML model', v: accuracy.data ? accuracy.data.model_version : '—', i: <Database size={14} />, sub: accuracy.data ? `${accuracy.data.evaluated_predictions} scored` : '' },
-                  { k: 'Sync priority lanes', v: '3', i: <ShieldCheck size={14} />, sub: 'alerts · cmds · bulk' },
-                ].map((r) => (
-                  <div key={r.k}>
-                    <dt className="eyebrow flex items-center gap-1.5">{r.i}{r.k}</dt>
-                    <dd className="font-display text-[22px] text-white leading-tight num truncate">{r.v}</dd>
-                    <p className="font-mono text-[10px] text-white/40">{r.sub}</p>
-                  </div>
-                ))}
-              </dl>
-            </Panel>
-
             <Panel eyebrow="Remote actuation" title="Command queue" right={<Link href={ROUTES.REMOTE_CONTROL} className="font-mono text-[10.5px] uppercase tracking-wider text-cyan hover:underline">Open →</Link>}>
               {commands.loading && !commands.data ? (
                 <Skeleton className="h-20" />
               ) : (commands.data ?? []).length === 0 ? (
-                <p className="text-sm text-white/50">No commands issued for this station.</p>
+                <p className="text-sm text-white/70">No commands issued for this station.</p>
               ) : (
                 <ul className="space-y-3">
                   {(commands.data ?? []).slice(0, 4).map((c) => (
@@ -383,7 +361,7 @@ export default function MissionControlPage() {
                         <p className="text-[13px] text-white truncate">
                           {c.action.toUpperCase()} · {c.asset_id}
                         </p>
-                        <p className="font-mono text-[10.5px] text-white/45">
+                        <p className="font-mono text-[10.5px] text-white/65">
                           by {c.issued_by}
                           {c.requires_second_approval ? (c.approved_by ? ` · approved by ${c.approved_by}` : ' · awaiting 2nd approver') : ' · single-approver class'}
                         </p>
@@ -394,21 +372,6 @@ export default function MissionControlPage() {
               )}
             </Panel>
 
-            <Panel eyebrow="Tamper-evident ledger" title="Latest audit events" right={<Link href={ROUTES.TRUST} className="font-mono text-[10.5px] uppercase tracking-wider text-cyan hover:underline">Trust center →</Link>} pad={false}>
-              <ul className="divide-y divide-brand-border/70">
-                {(audit.data ?? []).filter((a) => a.action !== 'reading.manual').slice(0, 6).map((a) => (
-                  <li key={a.seq} className="flex items-center gap-3 px-5 py-2.5">
-                    <span className="font-mono text-[10.5px] text-white/40 num w-9">#{a.seq}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[11.5px] text-white truncate">{a.action}</p>
-                      <p className="font-mono text-[10px] text-white/40 truncate">{a.resource ?? '—'}</p>
-                    </div>
-                    <span className="font-mono text-[10px] text-white/40 shrink-0">{ago(a.ts)}</span>
-                  </li>
-                ))}
-                {!audit.data && <li className="p-5"><Skeleton className="h-24" /></li>}
-              </ul>
-            </Panel>
           </div>
         </div>
       </div>

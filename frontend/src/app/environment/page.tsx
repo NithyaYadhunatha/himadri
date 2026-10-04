@@ -85,7 +85,7 @@ export default function EnvironmentPage() {
           right={
             <>
               <Provenance kind="live" />
-              <span className="font-mono text-[10.5px] text-white/45">Open-Meteo · {w ? `observed ${ago(w.observedAt)}` : '…'}</span>
+              <span className="font-mono text-[10.5px] text-white/65">Open-Meteo · {w ? `observed ${ago(w.observedAt)}` : '…'}</span>
             </>
           }
         />
@@ -122,7 +122,7 @@ export default function EnvironmentPage() {
                 </ResponsiveContainer>
               </div>
             )}
-            <div className="flex flex-wrap gap-4 mt-2 font-mono text-[10.5px] text-white/50">
+            <div className="flex flex-wrap gap-4 mt-2 font-mono text-[10.5px] text-white/70">
               <span><i className="inline-block w-2.5 h-0.5 bg-white align-middle mr-1.5" />sustained wind</span>
               <span><i className="inline-block w-2.5 h-2.5 bg-crimson/30 align-middle mr-1.5" />gusts</span>
               <span><i className="inline-block w-2.5 h-0.5 bg-amber align-middle mr-1.5" />70 km/h warning</span>
@@ -143,7 +143,7 @@ export default function EnvironmentPage() {
                   <li className="flex gap-2.5"><span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan shrink-0" />Heating load: {w && w.temperatureC < -25 ? 'high — boilers and heat trace working hard; watch fuel burn.' : 'moderate at current temperatures.'}</li>
                   <li className="flex gap-2.5"><span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan shrink-0" />Wind chill now: {w ? `${w.feelsLikeC.toFixed(0)}°C equivalent — exposed skin risk ${w.feelsLikeC < -35 ? 'within minutes' : 'in under an hour'}.` : '—'}</li>
                 </ul>
-                <p className="font-mono text-[10px] text-white/40">Thresholds are operational conventions for this platform, not an official meteorological warning.</p>
+                <p className="font-mono text-[10px] text-white/62">Thresholds are operational conventions for this platform, not an official meteorological warning.</p>
               </div>
             ) : (
               <Skeleton className="h-40" />
@@ -176,7 +176,7 @@ export default function EnvironmentPage() {
                   <li key={a.id} className="flex items-center gap-3 py-2.5">
                     <span className={`w-2 h-2 rounded-full ${a.status === 'ok' ? 'bg-emerald' : a.status === 'degraded' ? 'bg-amber' : 'bg-white/30'}`} />
                     <span className="text-[13px] text-white flex-1 truncate">{a.name}</span>
-                    <span className="font-mono text-[11px] text-white/45">{a.last_seen ? ago(a.last_seen) : 'never'}</span>
+                    <span className="font-mono text-[11px] text-white/65">{a.last_seen ? ago(a.last_seen) : 'never'}</span>
                     <span className="font-mono text-[11px] text-white/70 num w-16 text-right">{a.primary_value !== null ? fmtNum(a.primary_value, 1) : '—'}</span>
                   </li>
                 ))}

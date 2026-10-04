@@ -17,24 +17,24 @@ const PILLARS = [
     tag: 'Survive',
     title: 'It never waits for the satellite.',
     body: 'Ingest, alerting, the twin and every approval run on the station node. The uplink is a courier: priority lanes, content-hashed batches, a bytes budget — alerts first, bulk last.',
-    href: ROUTES.RESILIENCE,
-    cta: 'Cut the link',
+    href: ROUTES.OVERVIEW,
+    cta: 'See station status',
   },
   {
     icon: ShieldCheck,
     tag: 'Trust',
     title: 'Nothing acts without a witness.',
     body: 'Life-safety commands need a second, different person inside 15 minutes. Every event is hash-chained; verification recomputes the whole ledger. Every number carries its provenance.',
-    href: ROUTES.TRUST,
-    cta: 'Verify the chain',
+    href: ROUTES.REMOTE_CONTROL,
+    cta: 'Issue a command',
   },
   {
     icon: LineChart,
     tag: 'Foresee',
     title: 'Predictions that show their working.',
     body: 'Explainable risk scoring, fuel endurance fitted from live tank sensors, forecasts with honest intervals, and a what-if engine that never touches live state.',
-    href: ROUTES.ML_LAB,
-    cta: 'Open the ML lab',
+    href: ROUTES.PREDICTIVE,
+    cta: 'Open predictive modelling',
   },
 ]
 
@@ -73,26 +73,22 @@ export default async function LandingPage() {
             </div>
             <div className="leading-none">
               <p className="font-display text-[21px] text-white tracking-tight">Himadri</p>
-              <p className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-white/45 mt-1">Station command</p>
+              <p className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-white/65 mt-1">Station command</p>
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-7 font-mono text-[11px] uppercase tracking-wider text-white/55">
-            <Link href={ROUTES.RESILIENCE} className="hover:text-white">Resilience</Link>
-            <Link href={ROUTES.TRUST} className="hover:text-white">Trust</Link>
-            <Link href={ROUTES.ML_LAB} className="hover:text-white">ML lab</Link>
-            <Link href={ROUTES.ARCHITECTURE} className="hover:text-white">Architecture</Link>
           </nav>
           <div className="flex items-center gap-3">
             {isActive ? (
               <>
-                <Link href={ROUTES.MISSION} className="rounded-lg bg-white text-brand-surface px-4 py-2 font-mono text-[11px] uppercase tracking-wider hover:opacity-90">
+                <Link href={ROUTES.OVERVIEW} className="rounded-lg bg-white text-brand-surface px-4 py-2 font-mono text-[11px] uppercase tracking-wider hover:opacity-90">
                   Mission control
                 </Link>
                 {!DEV_BYPASS_AUTH && <UserButton />}
               </>
             ) : (
               <>
-                <Link href="/sign-in" className="font-mono text-[11px] uppercase tracking-wider text-white/60 hover:text-white px-2">Sign in</Link>
+                <Link href="/sign-in" className="font-mono text-[11px] uppercase tracking-wider text-white/75 hover:text-white px-2">Sign in</Link>
                 <Link href="/sign-up" className="rounded-lg bg-white text-brand-surface px-4 py-2 font-mono text-[11px] uppercase tracking-wider hover:opacity-90">Request access</Link>
               </>
             )}
@@ -105,19 +101,19 @@ export default async function LandingPage() {
         <div>
         <div className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-surface px-3.5 py-1.5 mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-marigold" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">Digital twin &amp; remote operations · Maitri + Bharati</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/75">Digital twin &amp; remote operations · Maitri + Bharati</span>
         </div>
         <h1 className="font-display text-[44px] sm:text-[60px] lg:text-[68px] leading-[1.0] tracking-[-0.02em] max-w-[1000px] text-white">
           Two stations. Eleven thousand kilometres.{' '}
           <span className="italic text-cyan">One picture you can trust.</span>
         </h1>
-        <p className="mt-8 max-w-[640px] text-[17px] leading-relaxed text-white/60">
+        <p className="mt-8 max-w-[640px] text-[17px] leading-relaxed text-white/75">
           Himadri is the digital twin and remote-management platform for India&rsquo;s Antarctic research stations. It keeps working when the link doesn&rsquo;t, makes every action accountable, and shows the evidence behind every number.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           {isActive ? (
             <>
-              <Link href={ROUTES.MISSION} className="inline-flex items-center gap-2 rounded-xl bg-white text-brand-surface px-7 py-4 font-mono text-[12px] uppercase tracking-wider shadow-cyan-glow hover:opacity-90 transition">
+              <Link href={ROUTES.OVERVIEW} className="inline-flex items-center gap-2 rounded-xl bg-white text-brand-surface px-7 py-4 font-mono text-[12px] uppercase tracking-wider shadow-cyan-glow hover:opacity-90 transition">
                 Enter mission control <ArrowRight size={15} />
               </Link>
               <StationEntryButtons />
@@ -151,7 +147,7 @@ export default async function LandingPage() {
             <p className="eyebrow">Live from the deployed backend</p>
             <h2 className="font-display text-[34px] leading-tight text-white mt-1">Every asset. Both stations. Right now.</h2>
           </div>
-          <p className="font-mono text-[11px] text-white/50 max-w-sm">Each dot is a real asset in the twin graph — generator, tank, freezer, instrument, vehicle. Colour is its live status.</p>
+          <p className="font-mono text-[11px] text-white/70 max-w-sm">Each dot is a real asset in the twin graph — generator, tank, freezer, instrument, vehicle. Colour is its live status.</p>
         </div>
         <Constellation />
       </section>
@@ -166,7 +162,7 @@ export default async function LandingPage() {
               </span>
               <p className="eyebrow">{p.tag}</p>
               <h3 className="font-display text-[26px] leading-tight text-white mt-1">{p.title}</h3>
-              <p className="text-[14px] text-white/60 leading-relaxed mt-3 flex-1">{p.body}</p>
+              <p className="text-[14px] text-white/75 leading-relaxed mt-3 flex-1">{p.body}</p>
               <p className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-cyan group-hover:gap-3 transition-all">
                 {p.cta} <ArrowRight size={13} />
               </p>
@@ -204,7 +200,7 @@ export default async function LandingPage() {
             </div>
             {VS.map(([a, b]) => (
               <div key={a} className="grid grid-cols-2 gap-6 px-5 py-4 border-b last:border-b-0 border-brand-border/70">
-                <p className="text-[13.5px] text-white/45 line-through decoration-white/20">{a}</p>
+                <p className="text-[13.5px] text-white/65 line-through decoration-white/20">{a}</p>
                 <p className="text-[13.5px] text-white">{b}</p>
               </div>
             ))}
@@ -219,14 +215,14 @@ export default async function LandingPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-marigold">PS 26060 · ISRO / NCPOR</p>
             <h2 className="font-display text-[36px] sm:text-[44px] leading-[1.05] mt-3">See the station the way HQ will.</h2>
           </div>
-          <Link href={isActive ? ROUTES.MISSION : '/sign-in'} className="inline-flex items-center gap-2 rounded-xl bg-marigold text-white px-7 py-4 font-mono text-[12px] uppercase tracking-wider hover:opacity-90 transition">
+          <Link href={isActive ? ROUTES.OVERVIEW : '/sign-in'} className="inline-flex items-center gap-2 rounded-xl bg-marigold text-white px-7 py-4 font-mono text-[12px] uppercase tracking-wider hover:opacity-90 transition">
             Open mission control <ArrowRight size={15} />
           </Link>
         </div>
       </section>
 
       <footer className="border-t border-brand-border/70">
-        <div className="max-w-[1240px] mx-auto px-6 py-8 flex flex-wrap items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-white/40">
+        <div className="max-w-[1240px] mx-auto px-6 py-8 flex flex-wrap items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-white/62">
           <span className="inline-flex items-center gap-2"><Fingerprint size={13} /> Smart India Hackathon 2026 — PS 26060</span>
           <span className="inline-flex items-center gap-2"><Radio size={13} /> Maitri · Bharati · built to scale to Maitri-II</span>
         </div>

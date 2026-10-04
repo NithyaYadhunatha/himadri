@@ -85,11 +85,7 @@ export const ASSET_CATEGORY_ABBREV: Record<string, string> = {
 }
 
 export const ROUTES = {
-  MISSION: '/mission',
-  RESILIENCE: '/resilience',
-  TRUST: '/trust',
-  ML_LAB: '/ml',
-  ARCHITECTURE: '/architecture',
+  OVERVIEW: '/overview',
   REPORT: '/report',
   REPLAY: '/replay',
   TWIN: '/twin',
@@ -132,11 +128,7 @@ export const NAV_GROUPS = [
   {
     label: 'COMMAND',
     items: [
-      { label: 'Mission Control', href: ROUTES.MISSION },
-      { label: 'Resilience', href: ROUTES.RESILIENCE },
-      { label: 'Trust Center', href: ROUTES.TRUST },
-      { label: 'ML Lab', href: ROUTES.ML_LAB },
-      { label: 'Architecture', href: ROUTES.ARCHITECTURE },
+      { label: 'Overview', href: ROUTES.OVERVIEW },
       { label: 'Replay', href: ROUTES.REPLAY },
       { label: 'Station Report', href: ROUTES.REPORT },
     ],

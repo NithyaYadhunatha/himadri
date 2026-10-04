@@ -36,7 +36,7 @@ function Station({ id, label, nodes, live }: { id: string; label: string; nodes:
     <div className="rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-panel">
       <div className="flex items-baseline justify-between mb-4">
         <p className="font-display text-2xl text-white">{label}</p>
-        <p className="font-mono text-[10.5px] text-white/50 num">
+        <p className="font-mono text-[10.5px] text-white/70 num">
           <span className="text-emerald font-semibold">{ok}</span> / {nodes.length} reporting {live ? '' : '· sample'}
         </p>
       </div>
@@ -55,7 +55,7 @@ function Station({ id, label, nodes, live }: { id: string; label: string; nodes:
                   />
                 ))}
               </div>
-              <span className="font-mono text-[8.5px] uppercase tracking-wider text-white/40 mt-1">{ASSET_CATEGORY_ABBREV[c] ?? c.slice(0, 3)}</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-wider text-white/62 mt-1">{ASSET_CATEGORY_ABBREV[c] ?? c.slice(0, 3)}</span>
             </div>
           )
         })}

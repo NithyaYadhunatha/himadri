@@ -26,7 +26,7 @@ const FlowCanvas = dynamic(() => import('@/components/graph/FlowCanvas').then((m
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-brand-bg">
-      <div className="font-mono text-xs text-white/30 animate-pulse">Initializing graph engine...</div>
+      <div className="font-mono text-xs text-white/55 animate-pulse">Initializing graph engine...</div>
     </div>
   ),
 })
@@ -37,7 +37,7 @@ function DarkTooltip({ active, payload }: { active?: boolean; payload?: Array<{ 
   if (!active || !payload || !payload.length) return null
   return (
     <div className="bg-brand-surface border border-brand-border rounded p-2 shadow-lg">
-      <p className="font-mono text-[10px] text-white/60 mb-1">{payload[0].name}</p>
+      <p className="font-mono text-[10px] text-white/75 mb-1">{payload[0].name}</p>
       <p className="font-mono text-sm" style={{ color: payload[0].payload.color }}>
         {payload[0].value} assets
       </p>
@@ -249,15 +249,15 @@ export default function StationTwinPage() {
             <h1 className="font-mono text-xs font-bold text-white uppercase tracking-widest">
               Station Twin — {station.toUpperCase()}
             </h1>
-            <span className="text-white/20">·</span>
-            <span className="font-mono text-[10px] text-white/40">{filteredNodes.length} / {nodes.length} assets</span>
+            <span className="text-white/50">·</span>
+            <span className="font-mono text-[10px] text-white/62">{filteredNodes.length} / {nodes.length} assets</span>
           </div>
           <div className="flex items-center gap-1.5">
             {selectedNode && (
               <button
                 onClick={handleClearNodeSelection}
                 title="Deselect"
-                className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/50 hover:text-white hover:border-white/20 transition-colors"
+                className="flex items-center justify-center w-7 h-7 rounded border border-brand-border text-white/70 hover:text-white hover:border-white/20 transition-colors"
               >
                 <X size={12} />
               </button>
@@ -273,7 +273,7 @@ export default function StationTwinPage() {
                 onClick={() => setMoreMenuOpen((o) => !o)}
                 title="More graph actions"
                 className={`flex items-center justify-center w-7 h-7 rounded border transition-colors ${
-                  moreMenuOpen ? 'bg-cyan/20 text-cyan border-cyan/40' : 'text-white/50 border-brand-border hover:text-white hover:border-white/20'
+                  moreMenuOpen ? 'bg-cyan/20 text-cyan border-cyan/40' : 'text-white/70 border-brand-border hover:text-white hover:border-white/20'
                 }`}
               >
                 <MoreHorizontal size={13} />
@@ -305,7 +305,7 @@ export default function StationTwinPage() {
             <button
               onClick={() => setSidebarOpen((o) => !o)}
               title={sidebarOpen ? 'Hide Panels' : 'Show Panels'}
-              className="flex items-center justify-center w-7 h-7 text-white/40 hover:text-white border border-brand-border rounded transition-colors"
+              className="flex items-center justify-center w-7 h-7 text-white/62 hover:text-white border border-brand-border rounded transition-colors"
             >
               {sidebarOpen ? <ChevronsLeft size={13} /> : <ChevronsRight size={13} />}
             </button>
@@ -352,7 +352,7 @@ export default function StationTwinPage() {
           <div className="order-2 flex-1 relative">
             {loading ? (
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-mono text-xs text-white/30 animate-pulse">Loading twin…</span>
+                <span className="font-mono text-xs text-white/55 animate-pulse">Loading twin…</span>
               </div>
             ) : error ? (
               <ErrorState message={error} onRetry={load} />
@@ -398,7 +398,7 @@ export default function StationTwinPage() {
           {!sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(true)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-6 h-14 bg-brand-surface border border-brand-border border-l-0 rounded-r-md text-white/40 hover:text-cyan hover:bg-brand-surface/80 transition-colors shadow-lg"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-6 h-14 bg-brand-surface border border-brand-border border-l-0 rounded-r-md text-white/62 hover:text-cyan hover:bg-brand-surface/80 transition-colors shadow-lg"
             >
               <ChevronsRight size={14} />
             </button>
@@ -420,7 +420,7 @@ export default function StationTwinPage() {
               ) : (
                 <div className="h-full overflow-y-auto p-4 space-y-4">
                   <div className="bg-brand-bg border border-brand-border rounded p-4 flex flex-col">
-                    <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-4">Station Health Overview</p>
+                    <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest mb-4">Station Health Overview</p>
                     <div className="flex items-center justify-center relative h-[140px] w-full min-w-0">
                       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                         <PieChart>
@@ -434,7 +434,7 @@ export default function StationTwinPage() {
                       </ResponsiveContainer>
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <span className="text-xl font-mono font-bold">{nodes.length}</span>
-                        <span className="text-[9px] font-mono text-white/30 uppercase">Assets</span>
+                        <span className="text-[10px] font-mono text-white/55 uppercase">Assets</span>
                       </div>
                     </div>
                   </div>
@@ -450,7 +450,7 @@ export default function StationTwinPage() {
                           <div key={n.id} className="flex items-center text-xs font-sans p-1.5 hover:bg-brand-surface rounded group cursor-pointer transition-colors" onClick={() => handleNodeSelect(n)}>
                             <span className="mr-1.5 shrink-0"><span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /></span>
                             <span className="flex-1 truncate group-hover:text-cyan transition-colors">{n.label}</span>
-                            <span className="font-mono text-white/30 text-[10px]">SIM</span>
+                            <span className="font-mono text-white/55 text-[10px]">SIM</span>
                           </div>
                         ))}
                       </div>
@@ -480,7 +480,7 @@ export default function StationTwinPage() {
 
                   <div className="bg-brand-bg border border-brand-border rounded p-4 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">At Risk</p>
+                      <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">At Risk</p>
                       <span className="font-mono text-[10px] text-amber">{atRiskNodes.length}</span>
                     </div>
                     <div className="space-y-1">
@@ -503,7 +503,7 @@ export default function StationTwinPage() {
 
                   <div className="bg-brand-bg border border-brand-border rounded p-4 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Zones</p>
+                      <p className="font-mono text-[10px] text-white/62 uppercase tracking-widest">Zones</p>
                       <Badge variant="neutral" size="sm">{zones.length}</Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -511,7 +511,7 @@ export default function StationTwinPage() {
                         <button
                           key={z}
                           onClick={() => setZone(z === zone ? '' : z)}
-                          className={`text-[10px] font-mono rounded px-2 py-1 border transition-colors ${z === zone ? 'bg-cyan/10 border-cyan/40 text-cyan' : 'border-brand-border text-white/50 hover:text-white'}`}
+                          className={`text-[10px] font-mono rounded px-2 py-1 border transition-colors ${z === zone ? 'bg-cyan/10 border-cyan/40 text-cyan' : 'border-brand-border text-white/70 hover:text-white'}`}
                         >
                           {z}
                         </button>

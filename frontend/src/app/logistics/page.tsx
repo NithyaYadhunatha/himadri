@@ -12,6 +12,8 @@ import { useBackend } from '@/lib/hooks/usePoll'
 import { useFuelEndurance } from '@/lib/hooks/useFuel'
 import { Kpi, Panel, PageHead, Pill, Meter, Skeleton, type Tone } from '@/components/ui/kit'
 import { fmtNum } from '@/lib/format'
+import { LogisticsDesk } from '@/components/forecast/LogisticsDesk'
+import { useStockItems } from '@/store/useLedgerStore'
 
 interface Vehicle {
   id: string
@@ -48,9 +50,11 @@ interface Waste {
 interface InventoryItem {
   id: string
   name: string
+  kind: string
   quantity: number
   unit: string
-  reorder_threshold: number | null
+  reorder_threshold?: number | null
+  last_checked?: string | null
 }
 interface Endurance {
   isolation_days_remaining: number
@@ -76,7 +80,7 @@ function Check_({ ok, label, detail }: { ok: boolean; label: string; detail?: st
       </span>
       <div>
         <p className="text-[13.5px] text-white">{label}</p>
-        {detail && <p className="font-mono text-[10.5px] text-white/45">{detail}</p>}
+        {detail && <p className="font-mono text-[10.5px] text-white/65">{detail}</p>}
       </div>
     </li>
   )
@@ -88,6 +92,7 @@ export default function LogisticsPage() {
   const convoys = useBackend<Convoy[]>(`convoys?station=${station}`, 20000)
   const waste = useBackend<Waste[]>(`waste?station=${station}`, 60000)
   const inventory = useBackend<InventoryItem[]>(`inventory?station=${station}`, 60000)
+  const stock = useStockItems(station, inventory.data ?? [])
   const endurance = useBackend<Endurance>(`logistics/endurance?station=${station}`, 60000)
   const fuel = useFuelEndurance(station)
   const [departMsg, setDepartMsg] = useState<Record<string, { ok: boolean; text: string }>>({})
@@ -198,7 +203,7 @@ export default function LogisticsPage() {
                             <span className="w-7 h-7 rounded-full bg-cyan/10 text-cyan flex items-center justify-center font-mono text-[10px]">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] text-white truncate">{a.member_name}</p>
-                              <p className="font-mono text-[10.5px] text-white/45 truncate">{a.equipment_charge ?? 'no equipment charge'}</p>
+                              <p className="font-mono text-[10.5px] text-white/65 truncate">{a.equipment_charge ?? 'no equipment charge'}</p>
                             </div>
                             {v ? <Pill tone={vTone(v.status)}>{v.name}</Pill> : <Pill tone="mute">on foot</Pill>}
                           </li>
@@ -229,7 +234,7 @@ export default function LogisticsPage() {
                       <p className="text-[13px] text-white truncate">{v.name}</p>
                       <Pill tone={vTone(v.status)}>{v.status}</Pill>
                     </div>
-                    <p className="font-mono text-[10.5px] text-white/45 mt-1">{v.subtype}</p>
+                    <p className="font-mono text-[10.5px] text-white/65 mt-1">{v.subtype}</p>
                     {v.spec?.cold_start_required ? <p className="font-mono text-[10px] text-amber mt-1.5">❄ cold-start procedure required</p> : null}
                   </div>
                 ))}
@@ -238,9 +243,9 @@ export default function LogisticsPage() {
           </Panel>
 
           <div className="space-y-5">
-            <Panel eyebrow="Waste" title="Streams held at station" right={<Trash2 size={16} className="text-white/40" />}>
+            <Panel eyebrow="Waste" title="Streams held at station" right={<Trash2 size={16} className="text-white/62" />}>
               {wasteByStream.length === 0 ? (
-                <p className="text-sm text-white/50">No waste records.</p>
+                <p className="text-sm text-white/70">No waste records.</p>
               ) : (
                 <ul className="space-y-3">
                   {wasteByStream.map(([s, n]) => (
@@ -251,15 +256,15 @@ export default function LogisticsPage() {
                 </ul>
               )}
             </Panel>
-            <Panel eyebrow="Stock" title="Inventory" right={<Boxes size={16} className="text-white/40" />}>
-              {(inventory.data ?? []).length === 0 ? (
+            <Panel eyebrow="Stock" title="Inventory" right={<Boxes size={16} className="text-white/62" />}>
+              {stock.length === 0 ? (
                 <p className="text-[13px] text-white/55 leading-relaxed">No stock records yet. Fuel is tracked live from tank sensors instead (see Energy); food, spares and medical stock appear here once counted.</p>
               ) : (
                 <ul className="divide-y divide-brand-border/70">
-                  {(inventory.data ?? []).slice(0, 8).map((i) => (
+                  {stock.slice(0, 8).map((i) => (
                     <li key={i.id} className="flex items-center justify-between py-2">
                       <span className="text-[13px] text-white">{i.name}</span>
-                      <span className={`font-mono text-[12px] num ${i.reorder_threshold !== null && i.quantity <= i.reorder_threshold ? 'text-crimson' : 'text-white/70'}`}>{fmtNum(i.quantity)} {i.unit}</span>
+                      <span className={`font-mono text-[12px] num ${i.reorder_threshold != null && i.quantity <= i.reorder_threshold ? 'text-crimson' : 'text-white/70'}`}>{fmtNum(i.quantity)} {i.unit}</span>
                     </li>
                   ))}
                 </ul>
@@ -267,6 +272,8 @@ export default function LogisticsPage() {
             </Panel>
           </div>
         </div>
+
+        <LogisticsDesk station={station} items={inventory.data ?? []} fuelL={fuel.totalL} onChanged={inventory.refresh} />
       </div>
     </div>
   )

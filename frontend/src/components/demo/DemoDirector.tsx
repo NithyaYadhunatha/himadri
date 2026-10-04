@@ -76,12 +76,12 @@ export function DemoDirector() {
       </div>
       <div className="p-4">
         {!state ? (
-          <p className="font-mono text-[11px] text-white/60 leading-relaxed">
+          <p className="font-mono text-[11px] text-white/75 leading-relaxed">
             Station feeder not reachable at <b>{FEEDER}</b>. Start it with <code className="bg-brand-surface-2 px-1.5 py-0.5 rounded">node tools/station-feeder/feeder.mjs</code>.
           </p>
         ) : (
           <>
-            <p className="font-mono text-[10.5px] text-white/50 mb-3">
+            <p className="font-mono text-[10.5px] text-white/70 mb-3">
               Feeder live · cycle {state.cycle} · {state.assets} assets · active incident: <b className="text-white">{state.incident || 'none'}</b>
             </p>
             <ul className="space-y-2">
@@ -96,9 +96,9 @@ export function DemoDirector() {
                     >
                       <span className="flex items-center justify-between">
                         <span className="text-[13px] text-white font-medium">{i.label}</span>
-                        <span className={`font-mono text-[9.5px] uppercase tracking-wider ${on ? 'text-crimson' : 'text-white/40'}`}>{on ? 'running — click to stop' : 'trigger'}</span>
+                        <span className={`font-mono text-[10px] uppercase tracking-wider ${on ? 'text-crimson' : 'text-white/62'}`}>{on ? 'running — click to stop' : 'trigger'}</span>
                       </span>
-                      <span className="block font-mono text-[10px] text-white/50 mt-0.5 leading-snug">{i.what}</span>
+                      <span className="block font-mono text-[10px] text-white/70 mt-0.5 leading-snug">{i.what}</span>
                     </button>
                   </li>
                 )
@@ -109,7 +109,7 @@ export function DemoDirector() {
             </button>
           </>
         )}
-        <p className="font-mono text-[9.5px] text-white/35 mt-3">Shift + D toggles this panel.</p>
+        <p className="font-mono text-[10px] text-white/58 mt-3">Shift + D toggles this panel.</p>
       </div>
     </div>
   )

@@ -38,7 +38,7 @@ function BlastRadius({ assetId }: { assetId: string }) {
     }
   }, [assetId])
   if (data === null) return <Skeleton className="h-10" />
-  if (data === 'err') return <p className="font-mono text-[11px] text-white/45">Blast radius unavailable for this asset.</p>
+  if (data === 'err') return <p className="font-mono text-[11px] text-white/65">Blast radius unavailable for this asset.</p>
   if (data.affected_count === 0) return <p className="font-mono text-[11px] text-white/55">Nothing else depends on this asset — failure is contained.</p>
   return (
     <div>
@@ -48,7 +48,7 @@ function BlastRadius({ assetId }: { assetId: string }) {
       <div className="flex flex-wrap gap-1.5">
         {data.affected_assets.slice(0, 10).map((a) => (
           <span key={a.asset_id} className="rounded-full border border-brand-border bg-brand-surface px-2.5 py-1 font-mono text-[10.5px] text-white/75">
-            {a.name} <span className="text-white/35">· {a.category}</span>
+            {a.name} <span className="text-white/58">· {a.category}</span>
           </span>
         ))}
       </div>
@@ -134,7 +134,7 @@ export default function AlertsPage() {
             <button
               key={s || 'all'}
               onClick={() => setState(s)}
-              className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${state === s ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/60 hover:text-white'}`}
+              className={`rounded-full border px-3.5 py-1.5 font-mono text-[10.5px] uppercase tracking-wider transition ${state === s ? 'bg-white text-brand-surface border-white' : 'border-brand-border bg-brand-surface text-white/75 hover:text-white'}`}
             >
               {s || 'all states'}
             </button>
@@ -168,7 +168,7 @@ export default function AlertsPage() {
               <div className="py-8 flex flex-col items-center text-center gap-2">
                 <LiveDot tone="ok" size={10} />
                 <p className="font-display text-xl text-white">Nothing matches these filters.</p>
-                <p className="font-mono text-[11.5px] text-white/50 max-w-md">
+                <p className="font-mono text-[11.5px] text-white/70 max-w-md">
                   Alerts auto-resolve when the data that raised them returns to normal, and stale-data alerts clear the moment a device reports again.
                 </p>
               </div>
@@ -186,12 +186,12 @@ export default function AlertsPage() {
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <Pill tone={SEV_TONE[a.severity]} dot={a.state === 'open'}>{a.severity}</Pill>
                           <Pill tone={a.state === 'open' ? 'warn' : a.state === 'acked' ? 'primary' : 'ok'}>{a.state}</Pill>
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">{a.category}</span>
-                          {a.occurrences > 1 && <span className="font-mono text-[10px] text-white/40">×{a.occurrences}</span>}
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-white/62">{a.category}</span>
+                          {a.occurrences > 1 && <span className="font-mono text-[10px] text-white/62">×{a.occurrences}</span>}
                           {a.escalated_at && a.state === 'open' && <Pill tone="crit">escalated</Pill>}
                         </div>
                         <p className="text-[15px] text-white leading-snug">{a.message}</p>
-                        <p className="font-mono text-[10.5px] text-white/45 mt-1.5">
+                        <p className="font-mono text-[10.5px] text-white/65 mt-1.5">
                           {a.asset_id} · first {ago(a.first_seen)} · last {ago(a.last_seen)}
                           {a.value !== null && a.value !== undefined ? ` · value ${a.value}` : ''}
                         </p>
@@ -205,7 +205,7 @@ export default function AlertsPage() {
                           >
                             <Crosshair size={12} /> Locate
                           </Link>
-                          <button onClick={() => setOpenId(open ? null : a.id)} className="p-1.5 text-white/40 hover:text-white">
+                          <button onClick={() => setOpenId(open ? null : a.id)} className="p-1.5 text-white/62 hover:text-white">
                             <ChevronDown size={16} className={`transition ${open ? 'rotate-180' : ''}`} />
                           </button>
                         </div>
@@ -215,7 +215,7 @@ export default function AlertsPage() {
                               <input value={ackNote} onChange={(e) => setAckNote(e.target.value)} placeholder="Ack note…" className="rounded-lg border border-brand-border bg-brand-bg px-2.5 py-1.5 text-xs text-white w-48 focus:outline-none focus:border-cyan" />
                               <div className="flex gap-1.5">
                                 <button onClick={() => act(() => alertsService.ack(a.id, ackNote).then(() => { setAckingId(null); setAckNote('') }))} className="rounded-lg bg-cyan text-brand-surface px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-wider">Confirm</button>
-                                <button onClick={() => { setAckingId(null); setAckNote('') }} className="px-2 font-mono text-[10.5px] uppercase tracking-wider text-white/45">Cancel</button>
+                                <button onClick={() => { setAckingId(null); setAckNote('') }} className="px-2 font-mono text-[10.5px] uppercase tracking-wider text-white/65">Cancel</button>
                               </div>
                             </div>
                           ) : (
@@ -224,7 +224,7 @@ export default function AlertsPage() {
                             </button>
                           ))}
                         {(a.state === 'open' || a.state === 'acked') && (
-                          <button onClick={() => act(() => alertsService.resolve(a.id))} className="font-mono text-[10.5px] uppercase tracking-wider text-white/45 hover:text-white">
+                          <button onClick={() => act(() => alertsService.resolve(a.id))} className="font-mono text-[10.5px] uppercase tracking-wider text-white/65 hover:text-white">
                             Resolve
                           </button>
                         )}

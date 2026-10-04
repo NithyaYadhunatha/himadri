@@ -42,9 +42,9 @@ export function NodeLogsModal({ nodeId, nodeName, open, onClose }: NodeLogsModal
       <div className="divide-y divide-brand-border">
         {logs.map((log) => (
           <div key={log.id} className="px-4 py-2 flex items-start gap-3">
-            <span className="font-mono text-[10px] text-white/30 shrink-0 w-[128px]">{formatTimestamp(log.timestamp)}</span>
+            <span className="font-mono text-[10px] text-white/55 shrink-0 w-[128px]">{formatTimestamp(log.timestamp)}</span>
             <span
-              className="font-mono text-[9px] uppercase tracking-wide shrink-0 w-[64px]"
+              className="font-mono text-[10px] uppercase tracking-wide shrink-0 w-[64px]"
               style={{ color: LEVEL_COLOR[log.level] }}
             >
               {log.level}

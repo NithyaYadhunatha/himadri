@@ -105,7 +105,7 @@ body {
 .font-mono { font-family: var(--font-mono); }
 .font-display { font-family: var(--font-display); letter-spacing: 0.05em; font-weight: 400; }
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
-.eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(8,3,48,0.5); }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(8,3,48,0.72); }
 .panel { background: var(--color-brand-surface); border: 1.5px solid #0D0549; border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
 .stagger > * { animation: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both; }
 .stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.1s}.stagger > *:nth-child(4){animation-delay:.15s}.stagger > *:nth-child(5){animation-delay:.2s}.stagger > *:nth-child(6){animation-delay:.25s}.stagger > *:nth-child(n+7){animation-delay:.3s}
@@ -191,3 +191,8 @@ main h2.font-mono.uppercase { letter-spacing: 0.12em; }
   * { box-shadow: none !important; }
   @page { margin: 14mm; }
 }
+
+/* ── Form controls ────────────────────────────────────────────── */
+input::placeholder, textarea::placeholder { color: rgba(8, 3, 48, 0.5); opacity: 1; }
+select, input, textarea { color: #080330; }
+select option { background: #FFFFFF; color: #080330; }

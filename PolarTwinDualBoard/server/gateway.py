@@ -6,6 +6,7 @@ available physical sensor readings to the backend's digital-twin ingest API.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import os
@@ -89,9 +90,9 @@ def _wire_command(body: Any, gateway_id: str) -> str:
     command = body.get("wireCommand")
     if command in {"BUZZER:ON", "BUZZER:OFF"}:
         return command
-    if isinstance(command, str) and command.startswith("SERVO:"):
-        angle_text = command.removeprefix("SERVO:")
-        if angle_text.isdigit() and 0 <= int(angle_text) <= 180:
+    if isinstance(command, str):
+        prefix, _, angle_text = command.partition(":")
+        if prefix in {"SERVO", "WRIST"} and angle_text.isdigit() and 0 <= int(angle_text) <= 180:
             return command
     raise ValueError("unsupported hardware command")
 
@@ -134,6 +135,14 @@ def merge_pi_readings(
         and 0 <= servo_angle <= 180
         else None
     )
+    wrist_angle = snapshot.get("wrist_angle")
+    system["wrist_angle"] = (
+        wrist_angle
+        if isinstance(wrist_angle, int)
+        and not isinstance(wrist_angle, bool)
+        and 0 <= wrist_angle <= 180
+        else None
+    )
     merged["system"] = system
     return merged
 
@@ -156,6 +165,7 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
         if isinstance(system.get("buzzer_on"), bool)
         else None,
         _reading("servo-01", system.get("servo_angle"), "deg"),
+        _reading("servo-02", system.get("wrist_angle"), "deg"),
         _reading("sensor-ultrasonic-01", packet.get("distance_cm"), "cm"),
         _reading("sensor-ir-01", int(packet["ir_detected"]), "state")
         if isinstance(packet.get("ir_detected"), bool)
@@ -178,6 +188,17 @@ def backend_payload(packet: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def open_arduino() -> serial.Serial | None:
+    """Open the Uno port, or return None to run in Pi-only (robotic arm) mode."""
+    if ARDUINO_PORT.strip().lower() in {"", "none"}:
+        return None
+    try:
+        return serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25)
+    except (serial.SerialException, OSError) as error:
+        print(f"Arduino unavailable ({error}); running in Pi-only mode (servos, HC-SR04, IR)")
+        return None
+
+
 def main() -> None:
     ingest_urls = backend_ingest_urls(BACKEND_URL)
     gateway_id = "polar-twin-uno"
@@ -195,13 +216,13 @@ def main() -> None:
         print(
             f"Pi hardware: HC-SR04 BCM{hardware.trigger_pin}/{hardware.echo_pin}, "
             f"IR BCM{hardware.ir_pin}, "
-            f"servo BCM{hardware.servo_pin}"
+            f"arm servo BCM{hardware.servo_pin}, wrist servo BCM{hardware.wrist_pin}"
         )
 
     session = requests.Session()
     try:
-      with serial.Serial(ARDUINO_PORT, ARDUINO_BAUD, timeout=0.25) as arduino:
-          print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT} @ {ARDUINO_BAUD}")
+      with (open_arduino() or contextlib.nullcontext()) as arduino:
+          print(f"PolarTwin Raspberry Pi Gateway started: {ARDUINO_PORT if arduino else 'Pi-only (no Uno)'} @ {ARDUINO_BAUD}")
           print(f"Backend ingest: {ingest_urls[0]} (fallback: {ingest_urls[-1]})")
           serial_lines = SerialLineBuffer()
           invalid_packets = 0
@@ -210,6 +231,7 @@ def main() -> None:
           next_backend_attempt = 0.0
           next_command_poll = 0.0
           last_command_warning = 0.0
+          next_pi_report = 0.0
           while True:
             now = time.monotonic()
             if now >= next_command_poll:
@@ -225,11 +247,17 @@ def main() -> None:
                             break
                         response.raise_for_status()
                         command = _wire_command(response.json(), gateway_id)
-                        if command.startswith("SERVO:"):
+                        if command.startswith(("SERVO:", "WRIST:")):
                             if hardware is None:
                                 raise ValueError("Pi servo hardware is disabled")
-                            hardware.set_servo_angle(int(command.removeprefix("SERVO:")))
+                            target, _, angle_text = command.partition(":")
+                            if target == "SERVO":
+                                hardware.set_servo_angle(int(angle_text))
+                            else:
+                                hardware.set_wrist_angle(int(angle_text))
                         else:
+                            if arduino is None:
+                                raise ValueError("Arduino not connected; cannot send " + command)
                             arduino.write((command + "\n").encode("ascii"))
                             arduino.flush()
                         if index:
@@ -241,10 +269,19 @@ def main() -> None:
                         print(f"Command polling unavailable: {error}")
                         last_command_warning = now
 
-            chunk = arduino.read(max(1, arduino.in_waiting))
-            if not chunk:
-                continue
-            for raw_line in serial_lines.feed(chunk):
+            if arduino is None:
+                # No Uno: report Pi-owned readings (servo angles, HC-SR04, IR) at ~1 Hz.
+                time.sleep(0.25)
+                if now < next_pi_report or hardware is None:
+                    continue
+                next_pi_report = now + 1.0
+                lines = [json.dumps({"device": "polar-twin-uno", "acceleration": {}, "system": {}})]
+            else:
+                chunk = arduino.read(max(1, arduino.in_waiting))
+                if not chunk:
+                    continue
+                lines = serial_lines.feed(chunk)
+            for raw_line in lines:
                 line = raw_line.strip()
                 if not line:
                     continue

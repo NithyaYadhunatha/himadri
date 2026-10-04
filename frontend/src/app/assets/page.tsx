@@ -57,7 +57,7 @@ function SummaryCard({ label, value, color, active, onClick, icon }: SummaryCard
         <p className="font-mono text-2xl font-bold leading-none" style={{ color }}>
           {value}
         </p>
-        <p className="font-mono text-[10px] text-white/50 uppercase tracking-widest mt-0.5">{label}</p>
+        <p className="font-mono text-[10px] text-white/70 uppercase tracking-widest mt-0.5">{label}</p>
       </div>
     </button>
   )
@@ -91,14 +91,14 @@ function FilterBar({ sort, filter, search, category, onSort, onFilter, onSearch,
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 border-b border-brand-border bg-brand-bg">
       <div className="relative flex-1 min-w-[200px] max-w-xs">
-        <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+        <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55" />
         <input
           type="text"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search assets..."
           className="w-full bg-brand-surface border border-brand-border rounded pl-8 pr-3 py-1.5
-            text-xs font-sans text-white placeholder:text-white/25
+            text-xs font-sans text-white placeholder:text-white/50
             focus:outline-none focus:border-cyan/50 focus:ring-1 focus:ring-cyan/20 transition-all"
         />
       </div>
@@ -115,14 +115,14 @@ function FilterBar({ sort, filter, search, category, onSort, onFilter, onSearch,
       </select>
 
       <div className="flex items-center gap-1.5">
-        <ArrowUpDown size={11} className="text-white/30" />
-        <span className="font-mono text-[10px] text-white/40 uppercase">Sort:</span>
+        <ArrowUpDown size={11} className="text-white/55" />
+        <span className="font-mono text-[10px] text-white/62 uppercase">Sort:</span>
         {SORT_OPTIONS.map((opt) => (
           <button
             key={opt.key}
             onClick={() => onSort(opt.key)}
             className={`px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-wider transition-colors ${
-              sort === opt.key ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/40 hover:text-white border border-transparent'
+              sort === opt.key ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/62 hover:text-white border border-transparent'
             }`}
           >
             {opt.label}
@@ -131,13 +131,13 @@ function FilterBar({ sort, filter, search, category, onSort, onFilter, onSearch,
       </div>
 
       <div className="flex items-center gap-1.5">
-        <SlidersHorizontal size={11} className="text-white/30" />
+        <SlidersHorizontal size={11} className="text-white/55" />
         {FILTER_OPTIONS.map((opt) => (
           <button
             key={opt.key}
             onClick={() => onFilter(opt.key)}
             className={`px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-wider transition-colors ${
-              filter === opt.key ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/40 hover:text-white border border-transparent'
+              filter === opt.key ? 'bg-cyan/10 border border-cyan/40 text-cyan' : 'text-white/62 hover:text-white border border-transparent'
             }`}
           >
             {opt.label}
@@ -146,7 +146,7 @@ function FilterBar({ sort, filter, search, category, onSort, onFilter, onSearch,
       </div>
 
       <div className="ml-auto">
-        <span className="font-mono text-[10px] text-white/30">{resultCount} assets</span>
+        <span className="font-mono text-[10px] text-white/55">{resultCount} assets</span>
       </div>
     </div>
   )
@@ -259,8 +259,8 @@ export default function AssetsPage() {
               <h1 className="font-mono text-sm font-semibold text-white uppercase tracking-widest">
                 Asset Health — {station.toUpperCase()}
               </h1>
-              <p className="text-white/40 text-xs mt-0.5 font-sans">
-                Live station asset health · <span className="text-white/60">{summary?.total ?? '—'} assets monitored</span>
+              <p className="text-white/62 text-xs mt-0.5 font-sans">
+                Live station asset health · <span className="text-white/75">{summary?.total ?? '—'} assets monitored</span>
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -357,13 +357,13 @@ export default function AssetsPage() {
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                    <span className="font-mono text-[10px] text-white/40">{label}</span>
+                    <span className="font-mono text-[10px] text-white/62">{label}</span>
                   </div>
                 ))}
               </>
             )}
           </div>
-          <span className="font-mono text-[10px] text-white/20">Auto-refresh every {REFRESH_INTERVAL}s</span>
+          <span className="font-mono text-[10px] text-white/50">Auto-refresh every {REFRESH_INTERVAL}s</span>
         </div>
       </div>
 

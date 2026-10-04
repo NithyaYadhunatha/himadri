@@ -94,11 +94,11 @@ const ACTION_COLOR: Record<string, string> = {
   'member.update': 'text-amber',
   'invitation.send': 'text-cyan/60',
   'invitation.revoke': 'text-crimson/60',
-  'node_business_meta.update': 'text-white/50',
+  'node_business_meta.update': 'text-white/70',
 }
 
 function actionColor(action: string): string {
-  return ACTION_COLOR[action] ?? 'text-white/40'
+  return ACTION_COLOR[action] ?? 'text-white/62'
 }
 
 function fmtDate(iso: string): string {
@@ -141,7 +141,7 @@ async function fetchLogData(
 }
 
 const inputClass =
-  'bg-brand-bg border border-brand-border rounded text-xs text-white/80 px-2 py-1.5 focus:border-cyan outline-none placeholder:text-white/30 w-full'
+  'bg-brand-bg border border-brand-border rounded text-xs text-white/80 px-2 py-1.5 focus:border-cyan outline-none placeholder:text-white/55 w-full'
 const selectClass =
   'bg-brand-bg border border-brand-border rounded text-xs text-white/80 px-2 py-1.5 focus:border-cyan outline-none w-full'
 
@@ -231,7 +231,7 @@ export default function LogsPage() {
           <h1 className="font-mono text-sm font-semibold tracking-widest uppercase text-white">
             Activity Logs
           </h1>
-          <p className="text-white/40 text-xs mt-0.5">Audit trail for all mutating actions</p>
+          <p className="text-white/62 text-xs mt-0.5">Audit trail for all mutating actions</p>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ export default function LogsPage() {
           className={`flex items-center gap-1.5 px-5 py-2.5 text-xs font-mono tracking-wider uppercase border-b-2 transition-colors ${
             view === 'feed'
               ? 'border-cyan text-cyan'
-              : 'border-transparent text-white/40 hover:text-white/70'
+              : 'border-transparent text-white/62 hover:text-white/70'
           }`}
         >
           <ScrollText size={12} />
@@ -253,7 +253,7 @@ export default function LogsPage() {
           className={`flex items-center gap-1.5 px-5 py-2.5 text-xs font-mono tracking-wider uppercase border-b-2 transition-colors ${
             view === 'audit'
               ? 'border-amber text-amber'
-              : 'border-transparent text-white/40 hover:text-white/70'
+              : 'border-transparent text-white/62 hover:text-white/70'
           }`}
         >
           <Shield size={12} />
@@ -292,7 +292,7 @@ export default function LogsPage() {
         />
         <div className="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
           <div>
-            <label className="text-white/40 text-xs mb-1 block">Actor email</label>
+            <label className="text-white/62 text-xs mb-1 block">Actor email</label>
             <input
               type="text"
               value={draft.actorEmail}
@@ -303,7 +303,7 @@ export default function LogsPage() {
             />
           </div>
           <div>
-            <label className="text-white/40 text-xs mb-1 block">
+            <label className="text-white/62 text-xs mb-1 block">
               Action{view === 'audit' && <span className="ml-1 text-amber/60">(preset)</span>}
             </label>
             <input
@@ -317,7 +317,7 @@ export default function LogsPage() {
             />
           </div>
           <div>
-            <label className="text-white/40 text-xs mb-1 block">Department</label>
+            <label className="text-white/62 text-xs mb-1 block">Department</label>
             <select
               value={draft.department}
               onChange={(e) => setDraft((d) => ({ ...d, department: e.target.value }))}
@@ -332,7 +332,7 @@ export default function LogsPage() {
             </select>
           </div>
           <div>
-            <label className="text-white/40 text-xs mb-1 block">From date</label>
+            <label className="text-white/62 text-xs mb-1 block">From date</label>
             <input
               type="date"
               value={draft.dateFrom}
@@ -341,7 +341,7 @@ export default function LogsPage() {
             />
           </div>
           <div>
-            <label className="text-white/40 text-xs mb-1 block">To date</label>
+            <label className="text-white/62 text-xs mb-1 block">To date</label>
             <input
               type="date"
               value={draft.dateTo}
@@ -355,7 +355,7 @@ export default function LogsPage() {
       {/* Log list */}
       <Card noPad>
         <div className="px-4 py-3 border-b border-brand-border flex items-center justify-between">
-          <span className="font-mono text-xs font-semibold tracking-widest text-white/60 uppercase">
+          <span className="font-mono text-xs font-semibold tracking-widest text-white/75 uppercase">
             {loading ? 'Loading…' : `${total.toLocaleString()} event${total !== 1 ? 's' : ''}`}
           </span>
           {loading && <Loader2 size={14} className="animate-spin text-cyan" />}
@@ -369,8 +369,8 @@ export default function LogsPage() {
 
         {!error && !loading && logs.length === 0 && (
           <div className="px-4 py-16 text-center">
-            <ScrollText size={28} className="mx-auto mb-3 text-white/15" />
-            <p className="text-white/30 text-xs">No events match the current filters.</p>
+            <ScrollText size={28} className="mx-auto mb-3 text-white/45" />
+            <p className="text-white/55 text-xs">No events match the current filters.</p>
           </div>
         )}
 
@@ -382,7 +382,7 @@ export default function LogsPage() {
                 className="px-4 py-2.5 hover:bg-white/[0.02] transition-colors"
               >
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  <span className="text-white/25 text-[10px] font-mono shrink-0 w-[140px]">
+                  <span className="text-white/50 text-[10px] font-mono shrink-0 w-[140px]">
                     {fmtDate(log.createdAt)}
                   </span>
                   <span className="text-white/70 text-xs font-medium truncate max-w-[200px]">
@@ -392,24 +392,24 @@ export default function LogsPage() {
                     {log.action}
                   </span>
                   {log.targetType && (
-                    <span className="text-white/30 text-xs">→ {log.targetType}</span>
+                    <span className="text-white/55 text-xs">→ {log.targetType}</span>
                   )}
                   {log.targetId && (
                     <span
-                      className="text-white/20 text-[10px] font-mono truncate max-w-[100px]"
+                      className="text-white/50 text-[10px] font-mono truncate max-w-[100px]"
                       title={log.targetId}
                     >
                       {log.targetId}
                     </span>
                   )}
                   {log.department && (
-                    <span className="bg-white/5 border border-white/10 rounded-full px-2 py-0.5 text-[9px] text-white/35 uppercase tracking-wider shrink-0">
+                    <span className="bg-white/5 border border-white/10 rounded-full px-2 py-0.5 text-[10px] text-white/58 uppercase tracking-wider shrink-0">
                       {deptLabel(log.department)}
                     </span>
                   )}
                 </div>
                 {log.metadata !== null && log.metadata !== undefined && (
-                  <div className="mt-0.5 ml-[148px] text-[10px] text-white/20 font-mono truncate">
+                  <div className="mt-0.5 ml-[148px] text-[10px] text-white/50 font-mono truncate">
                     {JSON.stringify(log.metadata)}
                   </div>
                 )}
@@ -420,7 +420,7 @@ export default function LogsPage() {
 
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-brand-border flex items-center justify-between">
-            <span className="text-white/30 text-xs">
+            <span className="text-white/55 text-xs">
               Page {page} of {totalPages}
             </span>
             <div className="flex gap-2">

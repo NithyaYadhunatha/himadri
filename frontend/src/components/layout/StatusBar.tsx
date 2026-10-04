@@ -57,10 +57,10 @@ function Cell({
     >
       <LiveDot tone={tone} size={7} pulse={!!pulse} />
       <div className="leading-tight">
-        <p className="font-mono text-[8.5px] uppercase tracking-[0.16em] text-white/40">{label}</p>
+        <p className="font-mono text-[8.5px] uppercase tracking-[0.16em] text-white/62">{label}</p>
         <p className="font-mono text-[11.5px] font-semibold text-white num truncate">
           {value}
-          {sub && <span className="font-normal text-white/45"> · {sub}</span>}
+          {sub && <span className="font-normal text-white/65"> · {sub}</span>}
         </p>
       </div>
     </Link>
@@ -93,11 +93,11 @@ export function StatusBar() {
   return (
     <div className="print:hidden bg-brand-surface border-b border-brand-border flex items-stretch overflow-x-auto">
       <div className="flex items-center gap-2 px-4 border-r border-brand-border/70 shrink-0 bg-white text-brand-surface">
-        <span className="font-mono text-[9px] uppercase tracking-[0.2em] opacity-60">Station</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] opacity-60">Station</span>
         <span className="font-display text-[15px] leading-none">{STATION_LABELS[station]}</span>
       </div>
       <Cell
-        href={ROUTES.RESILIENCE}
+        href={ROUTES.OVERVIEW}
         label="Uplink to HQ"
         value={linkLabel}
         tone={linkTone}
@@ -105,14 +105,14 @@ export function StatusBar() {
         pulse={linkTone === 'ok'}
       />
       <Cell
-        href={ROUTES.RESILIENCE}
+        href={ROUTES.OVERVIEW}
         label="Sync budget"
         value={sync.data ? fmtBytes(sync.data.bytes_budget) : '—'}
         tone={sync.data?.paused ? 'warn' : 'primary'}
         sub={sync.data ? (sync.data.last_sync ? ago(sync.data.last_sync) : 'never synced') : undefined}
       />
       <Cell
-        href={ROUTES.TRUST}
+        href={ROUTES.OVERVIEW}
         label="Audit chain"
         value={audit.error ? 'UNAVAILABLE' : audit.data ? (audit.data.valid ? 'VERIFIED' : 'BROKEN') : '…'}
         tone={chainTone}

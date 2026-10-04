@@ -28,7 +28,7 @@ const selectClass =
   'bg-brand-bg border border-brand-border rounded text-xs text-white/80 px-2 py-1.5 focus:border-cyan outline-none'
 
 const inputClass =
-  'w-full bg-brand-bg border border-brand-border rounded text-sm text-white px-3 py-2 focus:border-cyan outline-none placeholder:text-white/30'
+  'w-full bg-brand-bg border border-brand-border rounded text-sm text-white px-3 py-2 focus:border-cyan outline-none placeholder:text-white/55'
 
 function stationLabel(stationId: string | null): string {
   if (stationId === null) return 'All stations'
@@ -146,7 +146,7 @@ export default function AdminNotificationsPage() {
           <h1 className="font-mono text-sm font-semibold tracking-widest text-white uppercase">
             Alert Notification Recipients
           </h1>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-xs text-white/62 mt-0.5">
             Emailed when a station asset alert escalates to Critical/Emergency and goes unacknowledged (FR-60).
           </p>
         </div>
@@ -156,9 +156,9 @@ export default function AdminNotificationsPage() {
         <CardHeader title="Add Recipient" subtitle="Optionally scope to one station — leave unscoped to notify on every station's escalations" />
         <div className="mt-4 flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-[220px]">
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Email</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Email</label>
             <div className="relative mt-1">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55" />
               <input
                 type="email"
                 value={newEmail}
@@ -169,7 +169,7 @@ export default function AdminNotificationsPage() {
             </div>
           </div>
           <div className="flex-1 min-w-[160px]">
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Name (optional)</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Name (optional)</label>
             <input
               type="text"
               value={newName}
@@ -179,7 +179,7 @@ export default function AdminNotificationsPage() {
             />
           </div>
           <div>
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Station</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Station</label>
             <select
               className={`${selectClass} mt-1 block`}
               value={newStation}
@@ -205,17 +205,17 @@ export default function AdminNotificationsPage() {
           <CardHeader title="Recipients" subtitle={`${recipients.length} configured`} />
         </div>
         {loading ? (
-          <div className="p-6 flex justify-center text-white/40">
+          <div className="p-6 flex justify-center text-white/62">
             <Loader2 className="animate-spin" size={18} />
           </div>
         ) : loadError ? (
           <div className="p-6 text-center text-crimson text-sm">{loadError}</div>
         ) : recipients.length === 0 ? (
-          <div className="p-6 text-center text-white/40 text-sm">No recipients configured yet.</div>
+          <div className="p-6 text-center text-white/62 text-sm">No recipients configured yet.</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-white/40 text-xs uppercase tracking-wider">
+              <tr className="text-left text-white/62 text-xs uppercase tracking-wider">
                 <th className="px-4 py-2 font-normal">Email</th>
                 <th className="px-4 py-2 font-normal">Name</th>
                 <th className="px-4 py-2 font-normal">Station</th>
@@ -227,8 +227,8 @@ export default function AdminNotificationsPage() {
               {recipients.map((r) => (
                 <tr key={r.id} className="border-t border-brand-border">
                   <td className="px-4 py-2 text-white/80">{r.email}</td>
-                  <td className="px-4 py-2 text-white/60">{r.name ?? '—'}</td>
-                  <td className="px-4 py-2 text-white/60">{stationLabel(r.station_id)}</td>
+                  <td className="px-4 py-2 text-white/75">{r.name ?? '—'}</td>
+                  <td className="px-4 py-2 text-white/75">{stationLabel(r.station_id)}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => toggleActive(r)}
@@ -236,7 +236,7 @@ export default function AdminNotificationsPage() {
                       className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider rounded px-1.5 py-0.5 border ${
                         r.active
                           ? 'text-emerald bg-emerald/10 border-emerald/30'
-                          : 'text-white/40 bg-white/5 border-white/10'
+                          : 'text-white/62 bg-white/5 border-white/10'
                       }`}
                     >
                       {r.active ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
@@ -268,7 +268,7 @@ export default function AdminNotificationsPage() {
         />
         <div className="mt-4 flex items-end gap-3 flex-wrap">
           <div className="flex-1 min-w-[220px]">
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Send to (optional)</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Send to (optional)</label>
             <input
               type="email"
               value={testEmail}
@@ -278,7 +278,7 @@ export default function AdminNotificationsPage() {
             />
           </div>
           <div>
-            <label className="text-[11px] text-white/40 uppercase tracking-wider">Station</label>
+            <label className="text-[11px] text-white/62 uppercase tracking-wider">Station</label>
             <select
               className={`${selectClass} mt-1 block`}
               value={testStation}

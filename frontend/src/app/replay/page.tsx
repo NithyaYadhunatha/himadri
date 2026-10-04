@@ -120,7 +120,7 @@ export default function ReplayPage() {
           {!data ? (
             <Skeleton className="h-72" />
           ) : data.length < 3 ? (
-            <p className="font-mono text-[12px] text-white/50">Not enough history to replay yet.</p>
+            <p className="font-mono text-[12px] text-white/70">Not enough history to replay yet.</p>
           ) : (
             <>
               <div style={{ height: 300 }}>
@@ -144,7 +144,7 @@ export default function ReplayPage() {
                 <button onClick={() => (idx >= data.length - 1 ? (setIdx(0), setPlaying(true)) : setPlaying((p) => !p))} className="inline-flex items-center gap-2 rounded-xl bg-white text-brand-surface px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider">
                   {playing ? <Pause size={13} /> : <Play size={13} />} {playing ? 'Pause' : 'Play'}
                 </button>
-                <button onClick={() => { setPlaying(false); setIdx(0) }} className="p-2 text-white/50 hover:text-white" aria-label="Restart"><RotateCcw size={15} /></button>
+                <button onClick={() => { setPlaying(false); setIdx(0) }} className="p-2 text-white/70 hover:text-white" aria-label="Restart"><RotateCcw size={15} /></button>
                 <input type="range" min={0} max={data.length - 1} value={idx} onChange={(e) => { setPlaying(false); setIdx(Number(e.target.value)) }} className="flex-1 accent-[#1D1C93]" />
                 <span className="font-mono text-[11px] text-white/55 num w-16 text-right">{idx + 1}/{data.length}</span>
               </div>
@@ -162,14 +162,14 @@ export default function ReplayPage() {
                   <Pill tone={a.severity === 'critical' || a.severity === 'emergency' ? 'crit' : 'warn'}>{a.severity}</Pill>
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] text-white truncate">{a.message}</p>
-                    <p className="font-mono text-[10.5px] text-white/45">{a.asset_id} · {new Date(a.t).toISOString().slice(0, 16).replace('T', ' ')} UTC · {a.state}</p>
+                    <p className="font-mono text-[10.5px] text-white/65">{a.asset_id} · {new Date(a.t).toISOString().slice(0, 16).replace('T', ' ')} UTC · {a.state}</p>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </Panel>
-        <p className="font-mono text-[10.5px] text-white/40 mt-4">Hourly means from the recorded series; values in different units share one time axis (scales hidden), so read the cards above for exact figures at the cursor.</p>
+        <p className="font-mono text-[10.5px] text-white/62 mt-4">Hourly means from the recorded series; values in different units share one time axis (scales hidden), so read the cards above for exact figures at the cursor.</p>
         <p className="hidden">{fmtNum(0)}</p>
       </div>
     </div>

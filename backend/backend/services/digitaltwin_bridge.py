@@ -9,10 +9,9 @@ same Mosquitto broker (backend.config.settings.MQTT_BROKER_HOST/PORT).
 
 Device catalog below mirrors the 14 devices built in the
 Unity project's Assets/Editor/DigitalTwinSceneBuilder.cs (the Data(...) calls
-in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01`,
-which is a Pi-owned physical actuator exposed through the API, and `servo-02`,
-its software-only partner. Together they drive the two joints of Unity's
-Room 3 robotic arm (servo-01 = lower arm, servo-02 = upper arm).
+in PopulateEnvironment/PopulateSafety/PopulateEquipment), plus `servo-01` (robot
+arm) and `servo-02` (robot wrist), which are Pi-owned physical actuators
+exposed through the API.
 
 Nine devices have a real sensor/actuator on the PolarTwinDualBoard
 rig (see PolarTwin/himadri/PolarTwinDualBoard/docs/architecture.md). The rest
@@ -332,6 +331,57 @@ def list_rooms() -> list[dict[str, Any]]:
 
 def list_room_devices(room_id: str) -> list[dict[str, Any]]:
     return [device for device in _state.values() if device["roomId"] == room_id]
+
+
+def _parse_servo_angle(command: str, value: Any) -> int | None:
+    if (
+        command != "SET_ANGLE"
+        or isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or int(value) != value
+        or not 0 <= int(value) <= 180
+    ):
+        return None
+    return int(value)
+
+
+def _queue_servo(device_id: str, angle: int) -> None:
+    """Queue a SERVO:n / WRIST:n wire command for the Pi gateway. A newer
+    command for the same servo replaces any still-queued one so a slider drag
+    does not build a backlog of stale positions."""
+    prefix = _SERVO_WIRE_PREFIX[device_id]
+    queue = _hardware_commands[_HARDWARE_GATEWAY_ID]
+    stale = [c for c in queue if c.get("deviceId") == device_id]
+    for command in stale:
+        queue.remove(command)
+    queue.append({
+        "commandId": uuid.uuid4().hex,
+        "gatewayId": _HARDWARE_GATEWAY_ID,
+        "deviceId": device_id,
+        "wireCommand": f"{prefix}:{angle}",
+        "value": angle,
+        "queuedAt": _now_ms(),
+    })
+
+
+async def move_arm(arm: int | None, wrist: int | None) -> dict[str, int] | None:
+    """Queue arm and/or wrist moves atomically. Returns the accepted angles,
+    or None if nothing was requested or any angle is invalid."""
+    requested = {"servo-01": arm, "servo-02": wrist}
+    angles: dict[str, int] = {}
+    for device_id, raw in requested.items():
+        if raw is None:
+            continue
+        angle = _parse_servo_angle("SET_ANGLE", raw)
+        if angle is None:
+            return None
+        angles[device_id] = angle
+    if not angles:
+        return None
+    for device_id, angle in angles.items():
+        _queue_servo(device_id, angle)
+    return angles
 
 
 async def publish_command(device_id: str, command: str, value: Any) -> bool:
