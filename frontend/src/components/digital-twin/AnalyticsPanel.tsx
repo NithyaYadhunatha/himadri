@@ -88,8 +88,8 @@ export function AnalyticsPanel() {
             <table className="tw-mono" style={{ width: '100%', fontSize: 10, borderCollapse: 'collapse' }}>
               <tbody>
                 {getHistory(id).slice(-12).reverse().map((s) => (
-                  <tr key={s.t} style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                    <td style={{ padding: '2px 0', color: '#94A3B8' }}>{new Date(s.t).toLocaleTimeString()}</td>
+                  <tr key={s.t} style={{ borderTop: '1px solid rgba(8,3,48,.1)' }}>
+                    <td style={{ padding: '2px 0', color: '#5A5878' }}>{new Date(s.t).toLocaleTimeString()}</td>
                     <td style={{ textAlign: 'right' }}>{a.boolean ? a.stateLabels?.[s.v ? 1 : 0] : `${s.v} ${a.unit}`}</td>
                   </tr>
                 ))}

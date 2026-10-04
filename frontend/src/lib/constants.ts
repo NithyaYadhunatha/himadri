@@ -126,12 +126,8 @@ export const ROUTES = {
 // directly.
 export const NAV_GROUPS = [
   {
-    label: 'COMMAND',
-    items: [
-      { label: 'Overview', href: ROUTES.OVERVIEW },
-      { label: 'Replay', href: ROUTES.REPLAY },
-      { label: 'Station Report', href: ROUTES.REPORT },
-    ],
+    label: 'OVERVIEW',
+    items: [{ label: 'Overview', href: ROUTES.OVERVIEW }],
   },
   {
     label: 'STATION TWIN',

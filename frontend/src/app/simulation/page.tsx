@@ -58,7 +58,7 @@ function ResultView({ result }: { result: ScenarioResult }) {
       <div className="rounded-lg border bg-brand-surface p-4 shadow-[0_1px_2px_rgba(22,40,58,0.06)]" style={{ borderColor: bad ? `${CHART.red}66` : `${CHART.green}66`, borderLeft: `5px solid ${bad ? CHART.red : CHART.green}` }}>
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
-            <p className="font-sans text-lg font-semibold text-white flex items-center gap-2">
+            <p className="font-display text-[24px] text-white flex items-center gap-2">
               {bad ? <ShieldAlert size={20} className="text-crimson" /> : <ShieldCheck size={20} className="text-emerald" />}
               {result.name}
             </p>
@@ -109,7 +109,7 @@ function ResultView({ result }: { result: ScenarioResult }) {
                   <CartesianGrid {...gridProps} horizontal={false} vertical />
                   <XAxis type="number" tick={axisTick} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${(v / 100000).toFixed(0)}L`} />
                   <YAxis type="category" dataKey="name" width={100} tick={{ ...axisTick, fill: '#080330' }} tickLine={false} axisLine={false} />
-                  <Tooltip content={<ChartTooltip format={(v) => lakh(v)} />} cursor={{ fill: '#C8C5D8' }} />
+                  <Tooltip content={<ChartTooltip format={(v) => lakh(v)} />} cursor={{ fill: '#DEDBEC' }} />
                   <RBar dataKey="value" name="Cost" radius={[0, 4, 4, 0]} barSize={16} isAnimationActive={false}>
                     {costRows.map((r) => <Cell key={r.name} fill={r.color} />)}
                   </RBar>
@@ -138,7 +138,7 @@ function RunCard({ result, selected, active, onToggleCompare, onSelect }: { resu
     <div onClick={onSelect} className={`rounded-md border p-3 cursor-pointer transition-colors bg-brand-surface ${active ? 'border-cyan ring-1 ring-cyan/40' : 'border-brand-border hover:border-cyan/50'}`}>
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="min-w-0">
-          <p className="font-sans text-sm font-semibold text-white truncate">{result.name}</p>
+          <p className="font-display text-[18px] text-white truncate">{result.name}</p>
           <p className="font-mono text-[11px] text-white/62 mt-0.5">{result.station_id.toUpperCase()} · {new Date(result.created_at).toLocaleDateString('en-GB')}</p>
         </div>
         <Badge variant={verdictVariant(result.survivability_verdict)} size="sm">{result.survivability_verdict ?? '—'}</Badge>
@@ -384,7 +384,7 @@ export default function SimulationPage() {
                       {presets.map((p) => (
                         <label key={p.id} className={`flex items-start gap-2.5 p-3 rounded-md border cursor-pointer transition-colors ${selectedPreset === p.id ? 'border-cyan bg-cyan/10' : 'border-brand-border bg-brand-surface hover:border-cyan/50'}`}>
                           <input type="radio" name="preset" checked={selectedPreset === p.id} onChange={() => setSelectedPreset(p.id)} className="mt-1 accent-cyan" />
-                          <div><p className="text-sm font-sans font-semibold text-white">{p.label}</p><p className="text-xs font-sans text-white/70 mt-0.5 leading-snug">{p.description}</p></div>
+                          <div><p className="font-display text-[18px] text-white">{p.label}</p><p className="text-xs font-sans text-white/70 mt-0.5 leading-snug">{p.description}</p></div>
                         </label>
                       ))}
                       <div><label className={labelClass}>Horizon (days)</label><input type="number" min={7} max={365} className={inputClass} value={horizonDays} onChange={(e) => setHorizonDays(Number(e.target.value))} /></div>
@@ -421,7 +421,7 @@ export default function SimulationPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#080330]/45 backdrop-blur-sm p-4" onClick={() => setCompareResults(null)}>
           <div className="w-full max-w-5xl bg-brand-surface border border-brand-border rounded-lg shadow-2xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-brand-border sticky top-0 bg-brand-surface z-10">
-              <h2 className="font-mono text-sm font-bold text-white uppercase tracking-wider">Scenario comparison</h2>
+              <h2 className="font-display text-[24px] text-white">Scenario comparison</h2>
               <button onClick={() => setCompareResults(null)} className="text-white/70 hover:text-white" aria-label="Close"><X size={18} /></button>
             </div>
             <div className="p-4 space-y-5">

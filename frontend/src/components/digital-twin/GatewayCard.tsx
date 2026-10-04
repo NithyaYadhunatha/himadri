@@ -20,7 +20,7 @@ export function GatewayCard() {
 
   return (
     <div className="tw-panel">
-      <PanelHead title="Raspberry Pi Gateway"><Cpu size={13} color="#94A3B8" /></PanelHead>
+      <PanelHead title="Raspberry Pi Gateway"><Cpu size={13} color="#5A5878" /></PanelHead>
       <div className="tw-body">
         <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
           <StatusPill s={demo ? 'normal' : m.tone} label={gw} />

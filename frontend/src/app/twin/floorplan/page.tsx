@@ -205,25 +205,37 @@ export default function FloorPlanPage() {
             {sections.length === 0 ? (
               <ErrorState message="No zone data available to build a floor plan for this station." onRetry={load} />
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {activeSection?.rooms.map((room) => {
                   const { color, value, hint } = overlayFor(room)
+                  const na = value === 'n/a'
+                  const shown = room.assets.slice(0, 3)
                   return (
                     <button
                       key={room.zoneId}
                       title={hint}
                       onClick={() => setSelectedRoom(room)}
-                      className="group relative flex flex-col justify-between h-28 rounded-lg border p-3 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                      style={{ borderColor: `${color}66`, background: `linear-gradient(160deg, ${color}22 0%, ${color}08 100%)` }}
+                      className={`group relative flex min-h-[140px] flex-col justify-between rounded-xl border-[1.5px] bg-brand-surface p-3.5 text-left overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-lg ${na ? 'opacity-90' : ''}`}
+                      style={{ borderColor: na ? '#B3B0CE' : `${color}99`, background: na ? '#FFFFFF' : `linear-gradient(160deg, ${color}26 0%, #FFFFFF 70%)` }}
                     >
-                      <div className="absolute top-0 left-0 right-0 h-1" style={{ background: color }} />
-                      <div className="flex items-start justify-between gap-1">
-                        <span className="font-mono text-[10.5px] font-semibold text-white leading-tight">{room.name}</span>
-                        {room.restricted && <Lock size={11} className="text-amber shrink-0 mt-0.5" />}
+                      <div className="absolute top-0 left-0 right-0 h-1.5" style={{ background: na ? '#B3B0CE' : color }} />
+                      <div className="flex items-start justify-between gap-1 pt-1">
+                        <span className="text-[14px] font-semibold text-white leading-tight">{room.name}</span>
+                        {room.restricted && <Lock size={13} className="text-amber shrink-0 mt-0.5" />}
                       </div>
-                      <div className="flex items-end justify-between">
-                        <span className="font-mono text-[10px] text-white/62">{room.assets.length} asset{room.assets.length === 1 ? '' : 's'}</span>
-                        <span className="font-mono text-lg font-bold" style={{ color }}>{value}</span>
+                      <div className="flex flex-wrap gap-1 my-2">
+                        {shown.map((a) => (
+                          <span key={a.id} className="inline-flex max-w-full items-center gap-1 rounded-full bg-brand-surface border border-brand-border px-2 py-0.5 text-[11.5px] text-white">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: HEALTH_COLORS[a.health] }} />
+                            <span className="truncate">{a.label}</span>
+                          </span>
+                        ))}
+                        {room.assets.length > shown.length && <span className="px-1 text-[11.5px] text-white/75">+{room.assets.length - shown.length}</span>}
+                        {room.assets.length === 0 && <span className="text-[12px] text-white/70">No assets tagged</span>}
+                      </div>
+                      <div className="flex items-end justify-between gap-2">
+                        <span className="text-[12px] text-white/75">{na ? hint.replace(/^Avg. health of /, 'No ').replace(/ in this room$/, '') : `${room.assets.length} asset${room.assets.length === 1 ? '' : 's'}`}</span>
+                        <span className="font-display text-[28px] leading-none" style={{ color: na ? '#626079' : color }}>{na ? '—' : value}</span>
                       </div>
                     </button>
                   )

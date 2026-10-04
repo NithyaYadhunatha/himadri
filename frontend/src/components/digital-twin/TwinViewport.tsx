@@ -55,11 +55,11 @@ export const TwinViewport = memo(function TwinViewport({ station }: { station: S
       {available !== 'yes' && (
         <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center', padding: 24 }}>
           <div>
-            <Box size={30} color="#64748B" />
+            <Box size={30} color="#5A5878" />
             <p className="tw-mono" style={{ margin: '10px 0 4px', letterSpacing: '.12em', textTransform: 'uppercase' }}>
               {available === 'checking' ? `Loading ${STATION_LABELS[station]} 3D twin…` : `${STATION_LABELS[station]} 3D twin failed to load`}
             </p>
-            {available === 'no' && <Link href={ROUTES.TWIN} style={{ color: '#BEF264', fontSize: 11 }}>Open the 2D station twin instead</Link>}
+            {available === 'no' && <Link href={ROUTES.TWIN} style={{ color: '#1D1C93', fontSize: 11 }}>Open the 2D station twin instead</Link>}
           </div>
         </div>
       )}

@@ -37,6 +37,14 @@ export default function RiskHeatmapPage() {
   const [sel, setSel] = useState<{ row: Row; factor: Factor } | null>(null)
 
   const rows = useMemo(() => [...(risk.data ?? [])].sort((a, b) => b.score - a.score), [risk.data])
+  // Open on the single worst cell so the evidence panel is never empty.
+  const auto = useMemo(() => {
+    const top = rows[0]
+    if (!top || top.factors.length === 0) return null
+    const factor = [...top.factors].sort((a, b) => b.score * b.weight - a.score * a.weight)[0]
+    return { row: top, factor }
+  }, [rows])
+  const shown = sel ?? auto
   const cols = useMemo(() => {
     const m = new Map<string, { label: string; weight: number }>()
     for (const r of rows) for (const f of r.factors) if (!m.has(f.name)) m.set(f.name, { label: f.label, weight: f.weight })
@@ -79,7 +87,7 @@ export default function RiskHeatmapPage() {
                       <td className="px-3 py-2 font-mono text-[12px] uppercase tracking-wider text-white">{r.subsystem}</td>
                       {cols.map(([k]) => {
                         const f = r.factors.find((x) => x.name === k)
-                        const active = sel?.row.id === r.id && sel.factor.name === k
+                        const active = shown?.row.id === r.id && shown.factor.name === k
                         return (
                           <td key={k} className="p-0">
                             {f ? (
@@ -108,14 +116,14 @@ export default function RiskHeatmapPage() {
         </Panel>
 
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-5 mt-5">
-          <Panel eyebrow="Evidence" title={sel ? `${sel.row.subsystem} · ${sel.factor.label}` : 'Select a cell'}>
-            {sel ? (
+          <Panel eyebrow="Evidence" title={shown ? `${shown.row.subsystem} · ${shown.factor.label}` : 'Select a cell'}>
+            {shown ? (
               <div>
                 <div className="flex items-baseline gap-3">
-                  <span className="font-display text-5xl num" style={{ color: TONE_HEX[tone(sel.factor.score)] }}>{sel.factor.score.toFixed(0)}</span>
-                  <span className="font-mono text-[11px] text-white/70">× weight {(sel.factor.weight * 100).toFixed(0)}% = <b className="text-white">{(sel.factor.score * sel.factor.weight).toFixed(1)}</b> points of {sel.row.score.toFixed(0)}</span>
+                  <span className="font-display text-5xl num" style={{ color: TONE_HEX[tone(shown.factor.score)] }}>{shown.factor.score.toFixed(0)}</span>
+                  <span className="font-mono text-[11px] text-white/70">× weight {(shown.factor.weight * 100).toFixed(0)}% = <b className="text-white">{(shown.factor.score * shown.factor.weight).toFixed(1)}</b> points of {shown.row.score.toFixed(0)}</span>
                 </div>
-                <p className="text-[14px] text-white/80 leading-relaxed mt-4 rounded-xl bg-brand-surface-2/70 border border-brand-border p-4">{sel.factor.evidence}</p>
+                <p className="text-[14px] text-white/80 leading-relaxed mt-4 rounded-xl bg-brand-surface-2/70 border border-brand-border p-4">{shown.factor.evidence}</p>
               </div>
             ) : (
               <p className="text-[13px] text-white/55 leading-relaxed">Each cell is one factor of one subsystem&rsquo;s risk. The text the backend recorded for that cell appears here — the data it looked at, not a conclusion.</p>

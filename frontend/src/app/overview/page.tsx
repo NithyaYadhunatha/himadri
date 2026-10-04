@@ -181,7 +181,7 @@ export default function MissionControlPage() {
         />
 
         {/* KPI row */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 stagger">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 stagger">
           <Kpi
             label="Telemetry coverage"
             value={coverage}
@@ -204,7 +204,7 @@ export default function MissionControlPage() {
             tone={fuel.daysUsed === null ? "mute" : margin !== null && margin >= 0 ? "ok" : "crit"}
             icon={<Fuel size={15} />}
             spark={fuel.history.map((h) => h.litres)}
-            hint={fuel.daysUsed !== null ? `${margin !== null && margin >= 0 ? "+" : ""}${fmtNum(margin)} d vs ${isolation} d isolation · ${fuel.source === "model" ? "model estimate (tank history flat/stale)" : `derived from ${fuel.tanks.length} tank sensors`}` : fuel.loading ? "reading tank sensors…" : "no burn-rate data yet"}
+            hint={fuel.daysUsed !== null ? `${margin !== null && margin >= 0 ? "+" : ""}${fmtNum(margin)} d vs ${isolation} d isolation · ${fuel.source === "model" ? (fuel.synthetic ? "synthetic fuel-farm dataset" : "model estimate, tank history flat/stale") : `derived from ${fuel.tanks.length} tank sensors`}` : fuel.loading ? "reading tank sensors…" : "no burn-rate data yet"}
           />
           <Kpi
             label="Generation"
@@ -221,7 +221,7 @@ export default function MissionControlPage() {
             unit="days"
             tone={outlook?.food.daysMid != null && outlook.food.daysMid < 90 ? 'warn' : 'ok'}
             icon={<Boxes size={15} />}
-            hint={outlook && foodKg > 0 ? `model range ${outlook.food.daysEarliest ?? '>'}–${outlook.food.daysLatest ?? '>'} d · ${fmtNum(foodKg)} kg counted` : 'no food stock counted — enter it on Logistics'}
+            hint={outlook && foodKg > 0 ? `model range ${outlook.food.daysEarliest ?? ">"}–${outlook.food.daysLatest ?? ">"} d · ${fmtNum(foodKg)} kg ${stock.some((i) => i.kind === "food" && i.synthetic) ? "in store (synthetic dataset)" : "counted"}` : "loading stock…"}
           />
           <Kpi
             label="Predicted fuel run-out"

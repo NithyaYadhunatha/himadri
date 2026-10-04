@@ -1,6 +1,7 @@
 'use client'
 
-import { GitBranch, Home, Keyboard, LocateFixed, RotateCcw } from 'lucide-react'
+import { GitBranch, Home, Keyboard, LocateFixed, Maximize2, Minimize2, RotateCcw } from 'lucide-react'
+import { useChromeStore } from '@/store/useChromeStore'
 import { useEffect, useState } from 'react'
 import { STATION_LABELS } from '@/lib/constants'
 import { ASSETS, MAITRI_ROOMS, ROOMS } from '@/lib/twin/config'
@@ -69,6 +70,40 @@ function useOverlayKeys() {
   }, [])
 }
 
+/** Hides the app header/status strip (and asks the browser for real fullscreen) so only the scene, side panel and controls remain. */
+function FullscreenButton() {
+  const hidden = useChromeStore((s) => s.hidden)
+  const setHidden = useChromeStore((s) => s.setHidden)
+
+  const toggle = (on: boolean) => {
+    setHidden(on)
+    try {
+      if (on && !document.fullscreenElement) void document.documentElement.requestFullscreen?.().catch(() => {})
+      else if (!on && document.fullscreenElement) void document.exitFullscreen?.().catch(() => {})
+    } catch { /* browser fullscreen is best-effort; hiding the chrome already works */ }
+  }
+
+  useEffect(() => {
+    // leaving the page, or leaving browser fullscreen with Esc, restores the chrome
+    const onFs = () => { if (!document.fullscreenElement) useChromeStore.getState().setHidden(false) }
+    document.addEventListener('fullscreenchange', onFs)
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && useChromeStore.getState().hidden) useChromeStore.getState().setHidden(false) }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('fullscreenchange', onFs)
+      window.removeEventListener('keydown', onKey)
+      useChromeStore.getState().setHidden(false)
+    }
+  }, [])
+
+  return (
+    <button className="tw-hint tw-fs-btn" onClick={() => toggle(!hidden)} aria-pressed={hidden} aria-label={hidden ? 'Exit fullscreen' : 'Enter fullscreen'}>
+      {hidden ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+      {hidden ? 'Exit fullscreen' : 'Fullscreen'}
+    </button>
+  )
+}
+
 function TopBar() {
   const station = useStationStore((s) => s.station)
   const link = useTwin((s) => s.link)
@@ -96,6 +131,7 @@ function TopBar() {
         {mode === 'demo' && <div className="tw-banner demo">DEMO DATA — values are simulated and not from hardware</div>}
         {mode === 'live' && link !== 'live' && link !== 'connecting' && <div className={`tw-banner ${link === 'stale' ? 'warn' : 'crit'}`} role="status">{m.text}</div>}
         <div className="tw-top-actions">
+          <FullscreenButton />
           <button className="tw-hint" onClick={() => useHud.getState().toggleHelp()} aria-label="Show controls (H)"><Keyboard size={12} />Press <kbd>H</kbd> for Controls</button>
         </div>
       </div>

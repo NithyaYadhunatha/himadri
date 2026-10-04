@@ -9,7 +9,7 @@ import { StationEntryButtons } from '@/components/landing/StationEntryButtons'
 import { Constellation } from '@/components/landing/Constellation'
 import { LiveStrip } from '@/components/landing/LiveStrip'
 import { PolarMap } from '@/components/landing/PolarMap'
-import { HimadriMark } from '@/components/ui/HimadriMark'
+import Image from 'next/image'
 
 const PILLARS = [
   {
@@ -67,15 +67,9 @@ export default async function LandingPage() {
       {/* header */}
       <header className="sticky top-0 z-20 backdrop-blur bg-brand-bg/80 border-b border-brand-border/70">
         <div className="max-w-[1240px] mx-auto h-16 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] bg-white flex items-center justify-center">
-              <HimadriMark className="w-5 h-5 text-marigold" />
-            </div>
-            <div className="leading-none">
-              <p className="font-display text-[21px] text-white tracking-tight">Himadri</p>
-              <p className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-white/65 mt-1">Station command</p>
-            </div>
-          </div>
+          <Link href="/" className="flex items-center" aria-label="HIMADRI home">
+            <Image src="/himadri-logo.png" alt="HIMADRI" width={945} height={268} priority className="h-11 w-auto mix-blend-multiply" />
+          </Link>
           <nav className="hidden md:flex items-center gap-7 font-mono text-[11px] uppercase tracking-wider text-white/55">
           </nav>
           <div className="flex items-center gap-3">

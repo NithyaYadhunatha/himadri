@@ -190,7 +190,7 @@ export default function AlertsPage() {
                           {a.occurrences > 1 && <span className="font-mono text-[10px] text-white/62">×{a.occurrences}</span>}
                           {a.escalated_at && a.state === 'open' && <Pill tone="crit">escalated</Pill>}
                         </div>
-                        <p className="text-[15px] text-white leading-snug">{a.message}</p>
+                        <p className="font-display text-[21px] text-white leading-tight">{a.message}</p>
                         <p className="font-mono text-[10.5px] text-white/65 mt-1.5">
                           {a.asset_id} · first {ago(a.first_seen)} · last {ago(a.last_seen)}
                           {a.value !== null && a.value !== undefined ? ` · value ${a.value}` : ''}

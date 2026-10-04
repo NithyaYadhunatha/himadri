@@ -62,6 +62,54 @@ function buildFallbackPassport(assetId: string): AssetPassport | null {
   }
 }
 
+// The deployed backend nests the passport (identity / current_state /
+// telemetry_history_30d / maintenance_and_faults); the page reads a flat
+// shape. Accept either so a missing field can never crash the page.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function normalizePassport(raw: any, assetId: string): AssetPassport {
+  const idn = raw?.identity ?? {}
+  const cur = raw?.current_state ?? {}
+  const hist: any[] = raw?.telemetry_history ?? raw?.telemetry_history_30d ?? []
+  const log: any[] = raw?.maintenance_log ?? raw?.maintenance_and_faults ?? []
+  const { id, name, station_id, zone_id, category, subtype, provenance, spec, ...rest } = idn
+  const notRecorded = (v: unknown) => (v === null || v === undefined || v === '' ? 'Not recorded' : v)
+  const identity: Record<string, unknown> = {
+    station: station_id ? String(station_id).replace(/^./, (c: string) => c.toUpperCase()) : 'Not recorded',
+    zone: zone_id ?? 'Not recorded',
+    category: [category, subtype].filter(Boolean).join(' / ') || 'Not recorded',
+    manufacturer: notRecorded(rest.manufacturer),
+    ...Object.fromEntries(Object.entries(rest).filter(([k]) => k !== 'manufacturer').map(([k, v]) => [k, notRecorded(v)])),
+    ...(spec && typeof spec === 'object' ? spec : {}),
+  }
+  if (cur.risk_score !== undefined) identity.risk_score = cur.risk_score
+  if (cur.primary_value !== undefined && cur.primary_value !== null) identity.latest_reading = `${cur.primary_value}${cur.primary_unit ? ' ' + cur.primary_unit : ''}`
+  if (cur.last_seen) identity.last_seen = String(cur.last_seen).replace('T', ' ').slice(0, 19) + ' UTC'
+  identity.responsible_user = notRecorded(raw?.responsible_user)
+  if (raw?.controllable !== undefined) identity.remotely_controllable = raw.controllable ? 'Yes' : 'No'
+  if (raw?.life_safety !== undefined) identity.life_safety = raw.life_safety ? 'Yes' : 'No'
+  return {
+    id: raw?.id ?? id ?? assetId,
+    name: raw?.name ?? name ?? assetId,
+    category: raw?.category ?? category ?? 'asset',
+    subtype: raw?.subtype ?? subtype ?? null,
+    station_id: raw?.station_id ?? station_id ?? '',
+    zone_id: raw?.zone_id ?? zone_id ?? null,
+    status: raw?.status ?? cur.status ?? 'unknown',
+    health_score: Math.round((raw?.health_score ?? cur.health_score ?? 0) * 10) / 10,
+    provenance: raw?.provenance ?? provenance ?? 'unverified',
+    identity: raw?.maintenance_log ? idn : identity,
+    telemetry_history: hist.map((p) => ({ timestamp: p.timestamp ?? p.collected_at ?? '', values: p.values ?? {} })),
+    maintenance_log: log.map((m, i) => ({
+      id: m.id ?? `m-${i}`,
+      type: m.type ?? m.kind ?? 'Event',
+      description: m.description ?? m.message ?? '',
+      logged_by: m.logged_by ?? m.entered_by ?? null,
+      logged_at: m.logged_at ?? m.created_at ?? m.at ?? '',
+    })),
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -81,7 +129,7 @@ export const passportService = {
       if (fallback) return Promise.resolve({ ...fallback, maintenance_log: mockMaintenanceLogs.get(assetId) ?? [] })
       return Promise.reject(new Error('Asset not found'))
     }
-    return json(await fetch(`/api/nodes/${encodeURIComponent(assetId)}/passport`))
+    return normalizePassport(await json<unknown>(await fetch(`/api/nodes/${encodeURIComponent(assetId)}/passport`)), assetId)
   },
 
   logMaintenance: async (assetId: string, input: { type: string; description: string }): Promise<PassportMaintenanceEntry> => {

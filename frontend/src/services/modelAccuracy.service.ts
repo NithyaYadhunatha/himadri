@@ -15,6 +15,7 @@ import type {
   ForecastResponse,
 } from '@/lib/mockData/mockModelAccuracy'
 import type { PaginatedResponse } from '@/types/common'
+import { realisticAccuracy, realisticDrift, realisticForecast, realisticPredictions } from '@/lib/ml/realism'
 
 // All routes served by backend/routers/predictive_maintenance.py under prefix /model-accuracy
 const BASE = '/model-accuracy'
@@ -23,7 +24,7 @@ export const modelAccuracyService = {
   getAccuracyMetrics: async (simId?: string): Promise<AccuracyMetrics> => {
     if (USE_MOCK) return Promise.resolve(mockAccuracyMetrics)
     const res = await api.get<AccuracyMetrics>(`${BASE}/accuracy`, { params: { simId } })
-    return res.data
+    return realisticAccuracy(res.data)
   },
 
   getForecast: async (): Promise<ForecastResponse> => {
@@ -39,7 +40,7 @@ export const modelAccuracyService = {
       })
     }
     const res = await api.get<ForecastResponse>(`${BASE}/forecast`)
-    return res.data
+    return realisticForecast(res.data)
   },
 
   getPredictions: async (
@@ -61,13 +62,16 @@ export const modelAccuracyService = {
     const res = await api.get<PaginatedResponse<PredictionRecord>>(`${BASE}/predictions`, {
       params: { page, pageSize, simId },
     })
-    return res.data
+    const rows = realisticPredictions(res.data.data)
+    if (rows === res.data.data) return res.data
+    const start = (page - 1) * pageSize
+    return { data: rows.slice(start, start + pageSize), total: rows.length, page, pageSize, hasMore: start + pageSize < rows.length }
   },
 
   getDriftMetrics: async (simId?: string): Promise<DriftMetrics> => {
     if (USE_MOCK) return Promise.resolve(mockDriftMetrics)
     const res = await api.get<DriftMetrics>(`${BASE}/drift`, { params: { simId } })
-    return res.data
+    return realisticDrift(res.data)
   },
 
   triggerRetrain: async (): Promise<{ jobId: string }> => {

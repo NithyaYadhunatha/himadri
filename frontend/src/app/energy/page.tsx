@@ -74,15 +74,23 @@ function PowerChart({ station, keys }: { station: string; keys: SeriesRow[] }) {
     }
   }, [station, keys])
   if (!rows) return <Skeleton className="h-64" />
-  if (rows.length < 2) return <p className="font-mono text-[12px] text-white/70">Not enough power history yet.</p>
+  // No stored history yet (fresh deploy / feeder offline): draw an illustrative
+  // 36 h profile so the panel is never an empty box, and say so.
+  const synthetic = rows.length < 2
+  const data = synthetic ? illustrativePower(keys.map((k) => k.asset_id)) : rows
   return (
-    <div style={{ height: 260 }}>
+    <div style={{ height: 260 }} className="relative">
+      {synthetic && (
+        <span className="absolute right-2 top-0 z-10 rounded-full border border-amber/40 bg-amber/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-amber">
+          illustrative — no stored history yet
+        </span>
+      )}
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+        <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <CartesianGrid stroke="#B3B0CE" strokeDasharray="3 5" vertical={false} />
           <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={36} />
           <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} width={40} unit=" kW" />
-          <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
+          <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #B3B0CE', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
           {keys.map((k, i) => (
             <Area key={k.asset_id} dataKey={k.asset_id} name={k.asset_id.replace(`${station}-power-`, '')} type="monotone" stackId="p" stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.18} strokeWidth={1.8} isAnimationActive={false} connectNulls />
           ))}
@@ -90,6 +98,23 @@ function PowerChart({ station, keys }: { station: string; keys: SeriesRow[] }) {
       </ResponsiveContainer>
     </div>
   )
+}
+
+function illustrativePower(ids: string[]): Record<string, number | string>[] {
+  const now = Date.now()
+  const out: Record<string, number | string>[] = []
+  for (let h = 36; h >= 0; h--) {
+    const t = now - h * 3_600_000
+    const row: Record<string, number | string> = { t }
+    ids.forEach((id, i) => {
+      const base = 38 + (i % 3) * 14
+      const daily = Math.sin(((t / 3_600_000 + i * 3) / 24) * Math.PI * 2) * 6
+      const wobble = Math.sin(h * 1.7 + i) * 1.8
+      row[id] = Math.round((base + daily + wobble) * 10) / 10
+    })
+    out.push(row)
+  }
+  return out
 }
 
 export default function EnergyPage() {
@@ -136,7 +161,7 @@ export default function EnergyPage() {
           <Kpi label="CO₂e per day" value={scaledBurn ? co2PerDay / 1000 : null} unit="t" digits={1} tone="ink" icon={<Cloud size={15} />} hint={`${CO2_KG_PER_LITRE_DIESEL} kg/L diesel (IPCC default)`} />
         </div>
 
-        <div className="grid xl:grid-cols-[1.5fr_1fr] gap-5 mt-5">
+        <div className="mt-5">
           <Panel eyebrow="Last 36 hours" title="Power generation by asset" right={imbalance > 25 ? <Pill tone="warn">load imbalance {imbalance.toFixed(0)} kW</Pill> : <Pill tone="ok">balanced</Pill>}>
             {powerKeys.length ? <PowerChart station={station} keys={powerKeys} /> : <Skeleton className="h-64" />}
           </Panel>

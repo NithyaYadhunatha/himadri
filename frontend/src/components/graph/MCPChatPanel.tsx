@@ -165,12 +165,11 @@ export function MCPChatPanel({ nodes = [] }: Props) {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="print:hidden fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-white pl-4 pr-5 py-3 shadow-[0_8px_30px_-8px_rgba(8,3,48,0.55)] hover:-translate-y-0.5 transition-transform"
+          className="print:hidden fixed bottom-5 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-cyan text-brand-surface shadow-[0_8px_24px_-6px_rgba(29,28,147,0.55)] transition hover:scale-105 hover:bg-cyan/90"
           aria-label="Ask Himadri"
+          title="Ask Himadri"
         >
-          <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-marigold opacity-70 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-marigold" /></span>
-          <MessageSquare size={15} className="text-brand-surface" />
-          <span className="font-mono text-[11px] uppercase tracking-wider text-brand-surface">Ask Himadri</span>
+          <MessageSquare size={20} />
         </button>
       )}
 

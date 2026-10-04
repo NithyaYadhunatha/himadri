@@ -107,7 +107,7 @@ export default function EnvironmentPage() {
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={pts} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+                    <CartesianGrid stroke="#B3B0CE" strokeDasharray="3 5" vertical={false} />
                     <ReferenceArea y1={70} y2={100} fill="#D4820A" fillOpacity={0.07} />
                     <ReferenceArea y1={100} y2={200} fill="#C23B3B" fillOpacity={0.08} />
                     <ReferenceLine y={70} stroke="#D4820A" strokeDasharray="4 4" />
@@ -115,7 +115,7 @@ export default function EnvironmentPage() {
                     <ReferenceLine x={now} stroke="#080330" strokeDasharray="2 3" label={{ value: 'now', fontSize: 10, fill: '#080330', position: 'insideTopRight' }} />
                     <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={50} />
                     <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} width={42} unit="" domain={[0, (d: number) => Math.max(110, Math.ceil(d / 10) * 10)]} />
-                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v, n) => [`${Number(v).toFixed(0)} km/h`, n === 'gust' ? 'Gust' : 'Wind']} />
+                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #B3B0CE', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v, n) => [`${Number(v).toFixed(0)} km/h`, n === 'gust' ? 'Gust' : 'Wind']} />
                     <Area dataKey="gust" stroke="#C23B3B" strokeWidth={1.4} fill="#C23B3B" fillOpacity={0.12} isAnimationActive={false} />
                     <Line dataKey="wind" stroke="#080330" strokeWidth={2} dot={false} isAnimationActive={false} />
                   </ComposedChart>
@@ -156,11 +156,11 @@ export default function EnvironmentPage() {
             <div style={{ height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chart.length ? pts : pts} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
-                  <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+                  <CartesianGrid stroke="#B3B0CE" strokeDasharray="3 5" vertical={false} />
                   <ReferenceLine x={now} stroke="#080330" strokeDasharray="2 3" />
                   <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={50} />
                   <YAxis tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} width={36} unit="°" />
-                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v) => [`${Number(v).toFixed(1)} °C`, 'Temp']} />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #B3B0CE', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(t) => new Date(Number(t)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} formatter={(v) => [`${Number(v).toFixed(1)} °C`, 'Temp']} />
                   <Area dataKey="temp" stroke="#1D1C93" strokeWidth={2} fill="#1D1C93" fillOpacity={0.1} isAnimationActive={false} />
                 </ComposedChart>
               </ResponsiveContainer>

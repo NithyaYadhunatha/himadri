@@ -43,7 +43,7 @@ export function HealthGauge({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#8E8EB0"
+          stroke="#B3B0CE"
           strokeWidth={strokeWidth}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}

@@ -246,7 +246,7 @@ export default function StationTwinPage() {
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-brand-border shrink-0 bg-brand-bg">
           <div className="flex items-center gap-2">
             <Activity size={16} className="text-cyan" />
-            <h1 className="font-mono text-xs font-bold text-white uppercase tracking-widest">
+            <h1 className="compact-h1 text-white">
               Station Twin — {station.toUpperCase()}
             </h1>
             <span className="text-white/50">·</span>

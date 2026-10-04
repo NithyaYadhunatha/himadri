@@ -43,13 +43,13 @@ function Card({ tone = '', icon, title, value, unit, sub, score, color, extra }:
 }) {
   return (
     <div className={`tw-kpi ${tone}`}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#94A3B8' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#5A5878' }}>
         {icon}<span className="tw-k" style={{ flex: 1 }}>{title}</span>
-        {score !== undefined && <Ring value={score} color={color ?? '#84CC16'} />}
+        {score !== undefined && <Ring value={score} color={color ?? '#1D1C93'} />}
       </div>
       <div className="tw-big" style={{ marginTop: 4 }}>{value}{unit && <small>{unit}</small>}</div>
       <div className="tw-sub">{sub}</div>
-      {extra && <div className="tw-sub tw-mono" style={{ color: '#BEF264', marginTop: 2 }}>{extra}</div>}
+      {extra && <div className="tw-sub tw-mono" style={{ color: '#1D1C93', marginTop: 2 }}>{extra}</div>}
     </div>
   )
 }

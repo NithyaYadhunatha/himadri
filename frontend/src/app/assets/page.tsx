@@ -256,11 +256,10 @@ export default function AssetsPage() {
         <div className="px-6 py-4 border-b border-brand-border bg-gradient-to-b from-brand-surface to-brand-bg shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="font-mono text-sm font-semibold text-white uppercase tracking-widest">
-                Asset Health — {station.toUpperCase()}
-              </h1>
-              <p className="text-white/62 text-xs mt-0.5 font-sans">
-                Live station asset health · <span className="text-white/75">{summary?.total ?? '—'} assets monitored</span>
+              <p className="eyebrow">Assets · {station}</p>
+              <h1 className="mt-1 text-white">Asset health.</h1>
+              <p className="mt-1.5 text-[14px] text-white/80">
+                Live health of every asset at {station.charAt(0).toUpperCase() + station.slice(1)} · <b className="text-white">{summary?.total ?? '—'}</b> monitored
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">

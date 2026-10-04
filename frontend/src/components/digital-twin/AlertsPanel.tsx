@@ -32,7 +32,7 @@ export function AlertsPanel() {
           <div key={a.id} className={`tw-alert ${a.level} ${a.acknowledged ? 'acked' : ''}`}>
             <div className="bar" />
             <button style={{ all: 'unset', cursor: 'pointer', minWidth: 0 }} onClick={() => open(a.assetId)}>
-              <div className="tw-k" style={{ color: a.level === 'critical' ? '#FCA5A5' : a.level === 'warning' ? '#FCD34D' : '#7DD3FC' }}>{a.level}{a.demo ? ' · demo' : ''}</div>
+              <div className="tw-k" style={{ color: a.level === 'critical' ? '#C23B3B' : a.level === 'warning' ? '#A86405' : '#7DD3FC' }}>{a.level}{a.demo ? ' · demo' : ''}</div>
               <div style={{ fontWeight: 600 }}>{a.title}</div>
               <div className="tw-sub">{roomOf(ASSET_BY_ID[a.assetId]?.roomId ?? '')?.name} · {ago(now - a.at)}</div>
             </button>

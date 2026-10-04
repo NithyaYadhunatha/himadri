@@ -187,3 +187,94 @@ button.tw-card:hover { background: rgba(255,255,255,.07); }
 .tw-src.model, .tw-src.reference { color: #7DD3FC; border-color: rgba(56,189,248,.4); }
 .tw-src.simulated { color: #DDD6FE; border-color: rgba(139,92,246,.55); background: rgba(139,92,246,.14); }
 .tw-pill.info { color: #7DD3FC; border-color: rgba(56,189,248,.4); background: rgba(56,189,248,.1); }
+
+/* ── Paper & Ink retheme ──────────────────────────────────────────────
+   The console used to be a dark navy skin that clashed with the rest of the
+   app. These overrides (loaded last) re-skin it with the app's light tokens:
+   lavender field, white raised panels, deep-indigo accent, ink text. */
+.tw-root {
+  --tw-bg: #E9E7F3; --tw-bg2: #F3F2F9; --tw-bg3: #DEDBEC;
+  --tw-panel: #FFFFFF; --tw-panel2: #F3F2F9;
+  --tw-line: rgba(8, 3, 48, 0.14); --tw-line2: rgba(8, 3, 48, 0.28);
+  --tw-text: #080330; --tw-mute: rgba(8, 3, 48, 0.78); --tw-dim: rgba(8, 3, 48, 0.64);
+  --tw-accent: #1D1C93; --tw-ok: #0F8A6A; --tw-warn: #D4820A; --tw-crit: #C23B3B;
+  --tw-info: #1D1C93; --tw-purple: #A04FB8; --tw-off: #8A88A6;
+  font-size: 13px;
+}
+.tw-scroll { scrollbar-color: #B3B0CE transparent; }
+.tw-cam-rooms { scrollbar-color: #B3B0CE transparent; }
+.tw-panel,
+.tw-right > .tw-panel,
+.tw-rail {
+  background: #FFFFFF;
+  border: 1.5px solid #0D0549;
+  box-shadow: 0px 4px 15px 0px rgba(13, 5, 73, 0.22);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.tw-rail { border-width: 0 1.5px 0 0 !important; border-radius: 0 !important; box-shadow: none !important; background: #F3F2F9; }
+.tw-ph, .tw-right > .tw-panel .tw-ph { border-bottom-color: rgba(8, 3, 48, 0.14); }
+.tw-ph h2, .tw-right > .tw-panel .tw-ph h2 { color: #080330; font-size: 11px; font-weight: 700; }
+.tw-top { background: #FFFFFF; border-bottom: 1.5px solid #0D0549; color: #080330; }
+.tw-brand { color: #1D1C93; font-size: 12px; }
+.tw-hint { color: #080330; border-color: rgba(8,3,48,.28); background: #FFFFFF; font-size: 11px; }
+.tw-hint:hover { background: #F3F2F9; color: #1D1C93; }
+kbd { background: #F3F2F9; color: #080330; border-color: rgba(8,3,48,.3); }
+.tw-ib { color: rgba(8,3,48,.75); }
+.tw-ib:hover { background: #DEDBEC; color: #080330; }
+.tw-ib[aria-pressed="true"] { background: rgba(29,28,147,.12); color: #1D1C93; border-color: rgba(29,28,147,.5); }
+.tw-ib .tip { background: #080330; color: #FFFFFF; border-color: #080330; }
+.tw-rail .lbl { color: rgba(8,3,48,.6); font-size: 8px; }
+.tw-btn { background: #FFFFFF; border-color: rgba(8,3,48,.3); color: #080330; font-size: 11px; }
+.tw-btn:hover:not(:disabled) { background: #F3F2F9; border-color: #1D1C93; }
+.tw-btn.pri, .tw-btn.on,
+.tw-right .tw-btn.pri, .tw-right .tw-btn.on { background: #1D1C93; border-color: #1D1C93; color: #FFFFFF; }
+.tw-btn.pri:hover:not(:disabled), .tw-btn.on:hover:not(:disabled),
+.tw-right .tw-btn.pri:hover:not(:disabled), .tw-right .tw-btn.on:hover:not(:disabled) { background: #14137a; }
+.tw-btn.bad { background: rgba(194,59,59,.1); border-color: rgba(194,59,59,.5); color: #C23B3B; }
+.tw-cam-rooms .tw-btn.monitored { color: #0F8A6A; border-color: rgba(15,138,106,.55); background: rgba(15,138,106,.1); }
+.tw-cam-title { color: #080330; }
+.tw-flow-filters { background: #F3F2F9; border-color: rgba(8,3,48,.28); }
+.tw-flow-filters button { color: rgba(8,3,48,.78); font-size: 9px; }
+.tw-flow-filters button:hover { color: #080330; background: #DEDBEC; }
+.tw-flow-filters button.active { color: #FFFFFF; background: #1D1C93; }
+.tw-tabs { background: #E9E7F3; }
+.tw-tabs button { color: rgba(8,3,48,.78); font-size: 11px; }
+.tw-tabs button[aria-selected="true"] { background: #FFFFFF; color: #1D1C93; box-shadow: 0 1px 3px rgba(8,3,48,.2); }
+.tw-sel { background: #FFFFFF; color: #080330; border-color: rgba(8,3,48,.3); font-size: 12px; }
+.tw-sel option { background: #FFFFFF; color: #080330; }
+.tw-field > label, .tw-k { color: rgba(8,3,48,.7); font-size: 10px; }
+.tw-pill { border-color: rgba(8,3,48,.25); }
+.tw-pill.normal { color: #0F8A6A; border-color: rgba(15,138,106,.45); background: rgba(15,138,106,.1); }
+.tw-pill.warning { color: #A86405; border-color: rgba(212,130,10,.5); background: rgba(212,130,10,.12); }
+.tw-pill.critical { color: #C23B3B; border-color: rgba(194,59,59,.5); background: rgba(194,59,59,.1); }
+.tw-pill.demo { color: #7A2F93; border-color: rgba(160,79,184,.5); background: rgba(160,79,184,.12); }
+.tw-pill.info { color: #1D1C93; border-color: rgba(29,28,147,.4); background: rgba(29,28,147,.08); }
+.tw-card { background: #F3F2F9; border-color: rgba(8,3,48,.16); }
+.tw-card.sel { border-color: #1D1C93; box-shadow: 0 0 0 1px rgba(29,28,147,.35) inset; }
+button.tw-card:hover { background: #E9E7F3; }
+.tw-big small { color: rgba(8,3,48,.7); }
+.tw-sub { color: rgba(8,3,48,.74); font-size: 11px; }
+.tw-kv { font-size: 12px; }
+.tw-kpi { border-color: rgba(8,3,48,.16); background: linear-gradient(135deg, rgba(15,138,106,.14), #FFFFFF 75%); }
+.tw-kpi.c-info { background: linear-gradient(135deg, rgba(29,28,147,.12), #FFFFFF 75%); }
+.tw-kpi.c-purple { background: linear-gradient(135deg, rgba(160,79,184,.15), #FFFFFF 75%); }
+.tw-kpi.c-warn { background: linear-gradient(135deg, rgba(212,130,10,.16), #FFFFFF 75%); }
+.tw-kpi.c-crit { background: linear-gradient(135deg, rgba(194,59,59,.15), #FFFFFF 75%); }
+.tw-alert { background: #F3F2F9; border-color: rgba(8,3,48,.16); }
+.tw-node { fill: #FFFFFF; }
+.tw-edge { stroke: #B3B0CE; }
+.tw-edge.live { stroke: #0F8A6A; }
+.tw-edge.warn { stroke: #D4820A; } .tw-edge.dead { stroke: #C23B3B; }
+.tw-banner.warn { background: rgba(212,130,10,.12); border-color: rgba(212,130,10,.5); color: #8A5004; }
+.tw-banner.crit { background: rgba(194,59,59,.1); border-color: rgba(194,59,59,.5); color: #A12B2B; }
+.tw-banner.demo { background: rgba(160,79,184,.12); border-color: rgba(160,79,184,.45); color: #7A2F93; }
+.tw-banner.info { background: rgba(29,28,147,.08); border-color: rgba(29,28,147,.35); color: #1D1C93; }
+.tw-legend { background: linear-gradient(90deg, #1D1C93, #0F8A6A, #D4820A, #C23B3B); }
+.tw-range { accent-color: #1D1C93; }
+.tw-tt { background: #080330; color: #FFFFFF; border-color: #080330; }
+.tw-eq-head h3 { color: #080330; }
+.tw-src.model, .tw-src.reference { color: #1D1C93; border-color: rgba(29,28,147,.4); }
+.tw-src.simulated { color: #7A2F93; border-color: rgba(160,79,184,.5); background: rgba(160,79,184,.1); }
+
+/* Fullscreen: the app chrome is hidden, so the console takes the whole window. */
+.tw-fs-btn { gap: 6px; }

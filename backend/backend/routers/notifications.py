@@ -14,6 +14,7 @@ POST   /notification-recipients
 PATCH  /notification-recipients/{id}
 DELETE /notification-recipients/{id}
 POST   /notification-recipients/send-test
+GET    /notification-log?station=&limit=   (delivery log: sent / dry_run / failed)
 """
 
 from __future__ import annotations
@@ -25,9 +26,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database.postgres import get_db
 from backend.dependencies import require_bearer
-from backend.models.tables import NotificationRecipient, new_uuid
+from backend.models.tables import NotificationLog, NotificationRecipient, new_uuid
 from backend.schemas.schemas import (
     CreateNotificationRecipientRequest,
+    NotificationLogDetail,
     NotificationRecipientDetail,
     SendTestNotificationRequest,
     UpdateNotificationRecipientRequest,
@@ -130,3 +132,24 @@ async def send_test_notification(body: SendTestNotificationRequest, db: AsyncSes
     if not result["api_key_configured"]:
         logger.warning("notification.send_test_no_api_key")
     return result
+
+
+@router.get(
+    "/notification-log",
+    response_model=list[NotificationLogDetail],
+    dependencies=[Depends(require_bearer)],
+    operation_id="list_notification_log",
+)
+async def list_notification_log(
+    station: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
+) -> list[NotificationLogDetail]:
+    """Most-recent-first delivery log of alert emails (and tests). A status of
+    'dry_run' means the backend has no RESEND_API_KEY, so nothing was actually sent."""
+    q = select(NotificationLog)
+    if station:
+        q = q.where(NotificationLog.station_id == station)
+    q = q.order_by(NotificationLog.created_at.desc()).limit(limit)
+    result = await db.execute(q)
+    return [NotificationLogDetail.model_validate(r) for r in result.scalars().all()]

@@ -757,6 +757,21 @@ class SendTestNotificationRequest(BaseModel):
     station_id: str | None = None
 
 
+class NotificationLogDetail(BaseModel):
+    id: str
+    alert_id: str | None
+    station_id: str | None
+    recipient_email: str
+    severity: str | None
+    subject: str
+    kind: str
+    status: str
+    error: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 # ─── WebSocket ───────────────────────────────────────────────────────────────
 
 

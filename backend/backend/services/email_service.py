@@ -36,7 +36,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import settings
-from backend.models.tables import Alert, Asset, NotificationRecipient, Station
+from backend.models.tables import Alert, Asset, NotificationLog, NotificationRecipient, Station
 
 logger = structlog.get_logger(__name__)
 
@@ -143,13 +143,14 @@ def render_alert_email_html(
 """
 
 
-async def _send_email(to_email: str, subject: str, html: str) -> bool:
-    """POST to Resend's HTTP API. No-ops (with a warning) if RESEND_API_KEY
-    is unset; swallows and logs any transport/API failure. Never raises —
-    callers must be able to fire this without risking their own transaction."""
+async def _send_email(to_email: str, subject: str, html: str) -> tuple[str, str | None]:
+    """POST to Resend's HTTP API and report the outcome as (status, error) where
+    status is 'sent', 'dry_run' (RESEND_API_KEY unset — a warning is logged and
+    nothing leaves the building) or 'failed'. Never raises — callers must be able
+    to fire this without risking their own transaction."""
     if not settings.RESEND_API_KEY:
         logger.warning("email.no_api_key", to=to_email, subject=subject)
-        return False
+        return "dry_run", "RESEND_API_KEY not configured"
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -168,12 +169,46 @@ async def _send_email(to_email: str, subject: str, html: str) -> bool:
             )
         if resp.status_code >= 400:
             logger.error("email.send_failed", to=to_email, status=resp.status_code, body=resp.text[:500])
-            return False
+            return "failed", f"Resend HTTP {resp.status_code}: {resp.text[:300]}"
         logger.info("email.sent", to=to_email, subject=subject)
-        return True
+        return "sent", None
     except Exception as e:  # noqa: BLE001 — fire-and-forget, never propagate
         logger.error("email.send_error", to=to_email, error=str(e))
-        return False
+        return "failed", str(e)[:300]
+
+
+async def _deliver(
+    db: AsyncSession,
+    *,
+    to_email: str,
+    subject: str,
+    html: str,
+    kind: str,
+    alert_id: str | None = None,
+    station_id: str | None = None,
+    severity: str | None = None,
+) -> str:
+    """Send one email and record the outcome in notification_log. Logging is
+    best-effort too: a failed insert is swallowed so it can never affect alerting."""
+    status, error = await _send_email(to_email, subject, html)
+    try:
+        db.add(
+            NotificationLog(
+                alert_id=alert_id,
+                station_id=station_id,
+                recipient_email=to_email,
+                severity=severity,
+                subject=subject[:300],
+                kind=kind,
+                status=status,
+                error=error,
+            )
+        )
+        await db.commit()
+    except Exception as e:  # noqa: BLE001
+        await db.rollback()
+        logger.error("notification.log_failed", to=to_email, error=str(e))
+    return status
 
 
 def _asset_url(asset_id: str) -> str:
@@ -220,7 +255,16 @@ async def notify_alert_escalated(db: AsyncSession, alert: Alert) -> None:
         subject = f"[HIMADRI] {alert.severity.upper()} escalation — {asset_name}"
 
         for recipient in recipients:
-            await _send_email(recipient.email, subject, html)
+            await _deliver(
+                db,
+                to_email=recipient.email,
+                subject=subject,
+                html=html,
+                kind="escalation",
+                alert_id=alert.id,
+                station_id=alert.station_id,
+                severity=alert.severity,
+            )
     except Exception as e:  # noqa: BLE001 — see module docstring
         logger.error("notification.escalation_dispatch_failed", alert_id=alert.id, error=str(e))
 
@@ -277,7 +321,10 @@ async def send_test_email(
 
     sent = 0
     for target in targets:
-        if await _send_email(target, subject, html):
+        outcome = await _deliver(
+            db, to_email=target, subject=subject, html=html, kind="test", station_id=station_id, severity="critical"
+        )
+        if outcome == "sent":
             sent += 1
 
     return {"attempted": len(targets), "sent": sent, "api_key_configured": bool(settings.RESEND_API_KEY)}

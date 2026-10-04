@@ -11,7 +11,7 @@ export const CHART = {
   red: '#C23B3B',
   violet: '#A04FB8',
   ink: '#080330',
-  grid: '#8E8EB0',
+  grid: '#B3B0CE',
   muted: '#626079',
 } as const
 
@@ -22,7 +22,7 @@ export const axisTick = {
 } as const
 
 export const gridProps = {
-  stroke: '#8E8EB0',
+  stroke: '#B3B0CE',
   strokeDasharray: '3 3',
   vertical: false,
 } as const
