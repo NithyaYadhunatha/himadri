@@ -29,7 +29,7 @@ export function AssetControlPanel({ assetId }: { assetId: string }) {
         <button className="tw-btn bad" disabled={blocked || st.state === 'sending'} onClick={() => void go(true)}>ON</button>
         <button className="tw-btn pri" disabled={blocked || st.state === 'sending'} onClick={() => void go(false)}>OFF</button>
         {st.state !== 'idle' && (
-          <span role="status" className="tw-sub" style={{ color: st.state === 'accepted' ? '#86EFAC' : st.state === 'sending' ? '#7DD3FC' : '#FCA5A5' }}>
+          <span role="status" className="tw-sub" style={{ color: st.state === 'accepted' ? '#0F8A6A' : st.state === 'sending' ? '#7DD3FC' : '#C23B3B' }}>
             {MSG[st.state]}{st.state !== 'sending' && st.message ? ` — ${st.message}` : ''}
           </span>
         )}

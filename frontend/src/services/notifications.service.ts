@@ -42,6 +42,19 @@ export interface SendTestResult {
   api_key_configured: boolean
 }
 
+export interface NotificationLogEntry {
+  id: string
+  alert_id: string | null
+  station_id: string | null
+  recipient_email: string
+  severity: string | null
+  subject: string
+  kind: 'escalation' | 'test' | string
+  status: 'sent' | 'dry_run' | 'failed' | string
+  error: string | null
+  created_at: string
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -103,6 +116,12 @@ export const notificationsService = {
       return Promise.resolve()
     }
     await json(await fetch(`/api/admin/notification-recipients/${encodeURIComponent(id)}`, { method: 'DELETE' }))
+  },
+
+  log: async (station?: string | null, limit = 40): Promise<NotificationLogEntry[]> => {
+    const qs = new URLSearchParams({ limit: String(limit) })
+    if (station) qs.set('station', station)
+    return json(await fetch(`/api/admin/notification-log?${qs}`, { cache: 'no-store' }))
   },
 
   sendTest: async (opts: { email?: string; station_id?: string | null }): Promise<SendTestResult> => {

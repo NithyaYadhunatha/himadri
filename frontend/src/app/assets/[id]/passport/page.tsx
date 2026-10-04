@@ -87,7 +87,7 @@ export default function AssetPassportPage() {
           </button>
           <h1 className="font-mono text-lg font-bold text-white pr-12">{passport.name}</h1>
           <p className="font-mono text-[11px] text-white/62 mt-1">
-            {passport.category}{passport.subtype ? ` / ${passport.subtype}` : ''} · {passport.station_id.toUpperCase()}
+            {passport.category}{passport.subtype ? ` / ${passport.subtype}` : ''} · {(passport.station_id ?? '').toUpperCase()}
             {passport.zone_id ? ` / ${passport.zone_id}` : ''}
           </p>
           <div className="flex items-center gap-2 mt-3 flex-wrap">

@@ -50,17 +50,17 @@ export const TelemetryChart = memo(function TelemetryChart({ assetId, height = 1
         <div style={{ height }} role="img" aria-label={`${a.name} trend`}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 4, right: 6, bottom: 0, left: -18 }}>
-              <CartesianGrid stroke="rgba(255,255,255,.06)" vertical={false} />
-              <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleTimeString([], { minute: '2-digit', second: '2-digit' })} tick={{ fontSize: 9, fill: '#64748B' }} stroke="rgba(255,255,255,.1)" minTickGap={34} />
-              <YAxis tick={{ fontSize: 9, fill: '#64748B' }} stroke="rgba(255,255,255,.1)" domain={a.boolean ? [0, 1] : ['auto', 'auto']} ticks={a.boolean ? [0, 1] : undefined} width={42} />
+              <CartesianGrid stroke="rgba(8,3,48,.1)" vertical={false} />
+              <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(t) => new Date(t).toLocaleTimeString([], { minute: '2-digit', second: '2-digit' })} tick={{ fontSize: 9, fill: '#5A5878' }} stroke="rgba(8,3,48,.15)" minTickGap={34} />
+              <YAxis tick={{ fontSize: 9, fill: '#5A5878' }} stroke="rgba(8,3,48,.15)" domain={a.boolean ? [0, 1] : ['auto', 'auto']} ticks={a.boolean ? [0, 1] : undefined} width={42} />
               {a.warning !== undefined && !a.boolean && <ReferenceLine y={a.warning} stroke="#F59E0B" strokeDasharray="3 3" strokeOpacity={0.6} />}
               {a.critical !== undefined && !a.boolean && <ReferenceLine y={a.critical} stroke="#EF4444" strokeDasharray="3 3" strokeOpacity={0.6} />}
               <Tooltip
-                contentStyle={{ background: '#020617', border: '1px solid rgba(255,255,255,.14)', borderRadius: 8, fontSize: 10 }}
+                contentStyle={{ background: '#080330', border: '1px solid rgba(8,3,48,.2)', borderRadius: 8, fontSize: 10 }}
                 labelFormatter={(t) => new Date(Number(t)).toLocaleTimeString()}
                 formatter={(v) => [`${v} ${a.unit}`, a.name]}
               />
-              <Line type={a.boolean ? 'stepAfter' : 'monotone'} dataKey="v" stroke="#84CC16" strokeWidth={1.8} dot={false} isAnimationActive={false} />
+              <Line type={a.boolean ? 'stepAfter' : 'monotone'} dataKey="v" stroke="#1D1C93" strokeWidth={1.8} dot={false} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>

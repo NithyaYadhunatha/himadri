@@ -250,6 +250,26 @@ class NotificationRecipient(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
 
+class NotificationLog(Base):
+    """One row per email the alerting system tried to send (or would have sent
+    in dry-run mode when RESEND_API_KEY is unset). Powers the admin
+    Notifications page's delivery log; purely an audit/visibility aid, never
+    read by the alert engine itself."""
+
+    __tablename__ = "notification_log"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=new_uuid)
+    alert_id: Mapped[str | None] = mapped_column(String(64))
+    station_id: Mapped[str | None] = mapped_column(String(32))
+    recipient_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    severity: Mapped[str | None] = mapped_column(String(16))
+    subject: Mapped[str] = mapped_column(String(300), nullable=False)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False, default="escalation")  # escalation | test
+    status: Mapped[str] = mapped_column(String(16), nullable=False)  # sent | dry_run | failed
+    error: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+
+
 # ─── Commands (two-phase actuation, FR-9…14) ────────────────────────────────
 
 

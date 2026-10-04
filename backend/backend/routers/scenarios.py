@@ -25,6 +25,10 @@ from backend.websocket.manager import ws_manager
 
 router = APIRouter(tags=["Scenarios"])
 
+FOOD_KG_PER_PERSON_DAY = 3.6  # dry + frozen + fresh, incl. galley waste margin
+SYNTHETIC_FOOD_DAYS = 305  # ~10 months of supply on hand
+SYNTHETIC_FUEL_LITERS = 140_000.0  # ~215 days at the 27 L/h base burn
+
 
 @router.get("/scenarios/presets", dependencies=[Depends(require_bearer)], operation_id="list_scenario_presets")
 async def list_scenario_presets() -> dict:
@@ -44,13 +48,18 @@ async def _build_context(db: AsyncSession, station_id: str) -> dict:
 
     food_result = await db.execute(select(InventoryItem).where(InventoryItem.station_id == station_id, InventoryItem.kind == "food"))
     food_items = list(food_result.scalars().all())
-    # Rough days-of-food: treat each food item's quantity as person-days if unit is
-    # already "person_days", otherwise assume 1 unit ~= 1 person-day as a fallback.
-    food_days_available = sum((i.quantity for i in food_items), 0.0) or (headcount * 365 * 2)
+    # Food endurance in days = kg on hand / (headcount x daily ration). With no
+    # inventory rows (a fresh deploy), fall back to a synthetic store-room sized for
+    # ~10 months of winter supply (roughly what a real Antarctic station holds)
+    # instead of an unrealistic multi-year figure.
+    food_kg = sum((i.quantity for i in food_items if (i.unit or 'kg') == 'kg'), 0.0)
+    if food_kg <= 0:
+        food_kg = headcount * FOOD_KG_PER_PERSON_DAY * SYNTHETIC_FOOD_DAYS
+    food_days_available = food_kg / (headcount * FOOD_KG_PER_PERSON_DAY)
 
     return {
         "headcount": headcount,
-        "fuel_liters": fuel_liters or 500_000.0,
+        "fuel_liters": fuel_liters or SYNTHETIC_FUEL_LITERS,
         "food_days_available": food_days_available,
         "base_fuel_burn_lph": 27.0,
         "isolation_days_remaining": 150.0,

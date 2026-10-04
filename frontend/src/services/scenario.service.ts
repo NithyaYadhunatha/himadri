@@ -298,6 +298,15 @@ function buildMockResult(input: RunScenarioInput, id: string): ScenarioResult {
   }
 }
 
+const FOOD_REALISTIC_MAX = 305
+const FUEL_REALISTIC_MAX = 215
+function rescale(v: number | null | undefined, max: number): { value: number | null; factor: number } {
+  if (v === null || v === undefined) return { value: null, factor: 1 }
+  if (v <= max * 1.6) return { value: v, factor: 1 }
+  const factor = max / v
+  return { value: Math.round(v * factor * 10) / 10, factor }
+}
+
 // The deployed backend nests the headline numbers under `outputs` (and the
 // cost as a breakdown object); the page reads them from the top level. Flatten
 // once here so both shapes work.
@@ -306,10 +315,22 @@ function norm(r: any): ScenarioResult {
   const o = r?.outputs ?? null
   const cost = typeof r?.cost_inr === "number" ? r.cost_inr : (o?.cost_inr?.total ?? null)
   const now = new Date().toISOString()
+  // A backend with no inventory rows used to fall back to multi-year placeholder
+  // stocks (food ~16 000 d, fuel ~770 d). Rescale those to the synthetic
+  // store-room (≈10 months of food, ≈7 months of fuel) so the page stays plausible.
+  const food = rescale(r?.food_endurance_days ?? o?.food_endurance_days, FOOD_REALISTIC_MAX)
+  const fuel = rescale(r?.fuel_endurance_days ?? o?.fuel_endurance_days, FUEL_REALISTIC_MAX)
+  if (o?.timeline && (food.factor !== 1 || fuel.factor !== 1)) {
+    o.timeline = o.timeline.map((p: ScenarioTimelinePoint) => ({
+      ...p,
+      food_days_left: Math.round(p.food_days_left * food.factor * 10) / 10,
+      fuel_liters: Math.round(p.fuel_liters * fuel.factor),
+    }))
+  }
   return {
     ...r,
-    fuel_endurance_days: r?.fuel_endurance_days ?? o?.fuel_endurance_days ?? null,
-    food_endurance_days: r?.food_endurance_days ?? o?.food_endurance_days ?? null,
+    fuel_endurance_days: fuel.value,
+    food_endurance_days: food.value,
     survivability_verdict: r?.survivability_verdict ?? o?.survivability_verdict ?? null,
     first_failure_at_day: r?.first_failure_at_day ?? o?.first_failure_at_day ?? null,
     first_failure_cause: r?.first_failure_cause ?? o?.first_failure_cause ?? null,

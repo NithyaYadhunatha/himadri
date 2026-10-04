@@ -82,27 +82,27 @@ export interface ForecastResponse {
 // don't jump between renders/reloads within the same session.
 const now = Date.now()
 export const mockAccuracyMetrics: AccuracyMetrics = {
-  currentAccuracy: 84.3,
+  currentAccuracy: 85.2,
   targetAccuracy: 85.0,
   trend30d: Array.from({ length: 30 }, (_, i) => ({
     timestamp: new Date(now - (30 - i) * 86400000).toISOString(),
-    value: 78.5 + Math.sin(i * 0.37) * 3.2 + Math.cos(i * 0.13) * 1.6 + i * 0.14,
+    value: 83.6 + Math.sin(i * 0.37) * 1.4 + Math.cos(i * 0.13) * 0.8 + i * 0.06,
   })),
   totalPredictions: 4820,
-  correctPredictions: 4063,
+  correctPredictions: 4052,
   avgDeviation: 4.1,
   window: '30d',
   model_version: 'himadri-gbc-v1.3-mock',
   classification: {
-    accuracy: 84.3,
-    precision: 81.7,
-    recall: 79.8,
-    f1: 80.7,
-    roc_auc: 88.2,
+    accuracy: 85.2,
+    precision: 83.1,
+    recall: 81.4,
+    f1: 82.2,
+    roc_auc: 90.3,
   },
   runtime_prediction: {
-    mae_minutes: 3.6,
-    rmse_minutes: 4.9,
+    mae_minutes: 3.9,
+    rmse_minutes: 5.3,
   },
   evaluated_predictions: 4756,
   pending_predictions: 64,

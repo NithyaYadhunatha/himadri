@@ -294,7 +294,7 @@ function ForecastSection({ forecast, onSelectSystem }: { forecast: ForecastRespo
               <CartesianGrid {...gridProps} horizontal={false} vertical />
               <XAxis type="number" domain={[0, 'auto']} tick={axisTick} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${v}%`} />
               <YAxis type="category" dataKey="name" width={130} tick={{ ...axisTick, fill: '#080330' }} tickLine={false} axisLine={false} />
-              <Tooltip content={<ChartTooltip format={(v) => `${v}%`} />} cursor={{ fill: '#C8C5D8' }} />
+              <Tooltip content={<ChartTooltip format={(v) => `${v}%`} />} cursor={{ fill: '#DEDBEC' }} />
               <RBar dataKey="p" name="Failure probability" radius={[0, 4, 4, 0]} barSize={14} isAnimationActive={false}>
                 {chart.map((d, i) => <Cell key={i} fill={riskColor(d.level)} />)}
               </RBar>
@@ -374,7 +374,7 @@ function DriftSection({ drift, onRetrain }: { drift: DriftMetrics; onRetrain: ()
                 <CartesianGrid {...gridProps} horizontal={false} vertical />
                 <XAxis type="number" domain={[0, 40]} tick={axisTick} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${v}%`} />
                 <YAxis type="category" dataKey="name" width={140} tick={{ ...axisTick, fill: '#080330' }} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltip format={(v) => `${v}%`} />} cursor={{ fill: '#C8C5D8' }} />
+                <Tooltip content={<ChartTooltip format={(v) => `${v}%`} />} cursor={{ fill: '#DEDBEC' }} />
                 <RBar dataKey="Importance" fill={CHART.blue} radius={[0, 3, 3, 0]} barSize={8} isAnimationActive={false} />
                 <RBar dataKey="Drift" fill={CHART.red} radius={[0, 3, 3, 0]} barSize={8} isAnimationActive={false} />
               </BarChart>

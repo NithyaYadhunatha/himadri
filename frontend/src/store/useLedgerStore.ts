@@ -16,6 +16,7 @@
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { SYNTHETIC_STOCK } from '@/lib/syntheticData/stockData'
 
 export type LedgerKind = 'count' | 'delivery' | 'consumption' | 'adjustment'
 export type LedgerResource = 'fuel' | 'food' | 'water' | 'spare' | 'other'
@@ -124,6 +125,9 @@ export function ledgerToCsv(entries: LedgerEntry[]): string {
   return [head.join(','), ...rows].join('\n')
 }
 
+// Stamp for the synthetic lines' "last checked" times (fixed at load so renders stay pure).
+const MODULE_LOADED_AT = Date.now()
+
 export interface MergedStockItem {
   id: string
   name: string
@@ -134,9 +138,15 @@ export interface MergedStockItem {
   last_checked?: string | null
   /** true when this line (or its latest quantity) lives only on this device */
   local?: boolean
+  /** true when the line comes from the built-in synthetic dataset (no real count yet) */
+  synthetic?: boolean
 }
 
-/** Server inventory + lines created on this device + counts that could not be saved server-side. */
+/**
+ * Server inventory + lines created on this device + counts that could not be saved
+ * server-side. For each resource kind the station database has nothing for, the
+ * built-in synthetic dataset fills in so food endurance & the stock board are never blank.
+ */
 export function useStockItems(station: string, server: MergedStockItem[]): MergedStockItem[] {
   const localItems = useLedgerStore((s) => s.localItems)
   const overrides = useLedgerStore((s) => s.overrides)
@@ -146,6 +156,26 @@ export function useStockItems(station: string, server: MergedStockItem[]): Merge
       return o ? { ...i, quantity: o.quantity, last_checked: o.at, local: true } : i
     })
     const mine = localItems.filter((i) => i.station === station).map((i) => ({ ...i, local: true }))
-    return [...fromServer, ...mine]
+    const real = [...fromServer, ...mine]
+    const have = new Set(real.map((i) => i.kind))
+    const lines = SYNTHETIC_STOCK[station as keyof typeof SYNTHETIC_STOCK] ?? []
+    const synthetic: MergedStockItem[] = lines
+      .filter((l) => !have.has(l.kind))
+      .map((l) => {
+        const id = `synthetic-${station}-${l.key}`
+        const o = overrides[id]
+        return {
+          id,
+          name: l.name,
+          kind: l.kind,
+          quantity: o ? o.quantity : l.quantity,
+          unit: l.unit,
+          reorder_threshold: l.reorder_threshold,
+          last_checked: o ? o.at : new Date(MODULE_LOADED_AT - l.checkedDaysAgo * 86_400_000).toISOString(),
+          synthetic: !o,
+          local: !!o,
+        }
+      })
+    return [...real, ...synthetic]
   }, [server, localItems, overrides, station])
 }

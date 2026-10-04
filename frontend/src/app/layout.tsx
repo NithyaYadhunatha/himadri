@@ -57,8 +57,8 @@ export default function RootLayout({
         // theme; `variables`/`elements` below re-skin it to match exactly.
         variables: {
           colorPrimary: '#1D1C93',
-          colorBackground: '#C8C5D8',
-          colorInput: '#BBB8CD',
+          colorBackground: '#DEDBEC',
+          colorInput: '#E9E7F3',
           colorInputForeground: '#080330',
           colorForeground: '#080330',
           colorMutedForeground: 'rgba(8,3,48,0.5)',

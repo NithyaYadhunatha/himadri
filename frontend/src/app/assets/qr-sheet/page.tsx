@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Printer } from 'lucide-react'
-import { HimadriMark } from '@/components/ui/HimadriMark'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { InlineLoader, ErrorState } from '@/components/ui/Loader'
 import { nodeHealthService } from '@/services/nodeHealth.service'
@@ -106,8 +106,8 @@ export default function QrSheetPage() {
               rather than looking like a raw card dump. */}
           <div className="hidden print:flex items-center justify-between border-b-2 border-black pb-2 mb-2">
             <div className="flex items-center gap-2">
-              <HimadriMark className="w-4 h-4 text-black" />
-              <span className="font-mono font-bold text-sm tracking-widest">HIMADRI ASSET QR SHEET</span>
+              <Image src="/himadri-logo.png" alt="HIMADRI" width={945} height={268} className="h-8 w-auto" />
+              <span className="font-bold text-sm tracking-widest">ASSET QR SHEET</span>
             </div>
             <span className="font-mono text-[10px] text-black/50">{new Date().toLocaleDateString()} · {filtered.length} assets</span>
           </div>

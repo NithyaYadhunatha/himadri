@@ -13,25 +13,32 @@ import { buildOutlook } from '@/lib/ml/outlook'
 import { useLedgerStore } from '@/store/useLedgerStore'
 import type { StationKey } from '@/lib/ml/engine'
 
+// Built-in synthetic fuel farm, used only when a station has no tank telemetry at
+// all (so Overview/Energy never show a blank fuel figure).
+export const SYNTHETIC_FUEL_L: Record<string, number> = { maitri: 118_000, bharati: 132_000 }
+
 export interface FuelWithModel extends FuelState {
   /** burn actually used for `days` (L/h) */
   burnUsedLph: number
   /** days of endurance actually shown */
   daysUsed: number | null
   source: 'telemetry' | 'model' | 'none'
+  /** true when the litres on hand come from the built-in synthetic dataset */
+  synthetic?: boolean
 }
 
 export function useFuelOutlook(station: StationKey, fallbackL = 0): FuelWithModel {
   const fuel = useFuelEndurance(station)
   const { model } = useForecastModel()
   const deliveries = useLedgerStore((s) => s.deliveries)
-  const stock = fuel.totalL || fallbackL
+  const synthetic = !fuel.totalL && !fallbackL && !fuel.loading
+  const stock = fuel.totalL || fallbackL || (synthetic ? SYNTHETIC_FUEL_L[station] ?? 0 : 0)
   const modelOutlook = useMemo(
     () => (model && stock > 0 ? buildOutlook(model, station, { fuelL: stock, foodKg: 0 }, { deliveries }) : null),
     [model, station, stock, deliveries],
   )
   const telemetryOk = fuel.burnLph > 0.5 && fuel.days !== null
   if (telemetryOk) return { ...fuel, burnUsedLph: fuel.burnLph, daysUsed: fuel.days, source: 'telemetry' }
-  if (modelOutlook) return { ...fuel, totalL: stock, burnUsedLph: modelOutlook.fuel.avgDailyBurn / 24, daysUsed: modelOutlook.fuel.daysMid, source: 'model' }
+  if (modelOutlook) return { ...fuel, totalL: stock, burnUsedLph: modelOutlook.fuel.avgDailyBurn / 24, daysUsed: modelOutlook.fuel.daysMid, source: 'model', synthetic }
   return { ...fuel, burnUsedLph: 0, daysUsed: null, source: 'none' }
 }

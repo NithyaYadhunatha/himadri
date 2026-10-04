@@ -112,12 +112,12 @@ function EntryDesk({ station, items, onChanged }: { station: StationKey; items: 
       if ((tab === 'count' || tab === 'delivery') && item) {
         const next = tab === 'count' ? n : item.quantity + n
         // device-only lines have no server record to write to
-        const { saved } = item.id.startsWith('local-')
+        const { saved } = item.id.startsWith('local-') || item.id.startsWith('synthetic-')
           ? { saved: 'device' as const }
           : await saveOrLocal(() => post(`/api/inventory/${encodeURIComponent(item.id)}/count`, { quantity: next, checked_by }), () => undefined)
         if (saved === 'device' || item.local) setQuantity(item.id, next, checked_by)
         addEntry({ ...base, kind: tab, resource: item.kind as LedgerResource, itemId: item.id, itemName: item.name, quantity: n, unit: item.unit })
-        const note = saved === 'device' && !item.id.startsWith('local-') ? DEVICE_NOTE : ''
+        const note = saved === 'device' && !item.id.startsWith('local-') && !item.id.startsWith('synthetic-') ? DEVICE_NOTE : ''
         setMsg({ ok: true, text: tab === 'count' ? `${item.name} counted at ${fmtNum(n)} ${item.unit}.${note}` : `Received ${fmtNum(n)} ${item.unit}; ${item.name} is now ${fmtNum(next)} ${item.unit}.${note}` })
       } else if (tab === 'consumption') {
         addEntry({ ...base, kind: 'consumption', resource, quantity: n, unit: resource === 'food' ? 'kg' : 'L' })
@@ -316,7 +316,7 @@ export function LogisticsDesk({ station, items: serverItems, fuelL, onChanged }:
       <div className="grid xl:grid-cols-2 gap-5">
         <Panel eyebrow="Projection" title="Food stock until run-out">
           {outlook && foodKg ? <BandChart data={foodChart} unit="kg" height={240} color={CHART.green} midName="Projected stock" bandName="Heavy ↔ light use" yDomain={[0, 'auto']} yFormat={(v) => `${fmtNum(v / 1000)}k`} />
-            : <p className="text-[13px] text-white/75 py-10 text-center">{foodKg ? <Skeleton className="h-56" /> : 'Add a food stock line in the entry desk to see a projection.'}</p>}
+            : <div className="text-[13px] text-white/75 py-10 text-center">{foodKg ? <Skeleton className="h-56" /> : 'Add a food stock line in the entry desk to see a projection.'}</div>}
         </Panel>
         <Panel eyebrow="Consumption" title="Daily use · actual vs model, then forecast"
           right={<SegTabs size="sm" value={res} onChange={setRes} options={[{ value: 'food', label: 'Food' }, { value: 'water', label: 'Water' }]} />}>

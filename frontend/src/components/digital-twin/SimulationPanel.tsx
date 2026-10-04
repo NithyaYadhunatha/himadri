@@ -68,8 +68,8 @@ export function SimulationPanel() {
           <button className="tw-btn" disabled={status === 'stopped'} onClick={() => { simControls.reset(); rerender() }}><RotateCcw size={11} />Reset</button>
         </div>
         <div className="tw-k">Scenario · {status}</div>
-        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,.08)', overflow: 'hidden', margin: '4px 0' }}>
-          <div style={{ width: `${prog * 100}%`, height: '100%', background: '#8B5CF6', transition: 'width 1s linear' }} />
+        <div style={{ height: 6, borderRadius: 3, background: 'rgba(8,3,48,.12)', overflow: 'hidden', margin: '4px 0' }}>
+          <div style={{ width: `${prog * 100}%`, height: '100%', background: '#1D1C93', transition: 'width 1s linear' }} />
         </div>
         <div className="tw-sub">Ramps the variable to a stressed value over {SIM_RAMP_MS / 1000}s. Scenario injection on demo data — not a physics model, and it never sends commands to hardware.</div>
       </div>

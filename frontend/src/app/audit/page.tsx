@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ScrollText, ShieldCheck, ShieldAlert } from 'lucide-react'
+import { ShieldCheck, ShieldAlert } from 'lucide-react'
+import { PageHead, Pill } from '@/components/ui/kit'
+import { STATION_LABELS } from '@/lib/constants'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { ErrorState, InlineLoader, EmptyState } from '@/components/ui/Loader'
@@ -45,22 +47,21 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] overflow-y-auto bg-brand-bg p-6">
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-mono text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <ScrollText size={16} className="text-cyan" />
-              Audit Trail — {station.toUpperCase()}
-            </h1>
-            <p className="text-white/70 text-sm mt-1.5 font-sans">
-              Tamper-evident privileged-action log. Every entry is hash-chained to the previous one.
-            </p>
-          </div>
-          <Button variant="secondary" size="sm" icon={<ShieldCheck size={13} />} loading={verifying} onClick={handleVerify}>
-            Verify Integrity
-          </Button>
-        </div>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-[1200px] mx-auto px-6 py-7 space-y-6">
+        <PageHead
+          eyebrow={`Audit trail · ${STATION_LABELS[station]}`}
+          title="Every privileged action, hash-chained."
+          sub="A tamper-evident log of privileged actions. Every entry is chained to the previous one, so editing history breaks the chain and shows up here."
+          right={
+            <>
+              <Pill tone="mute">{entries.length} entries</Pill>
+              <Button variant="secondary" size="md" icon={<ShieldCheck size={14} />} loading={verifying} onClick={handleVerify}>
+                Verify integrity
+              </Button>
+            </>
+          }
+        />
 
         {verifyResult && (
           <div className={`rounded border p-4 flex items-start gap-3 ${verifyResult.valid ? 'border-emerald/30 bg-emerald/10' : 'border-crimson/30 bg-crimson/10'}`}>
@@ -83,27 +84,27 @@ export default function AuditPage() {
         {!loading && !error && entries.length === 0 && <EmptyState message="No privileged actions logged yet" />}
 
         {!loading && !error && entries.length > 0 && (
-          <div className="bg-brand-surface border border-brand-border rounded overflow-hidden">
-            <table className="w-full text-xs">
-              <thead className="bg-brand-bg text-white/62 font-mono uppercase text-[10px]">
+          <div className="panel overflow-hidden">
+            <table className="w-full text-[13.5px]">
+              <thead className="bg-brand-surface-2 text-white/75 uppercase text-[11px] tracking-wider">
                 <tr>
-                  <th className="text-left px-3 py-2">Seq</th>
-                  <th className="text-left px-3 py-2">Actor</th>
-                  <th className="text-left px-3 py-2">Action</th>
-                  <th className="text-left px-3 py-2">Target</th>
-                  <th className="text-left px-3 py-2">Station</th>
-                  <th className="text-left px-3 py-2">When</th>
+                  <th className="text-left px-4 py-3">Seq</th>
+                  <th className="text-left px-4 py-3">Actor</th>
+                  <th className="text-left px-4 py-3">Action</th>
+                  <th className="text-left px-4 py-3">Target</th>
+                  <th className="text-left px-4 py-3">Station</th>
+                  <th className="text-left px-4 py-3">When</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((e) => (
                   <tr key={e.seq} className="border-t border-brand-border">
-                    <td className="px-3 py-2 font-mono text-white/55">{e.seq}</td>
-                    <td className="px-3 py-2 text-white/70">{e.actor}</td>
-                    <td className="px-3 py-2"><Badge variant="info" size="sm">{e.action}</Badge></td>
-                    <td className="px-3 py-2 font-mono text-white/70">{e.target ?? '—'}</td>
-                    <td className="px-3 py-2 font-mono text-white/55 uppercase">{e.station_id ?? '—'}</td>
-                    <td className="px-3 py-2 font-mono text-white/55">{new Date(e.created_at).toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono text-white/55">{e.seq}</td>
+                    <td className="px-4 py-3 text-white/70">{e.actor}</td>
+                    <td className="px-4 py-3"><Badge variant="info" size="sm">{e.action}</Badge></td>
+                    <td className="px-4 py-3 font-mono text-white/70">{e.target ?? '—'}</td>
+                    <td className="px-4 py-3 font-mono text-white/55 uppercase">{e.station_id ?? '—'}</td>
+                    <td className="px-4 py-3 font-mono text-white/55">{new Date(e.created_at).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

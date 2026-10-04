@@ -8,11 +8,11 @@
  * Source: https://tweakcn.com/r/themes/cmp4sli94000004l4c91070io
  */
 @theme {
-  --color-brand-bg: #BBB8CD;        /* paper */
+  --color-brand-bg: #E9E7F3;        /* paper */
   --color-brand-surface: #FFFFFF;   /* raised card */
-  --color-brand-surface-2: #D5D2E2; /* inset panel */
-  --color-brand-surface-3: #C8C5D8; /* hover / elevated */
-  --color-brand-border: #8E8EB0;    /* hairline */
+  --color-brand-surface-2: #F3F2F9; /* inset panel */
+  --color-brand-surface-3: #DEDBEC; /* hover / elevated */
+  --color-brand-border: #B3B0CE;    /* hairline */
 
   /* ink: 'white' renders as deep ink; text-white/NN stays muted ink */
   --color-white: #080330;
@@ -32,7 +32,11 @@
 
   /* body stays Inter for dense dashboards; set to var(--font-bebas) for the theme's literal Bebas-everywhere look */
   --font-sans: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-mono: var(--font-fira), 'Fira Code', Menlo, Monaco, monospace;
+  /* One text face site-wide: labels, ids and numbers all use Inter (tabular
+     figures) so no page reads as a different font. Fira Code survives only
+     for real code (<code>, <pre>, <kbd>). */
+  --font-mono: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-code: var(--font-fira), 'Fira Code', Menlo, Monaco, monospace;
   --font-display: var(--font-bebas), 'Bebas Neue', Impact, sans-serif;
 
   --radius: 16px;
@@ -65,7 +69,7 @@
 html, body {
   color-scheme: light;
   height: 100%;
-  background-color: #BBB8CD;
+  background-color: #E9E7F3;
   color: #080330;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -105,13 +109,13 @@ body {
 .font-mono { font-family: var(--font-mono); }
 .font-display { font-family: var(--font-display); letter-spacing: 0.05em; font-weight: 400; }
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "zero" 1; }
-.eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(8,3,48,0.72); }
+.eyebrow { font-family: var(--font-sans); font-weight: 600; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(8,3,48,0.74); }
 .panel { background: var(--color-brand-surface); border: 1.5px solid #0D0549; border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); }
 .stagger > * { animation: rise 0.5s cubic-bezier(0.2,0.7,0.2,1) both; }
 .stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.1s}.stagger > *:nth-child(4){animation-delay:.15s}.stagger > *:nth-child(5){animation-delay:.2s}.stagger > *:nth-child(6){animation-delay:.25s}.stagger > *:nth-child(n+7){animation-delay:.3s}
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #D5D2E2 25%, #C8C5D8 50%, #D5D2E2 75%);
+  background: linear-gradient(90deg, #F3F2F9 25%, #DEDBEC 50%, #F3F2F9 75%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -123,29 +127,29 @@ body {
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #BBB8CD; }
-::-webkit-scrollbar-thumb { background: #8E8EB0; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #7B7BA0; }
+::-webkit-scrollbar-track { background: #E9E7F3; }
+::-webkit-scrollbar-thumb { background: #B3B0CE; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #9C99BC; }
 
 /* ── React Flow overrides ─────────────────────────────────────── */
 .react-flow__attribution { display: none; }
 .react-flow__controls button {
   background: #FFFFFF !important;
-  border-color: #8E8EB0 !important;
+  border-color: #B3B0CE !important;
   color: rgba(8,3,48,0.6) !important;
 }
 .react-flow__controls button:hover {
-  background: #D5D2E2 !important;
+  background: #F3F2F9 !important;
   color: #080330 !important;
 }
-.react-flow__minimap { border-color: #8E8EB0 !important; }
+.react-flow__minimap { border-color: #B3B0CE !important; }
 .react-flow__handle { opacity: 0 !important; }
 
 /* ── Recharts overrides ───────────────────────────────────────── */
 .recharts-tooltip-wrapper { outline: none; }
 .recharts-default-tooltip {
   background: #FFFFFF !important;
-  border: 1px solid #8E8EB0 !important;
+  border: 1px solid #B3B0CE !important;
   border-radius: 8px !important;
   color: #080330 !important;
   font-family: 'Fira Code', monospace !important;
@@ -164,24 +168,42 @@ body {
   outline-offset: 2px;
 }
 
-/* ── Legacy page headings ─────────────────────────────────────────
- * Older pages still render their title as a tiny uppercase mono h1.
- * Lift them into the display face so every page shares one voice. */
-main h1.font-mono {
+/* ── Typography system ────────────────────────────────────────────
+ * Display (Bebas Neue) = page + section titles and big figures.
+ * Inter = everything else. Small uppercase labels are Inter with tracking.
+ * Every page title shares one size so pages stop looking like different apps. */
+html, body, button, input, select, textarea { font-family: var(--font-sans); }
+body { font-variant-numeric: tabular-nums; font-size: 14px; line-height: 1.5; }
+code, pre, kbd, samp { font-family: var(--font-code); }
+main h1, main h1.font-mono, main h1.font-sans {
   font-family: var(--font-display);
+  font-weight: 400;
   text-transform: none;
-  letter-spacing: -0.015em;
-  font-size: 32px;
-  font-weight: 450;
-  line-height: 1.08;
+  letter-spacing: 0.03em;
+  font-size: 38px;
+  line-height: 1.05;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-main h1.font-mono > svg { width: 22px; height: 22px; opacity: 0.55; }
-main h1.font-mono + p,
-main h1.font-mono + div > p:first-child { font-size: 13.5px; line-height: 1.55; opacity: 0.7; max-width: 46rem; }
-main h2.font-mono.uppercase { letter-spacing: 0.12em; }
+main h1.compact-h1 { font-size: 24px; line-height: 1.1; }
+main h1 > svg { width: 24px; height: 24px; opacity: 0.6; flex-shrink: 0; }
+main h1 + p,
+main h1 + div > p:first-child { font-size: 14px; line-height: 1.6; max-width: 46rem; color: rgba(8,3,48,0.78); }
+main h2.font-mono.uppercase, main h3.font-mono.uppercase { letter-spacing: 0.1em; }
+
+/* ── Legibility floor ─────────────────────────────────────────────
+ * Muted-ink utilities used to go as low as 30% on a lavender field. Clamp
+ * them so secondary text stays readable, and lift the micro type sizes. */
+.text-white\/30, .text-white\/40, .text-white\/45, .text-white\/50, .text-white\/55, .text-white\/58, .text-white\/60 { color: rgba(8,3,48,0.68); }
+.text-white\/62, .text-white\/65 { color: rgba(8,3,48,0.74); }
+.text-white\/70, .text-white\/75 { color: rgba(8,3,48,0.82); }
+.text-white\/80, .text-white\/85, .text-white\/90 { color: rgba(8,3,48,0.9); }
+.text-\[7px\], .text-\[8px\], .text-\[8\.5px\] { font-size: 10px; }
+.text-\[10px\] { font-size: 11px; }
+.text-\[10\.5px\] { font-size: 11.5px; }
+.text-\[11px\] { font-size: 12px; }
+.eyebrow { font-size: 11.5px; color: rgba(8,3,48,0.74); }
 
 /* ── Print ───────────────────────────────────────────────────────── */
 @media print {

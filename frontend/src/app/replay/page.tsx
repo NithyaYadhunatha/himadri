@@ -126,10 +126,10 @@ export default function ReplayPage() {
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
-                    <CartesianGrid stroke="#8E8EB0" strokeDasharray="3 5" vertical={false} />
+                    <CartesianGrid stroke="#B3B0CE" strokeDasharray="3 5" vertical={false} />
                     <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(v) => new Date(v).toISOString().slice(11, 16)} tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: '#626079' }} axisLine={false} tickLine={false} minTickGap={40} />
                     <YAxis hide domain={[0, 1]} />
-                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #8E8EB0', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(v) => new Date(Number(v)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
+                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #B3B0CE', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11 }} labelFormatter={(v) => new Date(Number(v)).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'} />
                     {picked.map((p) => (
                       <Line key={p.key} dataKey={`${p.key}__n`} name={p.name} stroke={p.color} strokeWidth={2} dot={false} yAxisId={0} isAnimationActive={false} connectNulls />
                     ))}

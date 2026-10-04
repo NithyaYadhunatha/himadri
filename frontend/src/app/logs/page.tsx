@@ -26,6 +26,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
+import { PageHead } from '@/components/ui/kit'
 import { Button } from '@/components/ui/Button'
 import { DEPARTMENTS } from '@/lib/auth/constants'
 
@@ -223,17 +224,10 @@ export default function LogsPage() {
   const total = data?.total ?? 0
 
   return (
-    <div className="min-h-screen bg-brand-bg text-white p-6 space-y-5">
+    <div className="h-full overflow-y-auto">
+    <div className="max-w-[1200px] mx-auto px-6 py-7 text-white space-y-5">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <ScrollText size={22} className="text-cyan shrink-0" />
-        <div>
-          <h1 className="font-mono text-sm font-semibold tracking-widest uppercase text-white">
-            Activity Logs
-          </h1>
-          <p className="text-white/62 text-xs mt-0.5">Audit trail for all mutating actions</p>
-        </div>
-      </div>
+      <PageHead eyebrow="Audit" title="Activity logs." sub="Everything that changed the station — commands, acknowledgements, edits — with who did it and when." />
 
       {/* Tab bar */}
       <div className="flex gap-0 border-b border-brand-border">
@@ -446,6 +440,7 @@ export default function LogsPage() {
           </div>
         )}
       </Card>
+    </div>
     </div>
   )
 }

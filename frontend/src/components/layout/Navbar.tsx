@@ -9,7 +9,7 @@ import { UserButton } from '@clerk/nextjs'
 import { ROUTES, NAV_GROUPS, ADMIN_GROUP, LIVE_ASSET_COUNT, STATIONS, STATION_LABELS, type StationId } from '@/lib/constants'
 import { useStationStore } from '@/store/useStationStore'
 import { DEV_BYPASS_AUTH, MOCK_MEMBERSHIP } from '@/lib/auth/devBypass'
-import { HimadriMark } from '@/components/ui/HimadriMark'
+import Image from 'next/image'
 
 interface MeResponse {
   isAdmin?: boolean
@@ -104,7 +104,7 @@ export function Navbar() {
         <div
           className="absolute inset-0 opacity-[0.12] pointer-events-none"
           style={{
-            backgroundImage: 'linear-gradient(#8E8EB0 1px, transparent 1px), linear-gradient(90deg, #8E8EB0 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(#B3B0CE 1px, transparent 1px), linear-gradient(90deg, #B3B0CE 1px, transparent 1px)',
             backgroundSize: '14px 14px',
           }}
         />
@@ -118,14 +118,8 @@ export function Navbar() {
             fixes that structurally — both side columns absorb leftover
             space equally, so the middle column is always the row's true
             center regardless of how wide the logo or right cluster are. */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0 relative z-10 justify-self-start">
-          <div className="w-8 h-8 rounded-[9px] bg-white text-brand-surface flex items-center justify-center shadow-cyan-glow">
-            <HimadriMark className="w-[19px] h-[19px] text-marigold" />
-          </div>
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className="font-display font-semibold text-white text-[19px] tracking-tight">Himadri</span>
-            <span className="font-mono text-[10px] text-white/65 tracking-[0.22em] uppercase mt-0.5">Station Command</span>
-          </div>
+        <Link href="/" className="flex items-center shrink-0 relative z-10 justify-self-start" aria-label="HIMADRI home">
+          <Image src="/himadri-logo.png" alt="HIMADRI" width={945} height={268} priority className="h-10 w-auto" />
         </Link>
 
         {/* Primary group tabs — middle grid column, true row-center. */}
@@ -148,6 +142,7 @@ export function Navbar() {
 
         {/* Right cluster — right grid column */}
         <div className="flex items-center gap-3 shrink-0 relative z-10 justify-self-end">
+
           {/* Station: a locked static badge for station-scoped roles, a
               switcher only for roles that can actually see both stations. */}
           {canSwitch ? (
@@ -175,12 +170,12 @@ export function Navbar() {
             </div>
           )}
 
-          <div className="hidden xl:flex items-center gap-2 border border-emerald/30 bg-emerald/10 rounded-md px-2.5 py-1.5">
+          <div className="hidden xl:flex items-center gap-2 whitespace-nowrap border border-emerald/30 bg-emerald/10 rounded-full px-3 py-1.5">
             <span className="relative flex items-center justify-center">
               <span className="absolute w-2 h-2 rounded-full bg-emerald animate-ping opacity-75" />
               <span className="relative w-1.5 h-1.5 rounded-full bg-emerald" />
             </span>
-            <span className="font-mono text-[10px] text-emerald font-bold tracking-widest leading-none">{LIVE_ASSET_COUNT} ASSETS</span>
+            <span className="text-[11px] text-emerald font-bold tracking-widest leading-none whitespace-nowrap">{LIVE_ASSET_COUNT} ASSETS</span>
           </div>
 
           <span className="hidden 2xl:inline font-mono text-[10px] text-white/62 tracking-wider tabular-nums">
@@ -201,8 +196,8 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* ─── Secondary Sub-Nav — ONLY the active group's own items ───── */}
-      <div className="h-10 bg-brand-surface-2 border-b border-brand-border flex items-center justify-center px-5 overflow-hidden">
+      {/* ─── Secondary Sub-Nav — ONLY the active group's own items; hidden for single-page groups ───── */}
+      {activeGroup.items.length > 1 && <div className="h-10 bg-brand-surface-2 border-b border-brand-border flex items-center justify-center px-5 overflow-hidden">
         <nav className="flex items-center gap-7 h-full overflow-x-auto">
           {activeGroup.items.map((item) => {
             const isActive = item.href === activeItem?.href
@@ -220,7 +215,7 @@ export function Navbar() {
             )
           })}
         </nav>
-      </div>
+      </div>}
     </div>
   )
 }

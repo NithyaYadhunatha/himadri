@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     # Empty RESEND_API_KEY means "no-op with a warning log" — a missing key must
     # never break alert escalation itself (FR-60 keeps working with 0 recipients).
     RESEND_API_KEY: str = ""
+    # Comma-separated emails seeded as fleet-wide recipients on first start, if the
+    # notification_recipients table is empty (so escalations have someone to reach).
+    NOTIFICATION_SEED_EMAILS: str = ""
     EMAIL_FROM: str = "HIMADRI Alerts <onboarding@resend.dev>"
     # Base URL the escalation email links back to (e.g. /assets/{id}) — point
     # this at the deployed frontend origin outside local dev.

@@ -40,10 +40,10 @@ export function Ring({ value, color }: { value: number; color: string }) {
   const r = 15, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, value))
   return (
     <svg className="tw-ring" viewBox="0 0 38 38" role="img" aria-label={`Health ${Math.round(v)}`}>
-      <circle cx="19" cy="19" r={r} fill="none" stroke="rgba(255,255,255,.1)" strokeWidth="4" />
+      <circle cx="19" cy="19" r={r} fill="none" stroke="rgba(8,3,48,.15)" strokeWidth="4" />
       <circle cx="19" cy="19" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
         strokeDasharray={`${(v / 100) * c} ${c}`} transform="rotate(-90 19 19)" />
-      <text x="19" y="22.5" textAnchor="middle" fontSize="10" fontWeight="700" fill="#E5E7EB">{Math.round(v)}</text>
+      <text x="19" y="22.5" textAnchor="middle" fontSize="10" fontWeight="700" fill="#080330">{Math.round(v)}</text>
     </svg>
   )
 }

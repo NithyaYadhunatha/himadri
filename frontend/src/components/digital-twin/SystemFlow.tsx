@@ -67,8 +67,8 @@ export function SystemFlow() {
               onClick={() => { setFocus(n.id); if (n.select) select(n.select) }} onKeyDown={(e) => { if (e.key === 'Enter') { setFocus(n.id); if (n.select) select(n.select) } }}>
               <rect className="tw-node" width={n.w} height={40} rx={9} stroke={STATUS_COLOR[n.st]} strokeOpacity={focus === n.id ? 1 : 0.7} fill={focus === n.id ? '#162033' : '#0D111A'} />
               <circle cx={12} cy={20} r={4} fill={STATUS_COLOR[n.st]} />
-              <text x={22} y={17} fontSize={10} fontWeight={700} fill="#E5E7EB">{n.label}</text>
-              <text x={22} y={30} fontSize={8.5} fill="#64748B">{n.sub}</text>
+              <text x={22} y={17} fontSize={10} fontWeight={700} fill="#080330">{n.label}</text>
+              <text x={22} y={30} fontSize={8.5} fill="#5A5878">{n.sub}</text>
             </g>
           ))}
         </svg>

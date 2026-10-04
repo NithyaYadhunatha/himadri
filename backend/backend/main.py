@@ -182,6 +182,30 @@ async def _sweep_commands_and_alerts() -> None:
             logger.error("command_alert_sweep.error", error=str(e))
 
 
+async def _seed_notification_recipients() -> None:
+    """First-run convenience: if NOTIFICATION_SEED_EMAILS is set and nobody is
+    subscribed yet, add those addresses as fleet-wide recipients. Never fatal."""
+    emails = [e.strip() for e in settings.NOTIFICATION_SEED_EMAILS.split(",") if e.strip()]
+    if not emails:
+        return
+    try:
+        from sqlalchemy import func, select
+
+        from backend.models.tables import NotificationRecipient
+
+        factory = get_session_factory()
+        async with factory() as db:
+            existing = (await db.execute(select(func.count()).select_from(NotificationRecipient))).scalar_one()
+            if existing:
+                return
+            for email in emails:
+                db.add(NotificationRecipient(email=email, name=None, station_id=None, active=True))
+            await db.commit()
+            logger.info("notification.recipients_seeded", count=len(emails))
+    except Exception as e:  # noqa: BLE001
+        logger.warning("notification.seed_failed", error=str(e))
+
+
 # ─── Lifespan ─────────────────────────────────────────────────────────────────
 
 
@@ -192,6 +216,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     await create_all_tables()
     logger.info("himadri.postgres_ready")
+    await _seed_notification_recipients()
 
     try:
         await verify_connectivity()

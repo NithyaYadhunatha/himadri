@@ -42,27 +42,27 @@ export function PolarMap({ className = '' }: { className?: string }) {
       <defs>
         <radialGradient id="pm-ice" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="100%" stopColor="#BBB8CD" />
+          <stop offset="100%" stopColor="#E9E7F3" />
         </radialGradient>
         <filter id="pm-soft" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#080330" floodOpacity="0.12" />
         </filter>
       </defs>
 
-      <circle cx={CX} cy={CY} r={R + 14} fill="url(#pm-ice)" filter="url(#pm-soft)" stroke="#8E8EB0" />
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#8E8EB0" />
+      <circle cx={CX} cy={CY} r={R + 14} fill="url(#pm-ice)" filter="url(#pm-soft)" stroke="#B3B0CE" />
+      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#B3B0CE" />
 
       {/* graticule */}
       {lats.map((lat) => (
-        <circle key={lat} cx={CX} cy={CY} r={((lat + 90) / (90 + LAT_MAX)) * R} fill="none" stroke="#8E8EB0" strokeWidth="1" strokeDasharray={lat === 0 ? '0' : '2 5'} />
+        <circle key={lat} cx={CX} cy={CY} r={((lat + 90) / (90 + LAT_MAX)) * R} fill="none" stroke="#B3B0CE" strokeWidth="1" strokeDasharray={lat === 0 ? '0' : '2 5'} />
       ))}
       {lons.map((lon) => {
         const [x, y] = project(LAT_MAX, lon)
-        return <line key={lon} x1={CX} y1={CY} x2={x} y2={y} stroke="#8E8EB0" strokeWidth="1" strokeDasharray="2 6" />
+        return <line key={lon} x1={CX} y1={CY} x2={x} y2={y} stroke="#B3B0CE" strokeWidth="1" strokeDasharray="2 6" />
       })}
 
       {/* continent (Antarctic Circle, softly filled) */}
-      <circle cx={CX} cy={CY} r={acRadius} fill="#C8C5D8" stroke="#7B7BA0" strokeWidth="1.2" />
+      <circle cx={CX} cy={CY} r={acRadius} fill="#DEDBEC" stroke="#9C99BC" strokeWidth="1.2" />
       <text x={CX} y={CY + 4} textAnchor="middle" fill="#626079" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em' }}>
         ANTARCTICA
       </text>

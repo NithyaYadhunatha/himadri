@@ -76,19 +76,20 @@ function ZoneBandOverlay({ boxes }: { boxes: ZoneLayoutBox[] }) {
             top: box.y,
             width: box.width,
             height: box.height,
-            border: box.kind === 'band' ? '2px dashed #1D1C9355' : '1.5px dashed #62607977',
-            borderRadius: box.kind === 'band' ? 10 : 6,
-            background: box.kind === 'band' ? 'rgba(29,28,147,0.05)' : 'rgba(110,138,160,0.05)',
+            border: box.kind === 'band' ? '2.5px solid #1D1C93' : '2px solid #1D1C93aa',
+            borderRadius: box.kind === 'band' ? 16 : 12,
+            background: box.kind === 'band' ? 'rgba(29,28,147,0.025)' : 'rgba(29,28,147,0.03)',
+            boxShadow: box.kind === 'band' ? 'none' : '0 2px 10px -4px rgba(29,28,147,0.35)',
           }}
         >
           <div
-            className={`absolute -top-1 left-2.5 -translate-y-full font-mono uppercase tracking-wider flex items-center gap-1 rounded px-1.5 py-0.5 ${
+            className={`absolute left-3 top-0 -translate-y-1/2 flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 font-semibold uppercase tracking-wider ${
               box.kind === 'band'
-                ? 'text-[11px] text-[#1D1C93] font-bold bg-[#FFFFFFee] border border-[#1D1C9333]'
-                : 'text-[10px] text-[#08033099] bg-[#FFFFFFcc]'
+                ? 'bg-[#1D1C93] text-[12px] text-[#FFFFFF] shadow-md'
+                : 'border-[1.5px] border-[#1D1C93aa] bg-[#FFFFFF] text-[11px] text-[#1D1C93]'
             }`}
           >
-            {box.restricted && <Lock size={box.kind === 'band' ? 9 : 8} />}
+            {box.restricted && <Lock size={box.kind === 'band' ? 11 : 10} />}
             {box.label}
           </div>
         </div>
@@ -528,11 +529,11 @@ function FlowCanvasInner({
         nodesConnectable={!readOnly}
         elementsSelectable
         proOptions={{ hideAttribution: true }}
-        style={{ background: '#BBB8CD' }}
+        style={{ background: '#E9E7F3' }}
       >
         {/* Keep the actual crossing-line grid (dots read as a different,
             less "graph paper" texture) but faded well below the original
-            solid #8E8EB0 — that saturation was visually loud enough to
+            solid #B3B0CE — that saturation was visually loud enough to
             compete with the nodes themselves instead of sitting behind
             them. Alpha, not a duller hex, so it stays proportionally light
             at any zoom level. */}
@@ -540,7 +541,7 @@ function FlowCanvasInner({
           variant={BackgroundVariant.Lines}
           gap={40}
           size={1}
-          color="#8E8EB055"
+          color="#B3B0CE55"
         />
         <ViewportPortal>
           <ZoneBandOverlay boxes={zoneBoxes} />
